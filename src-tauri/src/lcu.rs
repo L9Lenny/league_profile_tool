@@ -14,6 +14,7 @@ pub fn find_lcu_info() -> Option<LcuInfo> {
     let mut sys = System::new();
     sys.refresh_processes_specifics(
         ProcessesToUpdate::All,
+        true,
         ProcessRefreshKind::default().with_exe(sysinfo::UpdateKind::Always)
     );
 
