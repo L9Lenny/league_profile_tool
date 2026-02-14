@@ -1,19 +1,19 @@
 {
     "version": "1.1.5",
     "notes": "v1.1.5: Project Structure & Community Standards Update. Added contributing guidelines, security policy, and professional GitHub issue templates.",
-    "pub_date": "2026-02-14T17:40:00Z",
+    "pub_date": "2026-02-14T16:41:00Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "PLACEHOLDER_SIGNATURE",
-            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.1.5/League-Profile-Tool_1.1.5_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.1.5/League.Profile.Tool_1.1.5_x64-setup.exe"
         },
-        "macosx-x86_64": {
+        "darwin-x86_64": {
             "signature": "PLACEHOLDER_SIGNATURE",
-            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.1.5/League-Profile-Tool.app.tar.gz"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.1.5/League.Profile.Tool_aarch64.app.tar.gz"
         },
-        "macosx-aarch64": {
+        "darwin-aarch64": {
             "signature": "PLACEHOLDER_SIGNATURE",
-            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.1.5/League-Profile-Tool.app.tar.gz"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.1.5/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }

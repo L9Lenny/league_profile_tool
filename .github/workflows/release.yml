@@ -64,6 +64,8 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           tagName: v__VERSION__
           releaseName: "League Profile Tool v__VERSION__"
@@ -71,3 +73,82 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
+
+  update-updater-json:
+    needs: publish-tauri
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Download signatures from release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          
+          # Download Windows signature
+          curl -L -o windows.sig \
+            "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_${VERSION}_x64-setup.exe.sig"
+          
+          # Download macOS signature (same for both architectures)
+          curl -L -o macos.sig \
+            "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_aarch64.app.tar.gz.sig"
+
+      - name: Update updater.json with signatures
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          
+          # Read signatures
+          WIN_SIG=$(cat windows.sig)
+          MAC_SIG=$(cat macos.sig)
+          
+          # Get current date in ISO format
+          PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Get release notes from CHANGELOG
+          NOTES=$(awk '/^## \[/{if (count++) exit} {if (count) print}' CHANGELOG.md | sed 's/"/\\"/g' | tr '\n' ' ')
+          
+          # Create updated updater.json
+          cat > updater.json << EOF
+          {
+              "version": "${VERSION}",
+              "notes": "${NOTES}",
+              "pub_date": "${PUB_DATE}",
+              "platforms": {
+                  "windows-x86_64": {
+                      "signature": "${WIN_SIG}",
+                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_${VERSION}_x64-setup.exe"
+                  },
+                  "darwin-x86_64": {
+                      "signature": "${MAC_SIG}",
+                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_aarch64.app.tar.gz"
+                  },
+                  "darwin-aarch64": {
+                      "signature": "${MAC_SIG}",
+                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_aarch64.app.tar.gz"
+                  }
+              }
+          }
+          EOF
+
+      - name: Commit and push updated updater.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updater.json
+          git commit -m "chore: update updater.json with signatures for v${{ steps.version.outputs.version }}"
+          git push origin main
