@@ -27,25 +27,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'npm' # This caches node_modules and npm cache automatically
+
+      - name: install frontend dependencies
+        run: npm ci # Faster and more reliable than 'install' in CI
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-
-      - name: install frontend dependencies
-        run: npm install
-
       - name: install rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
+          # Better keying for cache
+          key: ${{ matrix.platform }}-cargo
 
       - name: get changelog content
         id: changelog
