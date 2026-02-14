@@ -57,6 +57,27 @@ body {
   gap: 5px;
 }
 
+.nav-social {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-right: 10px;
+}
+
+.social-link-top {
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.social-link-top:hover {
+  color: var(--hextech-gold);
+  opacity: 1;
+  transform: translateY(-1px) scale(1.1);
+}
+
 .nav-item {
   color: var(--text-secondary);
   text-transform: uppercase;

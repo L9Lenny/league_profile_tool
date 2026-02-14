@@ -9,7 +9,9 @@ import {
   RefreshCw,
   ShieldCheck,
   Trash2,
-  Cpu
+  Cpu,
+  Github,
+  Coffee
 } from 'lucide-react';
 import "./App.css";
 
@@ -161,6 +163,27 @@ function App() {
           >
             <Settings size={16} /> <span>Settings</span>
           </div>
+        </div>
+
+        <div className="nav-social">
+          <a
+            href="https://github.com/L9Lenny/lol-profile-editor"
+            target="_blank"
+            rel="noreferrer"
+            className="social-link-top"
+            title="View Repository"
+          >
+            <Github size={18} />
+          </a>
+          <a
+            href="https://ko-fi.com/profumato"
+            target="_blank"
+            rel="noreferrer"
+            className="social-link-top"
+            title="Support Development"
+          >
+            <Coffee size={18} />
+          </a>
         </div>
       </nav>
 
@@ -337,12 +360,13 @@ function App() {
       <footer className="status-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className={`status-dot ${lcu ? 'online' : 'offline'}`}></div>
-          <span style={{ letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }}>
+          <span style={{ letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600, fontSize: '0.7rem' }}>
             {lcu ? 'LCU Connected' : 'Waiting for League...'}
           </span>
         </div>
-        <div style={{ marginLeft: 'auto', opacity: 0.6 }}>
-          Hextech Engine v{clientVersion}
+
+        <div style={{ marginLeft: 'auto', opacity: 0.5, fontSize: '0.65rem', letterSpacing: '2px', textTransform: 'uppercase' }}>
+          HEXTECH ENGINE v{clientVersion}
         </div>
       </footer>
 
