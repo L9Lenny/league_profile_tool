@@ -1,7 +1,9 @@
 {
-  "name": "tauri-app",
+  "name": "league-profile-tool",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "A professional tool for League of Legends profile customization via LCU API.",
+  "author": "L9Lenny",
   "type": "module",
   "scripts": {
     "dev": "vite",
