@@ -9,15 +9,60 @@ use tauri::{
 };
 
 use std::sync::Mutex;
+use std::fs;
+use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Settings {
+    minimize_to_tray: bool,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Settings {
+            minimize_to_tray: true,
+        }
+    }
+}
 
 struct AppSettings {
     minimize_to_tray: Mutex<bool>,
+    config_path: PathBuf,
+}
+
+impl AppSettings {
+    fn load_settings(&self) -> Settings {
+        if let Ok(content) = fs::read_to_string(&self.config_path) {
+            serde_json::from_str(&content).unwrap_or_default()
+        } else {
+            Settings::default()
+        }
+    }
+
+    fn save_settings(&self, settings: &Settings) {
+        if let Some(parent) = self.config_path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+        let _ = fs::write(&self.config_path, serde_json::to_string_pretty(settings).unwrap());
+    }
 }
 
 #[tauri::command]
 fn set_minimize_to_tray(state: tauri::State<AppSettings>, enabled: bool) {
     let mut minimize = state.minimize_to_tray.lock().unwrap();
     *minimize = enabled;
+    
+    // Save to config file
+    let settings = Settings {
+        minimize_to_tray: enabled,
+    };
+    state.save_settings(&settings);
+}
+
+#[tauri::command]
+fn get_minimize_to_tray(state: tauri::State<AppSettings>) -> bool {
+    *state.minimize_to_tray.lock().unwrap()
 }
 
 #[tauri::command]
@@ -57,7 +102,6 @@ async fn update_bio(port: String, token: String, new_bio: String) -> Result<Stri
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .manage(AppSettings { minimize_to_tray: Mutex::new(true) })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
@@ -65,6 +109,22 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_log::Builder::new().build())
         .setup(|app| {
+            // Get config directory
+            let config_dir = app.path().app_config_dir().unwrap();
+            let config_path = config_dir.join("settings.json");
+            
+            // Create AppSettings and load from file
+            let app_settings = AppSettings {
+                minimize_to_tray: Mutex::new(true),
+                config_path: config_path.clone(),
+            };
+            
+            // Load saved settings
+            let saved_settings = app_settings.load_settings();
+            *app_settings.minimize_to_tray.lock().unwrap() = saved_settings.minimize_to_tray;
+            
+            app.manage(app_settings);
+            
             // Setup System Tray
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let show_i = MenuItem::with_id(app, "show", "Show App", true, None::<&str>)?;
@@ -103,7 +163,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray])
+        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {

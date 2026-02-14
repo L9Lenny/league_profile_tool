@@ -60,6 +60,11 @@ function App() {
     // Check autostart status
     isEnabled().then(setIsAutostartEnabled);
 
+    // Load minimize to tray setting
+    invoke<boolean>("get_minimize_to_tray")
+      .then(setMinimizeToTray)
+      .catch(() => setMinimizeToTray(true));
+
     addLog("Application initialized.");
   }, []);
 
