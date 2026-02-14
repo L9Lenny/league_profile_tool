@@ -17,9 +17,16 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [clientVersion, setClientVersion] = useState("0.0.0");
+  const [latestVersion, setLatestVersion] = useState("Checking...");
 
   useEffect(() => {
     getVersion().then(setClientVersion);
+
+    // Fetch latest version from GitHub
+    fetch("https://raw.githubusercontent.com/L9Lenny/lol-profile-editor/main/updater.json")
+      .then(res => res.json())
+      .then(data => setLatestVersion(data.version))
+      .catch(() => setLatestVersion("N/A"));
   }, []);
 
   const checkConnection = async () => {
@@ -142,23 +149,23 @@ function App() {
 
             <div className="dashboard-grid">
               <div className="card stat-box">
-                <span className="stat-label">Client Status</span>
-                <span className={`stat-value ${lcu ? 'online' : 'offline'}`} style={{ color: lcu ? '#00ff64' : '#ff3232' }}>
-                  {lcu ? 'ONLINE' : 'OFFLINE'}
-                </span>
+                <span className="stat-label">Current Version</span>
+                <span className="stat-value">{clientVersion}</span>
               </div>
               <div className="card stat-box">
-                <span className="stat-label">App Version</span>
-                <span className="stat-value">{clientVersion}</span>
+                <span className="stat-label">Latest Release</span>
+                <span className="stat-value" style={{ color: clientVersion !== latestVersion && latestVersion !== "Checking..." ? 'var(--league-blue-light)' : 'var(--hextech-gold)' }}>
+                  {latestVersion}
+                </span>
               </div>
             </div>
 
             <div className="card" style={{ marginTop: '20px' }}>
               <h3 className="card-title">Latest Updates</h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                • Automated CI/CD pipeline for Windows/macOS.<br />
-                • Real-time LCU connection monitoring.<br />
-                • Optimized build performance and auto-releases.
+                • Real-time updates now fully functional.<br />
+                • Added update signing and capability management.<br />
+                • Maximum build speed with npm and Rust caching.
               </p>
             </div>
           </div>

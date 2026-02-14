@@ -41,7 +41,7 @@ async fn update_bio(port: String, token: String, new_bio: String) -> Result<Stri
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_updater::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio])
         .run(tauri::generate_context!())
