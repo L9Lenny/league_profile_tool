@@ -1,8 +1,45 @@
-.container {
-  padding: 20px;
-  font-family: sans-serif;
+.tab-content {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-input {
-  margin-right: 10px;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--league-blue-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hextech-gold-dark);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hextech-gold);
 }
