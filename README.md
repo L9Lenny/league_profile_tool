@@ -5,6 +5,7 @@ A professional-grade, premium tool built with **Tauri v2** and **React** for sea
 ![Version](https://img.shields.io/badge/version-1.1.4-c89b3c)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20|%20macOS-0ac1ff)
+![Downloads](https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?color=gold)
 
 ## ✨ Features
 
