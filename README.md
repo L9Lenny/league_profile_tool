@@ -1,18 +1,18 @@
 # League Profile Tool
 
-Uno strumento premium realizzato con Tauri e React per personalizzare il tuo profilo di League of Legends tramite le API LCU.
+A premium tool built with Tauri and React to customize your League of Legends profile via LCU APIs.
 
-## Funzionalità
-- ✨ **Cambio Bio/Status**: Aggiorna il tuo messaggio di stato con un click.
-- 🔗 **Connessione Automatica**: Rileva automaticamente se il client di League of Legends è aperto.
-- 🎨 **Interfaccia Hextech**: UI ispirata al design del client ufficiale.
+## Features
+- ✨ **Bio/Status Change**: Update your status message with a single click.
+- 🔗 **Automatic Connection**: Automatically detects if the League of Legends client is open.
+- 🎨 **Hextech Interface**: UI inspired by the official client design.
 
-## Requisiti
-- **Node.js**: Versione 20 o superiore (necessaria per Vite 6+).
-- **Rust**: Installato tramite rustup.
+## Requirements
+- **Node.js**: Version 20 or higher (required for Vite 6+).
+- **Rust**: Installed via rustup.
 
-## Sviluppo
-Per avviare l'app in modalità sviluppo:
+## Development
+To start the app in development mode:
 ```bash
 npm install
 npm run tauri dev
