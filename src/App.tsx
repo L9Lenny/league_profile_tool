@@ -45,11 +45,17 @@ function App() {
   useEffect(() => {
     getVersion().then(setClientVersion);
 
-    // Fetch latest version from GitHub
-    fetch("https://raw.githubusercontent.com/L9Lenny/lol-profile-editor/main/updater.json")
+    // Fetch latest version from GitHub with cache-buster
+    fetch(`https://raw.githubusercontent.com/L9Lenny/lol-profile-editor/main/updater.json?t=${Date.now()}`)
       .then(res => res.json())
-      .then(data => setLatestVersion(data.version))
-      .catch(() => setLatestVersion("N/A"));
+      .then(data => {
+        setLatestVersion(data.version);
+        addLog(`Latest version on GitHub: v${data.version}`);
+      })
+      .catch((err) => {
+        addLog(`Failed to fetch latest version: ${err}`);
+        setLatestVersion("N/A");
+      });
 
     // Check autostart status
     isEnabled().then(setIsAutostartEnabled);
@@ -100,7 +106,9 @@ function App() {
   const checkForUpdates = async () => {
     setMessage({ text: "Checking for updates...", type: "info" });
     try {
+      addLog("Starting update check...");
       const update = await check();
+      console.log("Update object:", update);
       if (update) {
         setMessage({ text: `Update v${update.version} found. Downloading...`, type: "info" });
 
@@ -132,8 +140,9 @@ function App() {
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       }
     } catch (err) {
-      addLog(`Update check failed: ${err}`);
-      setMessage({ text: `Update error: ${err}`, type: "error" });
+      addLog(`Update check encountered an error: ${err}`);
+      setMessage({ text: `Check failed: ${String(err)}`, type: "error" });
+      setTimeout(() => setMessage({ text: "", type: "" }), 5000);
     }
   };
 
@@ -178,7 +187,7 @@ function App() {
             className={`nav-item ${activeTab === 'status' ? 'active' : ''}`}
             onClick={() => setActiveTab('status')}
           >
-            <ShieldCheck size={16} /> <span>Custom Status</span>
+            <ShieldCheck size={16} /> <span>Status</span>
           </div>
           <div
             className={`nav-item ${activeTab === 'logs' ? 'active' : ''}`}

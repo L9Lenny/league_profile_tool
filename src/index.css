@@ -46,7 +46,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 40px;
+  padding: 0 15px;
   height: 70px;
   background: rgba(0, 0, 0, 0.4);
   border-bottom: 1px solid var(--glass-border);
@@ -54,7 +54,7 @@ body {
 
 .nav-links {
   display: flex;
-  gap: 10px;
+  gap: 5px;
 }
 
 .nav-item {
@@ -64,7 +64,7 @@ body {
   font-size: 0.8rem;
   letter-spacing: 1px;
   cursor: pointer;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 4px;
   display: flex;
   align-items: center;
