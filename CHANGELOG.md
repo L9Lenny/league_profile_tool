@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-15
+
+### Added
+- **Rank Tab (New)**: Dedicated module for Rank overrides with live "Draft Preview" and native LCU bridge integration.
+- **Master Tier Aesthetic**: Radical UI overhaul with borderless design, holographic grids, and refined gold-trim glassmorphism.
+- **Hextech Toast System**: Top-center animated notifications with glassmorphism and contextual icons for immediate user feedback.
+- **Update Intelligence**: Contextual navigation beacons and a dedicated system management panel in Settings to replace intrusive banners.
+
+### Changed
+- **Messaging Humanization**: Simplified technical jargon (e.g., "Bridge Interface" instead of "Kernel Optimization") for better user accessibility.
+- **Home Dashboard**: Purged visual clutter and hero badges for a cleaner, more professional "mission-control" feel.
+- **Performance Architecture**: Deduplicated imports and optimized asset loading for improved runtime efficiency.
+
+### Fixed
+- **Layout Integrity**: Forced strict overflow controls to eliminate scrollbars and maintain the "borderless client" immersion.
+- **Import Conflicts**: Resolved duplicate icon and state declarations in the main application logic.
+
+
+
 ## [1.1.16] - 2026-02-14
 
 ### Added

@@ -71,32 +71,66 @@ async fn get_lcu_connection() -> Result<lcu::LcuInfo, String> {
 }
 
 #[tauri::command]
-async fn update_bio(port: String, token: String, new_bio: String) -> Result<String, String> {
+async fn lcu_request(
+    method: String,
+    endpoint: String,
+    body: Option<serde_json::Value>,
+    port: String,
+    token: String
+) -> Result<serde_json::Value, String> {
     let client = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()
         .map_err(|e| e.to_string())?;
 
-    let url = format!("https://127.0.0.1:{}/lol-chat/v1/me", port);
+    let url = format!("https://127.0.0.1:{}{}", port, endpoint);
     let auth = lcu::get_auth_header(&token);
 
-    let body = json!({
-        "statusMessage": new_bio
-    });
+    let mut request = match method.as_str() {
+        "GET" => client.get(url),
+        "POST" => client.post(url),
+        "PUT" => client.put(url),
+        "DELETE" => client.delete(url),
+        "PATCH" => client.patch(url),
+        _ => return Err("Invalid method".to_string()),
+    };
 
-    let res = client.put(url)
-        .header(AUTHORIZATION, auth)
-        .header(CONTENT_TYPE, "application/json")
-        .json(&body)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
+    request = request.header(AUTHORIZATION, auth).header(CONTENT_TYPE, "application/json");
 
-    if res.status().is_success() {
-        Ok("Bio updated successfully!".to_string())
-    } else {
-        Err(format!("LCU Error: {}", res.status()))
+    if let Some(b) = body {
+        request = request.json(&b);
     }
+
+    let res = request.send().await.map_err(|e| e.to_string())?;
+    
+    // For 204 No Content or empty responses
+    if res.status().as_u16() == 204 {
+        return Ok(json!({"status": "success"}));
+    }
+
+    let status = res.status();
+    let text = res.text().await.map_err(|e| e.to_string())?;
+    
+    if status.is_success() {
+        if text.is_empty() {
+            Ok(json!({"status": "success"}))
+        } else {
+            Ok(serde_json::from_str(&text).unwrap_or_else(|_| json!({"data": text})))
+        }
+    } else {
+        Err(format!("LCU Error {}: {}", status, text))
+    }
+}
+
+#[tauri::command]
+async fn update_bio(port: String, token: String, new_bio: String) -> Result<String, String> {
+    lcu_request(
+        "PUT".to_string(),
+        "/lol-chat/v1/me".to_string(),
+        Some(json!({"statusMessage": new_bio})),
+        port,
+        token
+    ).await.map(|_| "Bio updated successfully!".to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -163,7 +197,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray])
+        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray, lcu_request])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {

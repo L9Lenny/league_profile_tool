@@ -5,13 +5,17 @@ import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import {
   Home,
   Settings,
-  Terminal,
-  RefreshCw,
   ShieldCheck,
   Trash2,
   Cpu,
   Github,
-  Coffee
+  Coffee,
+  Trophy,
+  ChevronRight,
+  Layout,
+  Terminal,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import "./App.css";
 
@@ -32,10 +36,14 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [clientVersion, setClientVersion] = useState("0.0.0");
-  const [latestVersion, setLatestVersion] = useState("Checking...");
+  const [latestVersion, setLatestVersion] = useState("");
   const [isAutostartEnabled, setIsAutostartEnabled] = useState(false);
   const [minimizeToTray, setMinimizeToTray] = useState(true);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+
+  // Rank Overrides
+  const [soloTier, setSoloTier] = useState("CHALLENGER");
+  const [soloDiv, setSoloDiv] = useState("I");
 
   const addLog = (msg: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -50,11 +58,10 @@ function App() {
       .then(res => res.json())
       .then(data => {
         setLatestVersion(data.version);
-        addLog(`Latest version on GitHub: v${data.version}`);
+        addLog(`Latest version available: v${data.version}`);
       })
       .catch((err) => {
         addLog(`Failed to fetch latest version: ${err}`);
-        setLatestVersion("N/A");
       });
 
     // Check autostart status
@@ -146,10 +153,16 @@ function App() {
             <Home size={16} /> <span>Home</span>
           </div>
           <div
-            className={`nav-item ${activeTab === 'status' ? 'active' : ''}`}
-            onClick={() => setActiveTab('status')}
+            className={`nav-item ${activeTab === 'bio' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bio')}
           >
-            <ShieldCheck size={16} /> <span>Status</span>
+            <ShieldCheck size={16} /> <span>Bio</span>
+          </div>
+          <div
+            className={`nav-item ${activeTab === 'rank' ? 'active' : ''}`}
+            onClick={() => setActiveTab('rank')}
+          >
+            <Trophy size={16} /> <span>Rank</span>
           </div>
           <div
             className={`nav-item ${activeTab === 'logs' ? 'active' : ''}`}
@@ -161,7 +174,11 @@ function App() {
             className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
-            <Settings size={16} /> <span>Settings</span>
+            <Settings size={16} />
+            <span>Settings</span>
+            {latestVersion && clientVersion !== latestVersion && (
+              <div className="nav-update-beacon"></div>
+            )}
           </div>
         </div>
 
@@ -191,63 +208,48 @@ function App() {
       <main className="content-area">
         {activeTab === 'home' && (
           <div className="tab-content fadeIn">
-            <header style={{ marginBottom: '30px', textAlign: 'center' }}>
-              <h2 style={{ color: 'var(--hextech-gold)', margin: '0 0 10px 0', fontSize: '2rem', letterSpacing: '2px' }}>WELCOME</h2>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Manage your League profile with elegance.</p>
-            </header>
+            <div className="home-hero">
+              <h1 className="hero-title">League Profile Tool</h1>
+              <p className="hero-subtitle">Elevate your presence in the League of Legends ecosystem with precision overrides and aesthetic controls.</p>
 
-            {/* Modern Hextech Update Banner */}
-            {clientVersion !== latestVersion && latestVersion !== "Checking..." && latestVersion !== "N/A" && (
-              <div className="update-banner-premium fadeIn">
-                <div className="update-banner-content">
-                  <div className="update-icon-wrapper">
-                    <RefreshCw size={24} className="spin-slow" />
-                  </div>
-                  <div className="update-text">
-                    <h3>New Version Available</h3>
-                    <p>A new version of <b>League Profile Tool (v{latestVersion})</b> is ready to enhance your experience.</p>
-                  </div>
-                  <a
-                    href={`https://github.com/L9Lenny/lol-profile-editor/releases/latest`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="update-link-btn"
-                  >
-                    INSTALL NOW
-                  </a>
-                </div>
-              </div>
-            )}
-
-            <div className="dashboard-grid">
-              <div className="card stat-box">
-                <span className="stat-label">Installed Version</span>
-                <span className="stat-value">{clientVersion}</span>
-              </div>
-              <div className="card stat-box">
-                <span className="stat-label">Latest Release</span>
-                <span className="stat-value" style={{ color: clientVersion !== latestVersion && latestVersion !== "Checking..." ? 'var(--league-blue-light)' : 'var(--hextech-gold)' }}>
-                  {latestVersion}
-                </span>
+              <div className={`connection-status-pill ${lcu ? 'connected' : 'disconnected'}`}>
+                <div className="status-dot"></div>
+                {lcu ? 'CLIENT CONNECTED' : 'WAITING FOR CLIENT'}
               </div>
             </div>
 
-            <div className="card" style={{ marginTop: '20px' }}>
-              <h3 className="card-title">Project Vision</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                • <b>Absolute Precision:</b> LCU interaction optimized for speed.<br />
-                • <b>Tailored UI:</b> A premium interface inspired by the Hextech aesthetic.<br />
-                • <b>User-Centric:</b> Configurable behavior to fit your ritual.<br />
-                • <b>Open Excellence:</b> Community-driven improvements and transparency.
-              </p>
+            <div className="quick-start-grid">
+              <div className="feature-card" onClick={() => setActiveTab('bio')}>
+                <div className="feature-icon"><Layout size={24} /></div>
+                <div className="feature-body">
+                  <h3>Profile Bio</h3>
+                  <p>Update your status message and biographical data instantly.</p>
+                </div>
+                <ChevronRight size={18} className="feature-arrow" />
+              </div>
+
+              <div className="feature-card" onClick={() => setActiveTab('rank')}>
+                <div className="feature-icon"><Trophy size={24} /></div>
+                <div className="feature-body">
+                  <h3>Rank Overrides</h3>
+                  <p>Override your visible Solo/Duo rankings in the social engine.</p>
+                </div>
+                <ChevronRight size={18} className="feature-arrow" />
+              </div>
+            </div>
+
+            {/* Version Footer */}
+            <div className="home-footer">
+              <span className="version-label">Application Build</span>
+              <span className="version-value">v{clientVersion}</span>
             </div>
           </div>
         )}
 
-        {activeTab === 'status' && (
+        {activeTab === 'bio' && (
           <div className="tab-content fadeIn">
             <div className="card">
-              <h3 className="card-title">Edit Profile Bio</h3>
+              <h3 className="card-title">Profile Bio</h3>
 
               <div className="input-group">
                 <label>New Status Message</label>
@@ -264,8 +266,9 @@ function App() {
                 className="primary-btn"
                 onClick={handleUpdateBio}
                 disabled={!lcu || loading || !bio.trim()}
+                style={{ width: '100%' }}
               >
-                {loading ? 'UPDATING...' : 'APPLY CHANGES'}
+                APPLY
               </button>
 
               {!lcu && (
@@ -273,6 +276,78 @@ function App() {
                   ⚠ Start League of Legends to enable this feature.
                 </p>
               )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'rank' && (
+          <div className="tab-content fadeIn">
+            <div className="card">
+              <h3 className="card-title">Rank Override</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '30px' }}>
+                Modify how your rank is displayed in the chat system and on hover cards.
+              </p>
+
+              <div className="input-group">
+                <label>Solo/Duo Ranking</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <select
+                    value={soloTier}
+                    onChange={(e) => setSoloTier(e.target.value)}
+                    style={{ flex: 2 }}
+                  >
+                    {["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"].map(r => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={soloDiv}
+                    onChange={(e) => setSoloDiv(e.target.value)}
+                    style={{ flex: 1 }}
+                  >
+                    {["I", "II", "III", "IV"].map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="rank-preview-mini" style={{ marginTop: '20px', padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', borderRadius: '6px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Draft Preview</span>
+                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>{soloTier} <span style={{ color: 'var(--hextech-gold)' }}>{soloDiv}</span></span>
+              </div>
+
+              <button
+                className="primary-btn"
+                style={{ marginTop: '20px', width: '100%' }}
+                onClick={async () => {
+                  if (!lcu) return;
+                  setLoading(true);
+                  try {
+                    await invoke("lcu_request", {
+                      method: "PUT",
+                      endpoint: "/lol-chat/v1/me",
+                      body: {
+                        lol: {
+                          rankedLeagueTier: soloTier,
+                          rankedLeagueDivision: soloDiv,
+                          rankedLeagueQueue: "RANKED_SOLO_5x5"
+                        }
+                      },
+                      port: lcu.port,
+                      token: lcu.token
+                    });
+                    addLog(`Rank override: ${soloTier} ${soloDiv}`);
+                    setMessage({ text: "Rank Applied!", type: "success" });
+                    setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                  } catch (err) {
+                    addLog(`Rank Error: ${err}`);
+                    setMessage({ text: "Failed to apply rank", type: "error" });
+                  } finally { setLoading(false); }
+                }}
+              >
+                APPLY
+              </button>
             </div>
           </div>
         )}
@@ -341,13 +416,35 @@ function App() {
               </div>
             </div>
 
+            {latestVersion && clientVersion !== latestVersion && (
+              <div className="card update-panel-hero">
+                <div className="update-content">
+                  <div className="update-intel">
+                    <RefreshCw size={24} className="intel-spinner" />
+                    <div>
+                      <h3 className="update-title-hero">New Enhancement Available</h3>
+                      <p className="update-desc-hero">A fresh build of the toolkit is ready to be installed (<b>v{latestVersion}</b>).</p>
+                    </div>
+                  </div>
+                  <a
+                    href="https://github.com/L9Lenny/lol-profile-editor/releases/latest"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="update-action-btn-hero"
+                  >
+                    UPDATE NOW
+                  </a>
+                </div>
+              </div>
+            )}
+
             <div className="card" style={{ marginTop: '20px', background: 'rgba(200, 155, 60, 0.03)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <Cpu size={24} style={{ color: 'var(--hextech-gold)' }} />
                 <div>
-                  <h4 style={{ margin: 0, color: 'var(--hextech-gold)', fontSize: '0.9rem' }}>Kernel Optimization</h4>
+                  <h4 style={{ margin: 0, color: 'var(--hextech-gold)', fontSize: '0.9rem' }}>Bridge Interface</h4>
                   <p style={{ margin: '5px 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    LCU bridge is operating on high-priority mode via Tauri v2 Core.
+                    High-performance LCU communication layer via Tauri v2 Core.
                   </p>
                 </div>
               </div>
@@ -370,9 +467,11 @@ function App() {
         </div>
       </footer>
 
+
       {message.text && (
         <div className={`toast ${message.type}`}>
-          {message.text}
+          {message.type === 'success' ? <ShieldCheck size={16} /> : <AlertCircle size={16} />}
+          <span>{message.text}</span>
         </div>
       )}
     </div>
