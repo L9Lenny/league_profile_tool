@@ -25,7 +25,7 @@
   "plugins": {
     "updater": {
       "active": true,
-      "pubkey": "CONTENT_OF_YOUR_PUBLIC_KEY_HERE",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU2ODE0RTM3MkFGRDMwNDMKUldSRE1QMHFOMDZCVnBpYjBJTjlaMVNjUWZkdER3T2hpd0lSdytHdGdMRCtrU2x3eHQ4UEg2VkYK",
       "endpoints": [
         "https://raw.githubusercontent.com/L9Lenny/lol-profile-editor/main/updater.json"
       ]
