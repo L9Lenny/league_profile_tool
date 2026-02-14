@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 import "./App.css";
 
 interface LcuInfo {
@@ -54,12 +56,43 @@ function App() {
     }
   };
 
-  const handleFakeUpdate = () => {
+  const handleUpdate = async () => {
     setMessage({ text: "Checking for updates...", type: "info" });
-    setTimeout(() => {
-      setMessage({ text: "Software is already up to date", type: "success" });
-      setTimeout(() => setMessage({ text: "", type: "" }), 3000);
-    }, 2000);
+    try {
+      const update = await check();
+      if (update) {
+        setMessage({ text: `Update v${update.version} found. Downloading...`, type: "info" });
+
+        let downloaded = 0;
+        let contentLength = 0;
+
+        await update.downloadAndInstall((event) => {
+          switch (event.event) {
+            case 'Started':
+              contentLength = event.data.contentLength || 0;
+              setMessage({ text: `Downloading update...`, type: "info" });
+              break;
+            case 'Progress':
+              downloaded += event.data.chunkLength;
+              if (contentLength > 0) {
+                const percent = Math.round((downloaded / contentLength) * 100);
+                setMessage({ text: `Downloading: ${percent}%`, type: "info" });
+              }
+              break;
+            case 'Finished':
+              setMessage({ text: "Installation complete. Relaunching...", type: "success" });
+              break;
+          }
+        });
+
+        await relaunch();
+      } else {
+        setMessage({ text: "Software is already up to date.", type: "success" });
+        setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+      }
+    } catch (err) {
+      setMessage({ text: `Update error: ${err}`, type: "error" });
+    }
   };
 
   return (
@@ -82,7 +115,7 @@ function App() {
         </div>
 
         <div className="nav-actions">
-          <button className="update-btn" onClick={handleFakeUpdate}>
+          <button className="update-btn" onClick={handleUpdate}>
             Update
           </button>
           <a
