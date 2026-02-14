@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
-import { check } from "@tauri-apps/plugin-updater";
-import { relaunch } from "@tauri-apps/plugin-process";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 import {
   Home,
@@ -108,49 +106,6 @@ function App() {
     }
   };
 
-  const checkForUpdates = async () => {
-    setMessage({ text: "Checking for updates...", type: "info" });
-    try {
-      addLog("Starting update check...");
-      const update = await check();
-      console.log("Update object:", update);
-      if (update) {
-        setMessage({ text: `Update v${update.version} found. Downloading...`, type: "info" });
-
-        let downloaded = 0;
-        let contentLength = 0;
-
-        await update.downloadAndInstall((event) => {
-          switch (event.event) {
-            case 'Started':
-              contentLength = event.data.contentLength || 0;
-              setMessage({ text: `Downloading update...`, type: "info" });
-              break;
-            case 'Progress':
-              downloaded += event.data.chunkLength;
-              if (contentLength > 0) {
-                const percent = Math.round((downloaded / contentLength) * 100);
-                setMessage({ text: `Downloading: ${percent}%`, type: "info" });
-              }
-              break;
-            case 'Finished':
-              setMessage({ text: "Installation complete. Relaunching...", type: "success" });
-              break;
-          }
-        });
-
-        await relaunch();
-      } else {
-        setMessage({ text: "Software is already up to date.", type: "success" });
-        setTimeout(() => setMessage({ text: "", type: "" }), 3000);
-      }
-    } catch (err) {
-      addLog(`Update check encountered an error: ${err}`);
-      setMessage({ text: `Check failed: ${String(err)}`, type: "error" });
-      setTimeout(() => setMessage({ text: "", type: "" }), 5000);
-    }
-  };
-
   const toggleAutostart = async () => {
     try {
       if (isAutostartEnabled) {
@@ -207,12 +162,6 @@ function App() {
             <Settings size={16} /> <span>Settings</span>
           </div>
         </div>
-
-        <div className="nav-actions">
-          <button className="update-btn" onClick={checkForUpdates}>
-            <RefreshCw size={14} className={message.text.includes("Checking") ? "spin" : ""} /> Update Check
-          </button>
-        </div>
       </nav>
 
       {/* Main Content */}
@@ -220,13 +169,39 @@ function App() {
         {activeTab === 'home' && (
           <div className="tab-content fadeIn">
             <header style={{ marginBottom: '30px', textAlign: 'center' }}>
-              <h2 style={{ color: 'var(--hextech-gold)', margin: '0 0 10px 0', fontSize: '2rem' }}>WELCOME</h2>
+              <h2 style={{ color: 'var(--hextech-gold)', margin: '0 0 10px 0', fontSize: '2rem', letterSpacing: '2px' }}>WELCOME</h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Manage your League profile with elegance.</p>
             </header>
 
+            {/* Update Recommendation Banner */}
+            {clientVersion !== latestVersion && latestVersion !== "Checking..." && latestVersion !== "N/A" && (
+              <div className="card update-banner-premium">
+                <div className="update-banner-content">
+                  <div className="update-icon-wrapper">
+                    <RefreshCw size={24} className="spin-slow" />
+                  </div>
+                  <div className="update-text">
+                    <h3 style={{ color: 'var(--hextech-gold)', margin: '0 0 5px 0' }}>Elevate Your Experience</h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                      Version <b>v{latestVersion}</b> is now available. We've refined the engine for better stability and introduced new aesthetic improvements. Stay ahead with the latest Hextech refinements.
+                    </p>
+                  </div>
+                  <a
+                    href={`https://github.com/L9Lenny/lol-profile-editor/releases/latest`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="primary-btn update-link-btn"
+                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 'fit-content' }}
+                  >
+                    GET v{latestVersion}
+                  </a>
+                </div>
+              </div>
+            )}
+
             <div className="dashboard-grid">
               <div className="card stat-box">
-                <span className="stat-label">Current Version</span>
+                <span className="stat-label">Installed Version</span>
                 <span className="stat-value">{clientVersion}</span>
               </div>
               <div className="card stat-box">
@@ -238,12 +213,12 @@ function App() {
             </div>
 
             <div className="card" style={{ marginTop: '20px' }}>
-              <h3 className="card-title">What's New</h3>
+              <h3 className="card-title">Project Vision</h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                • <b>Window Management:</b> You can now resize the application window.<br />
-                • <b>Custom Exit Behavior:</b> Toggle between closing the app or minimizing to tray.<br />
-                • <b>Better Performance:</b> Refined backend logic for faster LCU detection.<br />
-                • <b>Refined UI:</b> Softened borders and improved navigation aesthetics.
+                • <b>Absolute Precision:</b> LCU interaction optimized for speed.<br />
+                • <b>Tailored UI:</b> A premium interface inspired by the Hextech aesthetic.<br />
+                • <b>User-Centric:</b> Configurable behavior to fit your ritual.<br />
+                • <b>Open Excellence:</b> Community-driven improvements and transparency.
               </p>
             </div>
           </div>
@@ -282,12 +257,40 @@ function App() {
           </div>
         )}
 
+        {activeTab === 'logs' && (
+          <div className="tab-content fadeIn" style={{ height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column' }}>
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h3 className="card-title" style={{ margin: 0 }}>System Logs</h3>
+                <button
+                  onClick={() => setLogs([])}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem' }}
+                >
+                  <Trash2 size={12} /> CLEAR
+                </button>
+              </div>
+              <div className="log-container">
+                {logs.length === 0 ? (
+                  <div style={{ color: 'var(--text-secondary)', opacity: 0.5, fontStyle: 'italic' }}>No logs yet...</div>
+                ) : (
+                  logs.map((log, i) => (
+                    <div key={i} className="log-entry">
+                      <span style={{ color: 'var(--hextech-gold-dark)', marginRight: '10px' }}>[{log.time}]</span>
+                      {log.msg}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'settings' && (
           <div className="tab-content fadeIn">
             <div className="card">
               <h3 className="card-title">Technical Settings</h3>
 
-              <div className="settings-row">
+              <div className="settings-row" onClick={toggleAutostart}>
                 <div className="settings-info">
                   <span className="settings-label">Auto-launch</span>
                   <p className="settings-desc">Launch the app automatically when your PC starts.</p>
@@ -296,60 +299,37 @@ function App() {
                   <input
                     type="checkbox"
                     checked={isAutostartEnabled}
-                    onChange={toggleAutostart}
+                    readOnly
                   />
-                  <span className="slider round"></span>
+                  <span className="slider"></span>
                 </label>
               </div>
 
-              <div className="settings-row" style={{ marginTop: '20px' }}>
+              <div className="settings-row" onClick={toggleMinimizeToTray} style={{ marginTop: '10px' }}>
                 <div className="settings-info">
                   <span className="settings-label">Minimize to Tray</span>
-                  <p className="settings-desc">When you close the app, it will stay active in the system tray.</p>
+                  <p className="settings-desc">Close button will minimize the app to the system tray.</p>
                 </div>
                 <label className="switch">
                   <input
                     type="checkbox"
                     checked={minimizeToTray}
-                    onChange={toggleMinimizeToTray}
+                    readOnly
                   />
-                  <span className="slider round"></span>
+                  <span className="slider"></span>
                 </label>
               </div>
             </div>
 
-            <div className="card" style={{ marginTop: '20px' }}>
-              <h3 className="card-title">System Information</h3>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Cpu size={14} /> <span>OS: Windows</span>
+            <div className="card" style={{ marginTop: '20px', background: 'rgba(200, 155, 60, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <Cpu size={24} style={{ color: 'var(--hextech-gold)' }} />
+                <div>
+                  <h4 style={{ margin: 0, color: 'var(--hextech-gold)', fontSize: '0.9rem' }}>Kernel Optimization</h4>
+                  <p style={{ margin: '5px 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    LCU bridge is operating on high-priority mode via Tauri v2 Core.
+                  </p>
                 </div>
-                <p>Tauri Version: 2.0</p>
-                <p>Identifier: com.leenny.league-profile-tool</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'logs' && (
-          <div className="tab-content fadeIn">
-            <div className="log-card" style={{ height: '400px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h2 className="card-title" style={{ margin: 0, border: 'none' }}>System Logs</h2>
-                <button className="icon-btn" onClick={() => setLogs([])} title="Clear Logs">
-                  <Trash2 size={18} />
-                </button>
-              </div>
-              <div className="log-container">
-                {logs.length > 0 ? (
-                  logs.map((log, i) => (
-                    <div key={i} className="log-entry">
-                      <span style={{ color: '#c89b3c' }}>[{log.time}]</span> {log.msg}
-                    </div>
-                  ))
-                ) : (
-                  <div className="empty-logs">No logs recorded yet...</div>
-                )}
               </div>
             </div>
           </div>
@@ -359,20 +339,21 @@ function App() {
       {/* Status Bar */}
       <footer className="status-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className={`status-dot ${lcu ? 'online' : 'offline'}`}></span>
-          {lcu ? `Connected: Port ${lcu.port}` : 'Waiting for client...'}
+          <div className={`status-dot ${lcu ? 'online' : 'offline'}`}></div>
+          <span style={{ letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }}>
+            {lcu ? 'LCU Connected' : 'Waiting for League...'}
+          </span>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
-          {message.text && (
-            <span style={{
-              color: message.type === 'error' ? '#ff3232' : message.type === 'success' ? '#00ff64' : 'var(--league-blue-light)',
-              fontWeight: 'bold'
-            }}>
-              {message.text}
-            </span>
-          )}
+        <div style={{ marginLeft: 'auto', opacity: 0.6 }}>
+          Hextech Engine v{clientVersion}
         </div>
       </footer>
+
+      {message.text && (
+        <div className={`toast ${message.type}`}>
+          {message.text}
+        </div>
+      )}
     </div>
   );
 }
