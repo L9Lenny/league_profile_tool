@@ -2,26 +2,38 @@
 
 A professional-grade, premium tool built with **Tauri v2** and **React** for seamless League of Legends profile customization via the LCU (League Client Update) API.
 
-[![Release](https://img.shields.io/github/v/release/L9Lenny/lol-profile-editor?style=for-the-badge&logo=github&color=c89b3c)](https://github.com/L9Lenny/lol-profile-editor/releases)
-[![Build](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/release.yml?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/L9Lenny/lol-profile-editor/actions)
-[![Snyk](https://img.shields.io/badge/snyk-monitored-4C4A73?style=for-the-badge&logo=snyk)](https://github.com/L9Lenny/lol-profile-editor/actions/workflows/snyk.yml)
-[![Quality Gate](https://img.shields.io/sonar/quality_gate/L9Lenny_lol-profile-editor?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarcloud)](https://sonarcloud.io/summary/new_code?id=L9Lenny_lol-profile-editor)
-[![Downloads](https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?style=for-the-badge&logo=github&color=0ac1ff)](https://github.com/L9Lenny/lol-profile-editor/releases)
-[![License](https://img.shields.io/github/license/L9Lenny/lol-profile-editor?style=for-the-badge&color=785a28)](LICENSE)
+<p align="center">
+
+<a href="https://github.com/L9Lenny/lol-profile-editor/releases">
+  <img src="https://img.shields.io/github/v/release/L9Lenny/lol-profile-editor?style=flat-square&logo=github&color=2f81f7" />
+</a>
+
+<a href="https://github.com/L9Lenny/lol-profile-editor/actions">
+  <img src="https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/release.yml?style=flat-square&logo=githubactions&logoColor=white&color=238636" />
+</a>
+
+<a href="https://github.com/L9Lenny/lol-profile-editor/actions/workflows/snyk.yml">
+  <img src="https://img.shields.io/badge/Security-Snyk-4C4A73?style=flat-square&logo=snyk&logoColor=white" />
+</a>
+
+<a href="https://sonarcloud.io/summary/new_code?id=L9Lenny_lol-profile-editor">
+  <img src="https://img.shields.io/badge/Code%20Quality-SonarCloud-F3702A?style=flat-square&logo=sonarcloud&logoColor=white" />
+</a>
+
+<a href="https://github.com/L9Lenny/lol-profile-editor/releases">
+  <img src="https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?style=flat-square&logo=github&color=8250df" />
+</a>
+
+<a href="LICENSE">
+  <img src="https://img.shields.io/github/license/L9Lenny/lol-profile-editor?style=flat-square&color=9e6a03" />
+</a>
+
+</p>
+
 
 ---
 
 ![League Profile Tool Demo](res/docs/img/demo.png)
-
----
-
-## ☕ Support the Project
-
-If this tool helped you customize your profile and you enjoy the Hextech experience, consider supporting the development! Every coffee helps keep the engine running and the UI polished.
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/profumato)
-
----
 
 ## ✨ Features
 
@@ -97,6 +109,16 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 🤝 Contributing
 
 Contributions are welcome! Check out our [Contributing Guidelines](res/docs/CONTRIBUTING.md) and [Code of Conduct](res/docs/CODE_OF_CONDUCT.md).
+
+---
+
+## ☕ Support the Project
+
+If this tool helped you customize your profile and you enjoy the Hextech experience, consider supporting the development! Every coffee helps keep the engine running and the UI polished.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/profumato)
+
+---
 
 ## 📜 Changelog
 
