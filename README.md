@@ -4,8 +4,10 @@ A professional-grade, premium tool built with **Tauri v2** and **React** for sea
 
 [![Release](https://img.shields.io/github/v/release/L9Lenny/lol-profile-editor?color=c89b3c&label=latest&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/releases)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/release.yml?style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/actions)
-[![Security Scan](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/codeql-analysis.yml?label=security&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/actions/workflows/codeql-analysis.yml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/snyk.yml?label=snyk&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/actions/workflows/snyk.yml)
+[![SonarCloud Quality Gate](https://img.shields.io/sonar/quality_gate/L9Lenny_lol-profile-editor?server=https%3A%2F%2Fsonarcloud.io&style=flat-square)](https://sonarcloud.io/summary/new_code?id=L9Lenny_lol-profile-editor)
 [![Downloads](https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?color=0ac1ff&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/releases)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 [![License](https://img.shields.io/github/license/L9Lenny/lol-profile-editor?color=785a28&style=flat-square)](LICENSE)
 
 ---
@@ -79,6 +81,26 @@ Contributions are welcome! Check out our [Contributing Guidelines](res/docs/CONT
 ## 📜 Changelog
 
 Stay up to date with the latest changes in the [CHANGELOG](res/docs/CHANGELOG.md).
+
+## ✨ Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/L9Lenny"><img src="https://avatars.githubusercontent.com/u/74313264?v=4?s=100" width="100px;" alt="L9Lenny"/><br /><sub><b>L9Lenny</b></sub></a><br /><a href="https://github.com/L9Lenny/lol-profile-editor/commits?author=L9Lenny" title="Code">💻</a> <a href="#design-L9Lenny" title="Design">🎨</a> <a href="#maintenance-L9Lenny" title="Maintenance">🚧</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ---
 *Disclaimer: This tool is not affiliated with, endorsed by, or integrated with Riot Games in any official capacity.*
