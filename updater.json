@@ -1,6 +1,6 @@
 {
   "version": "1.2.1",
-  "notes": "## [1.2.1] - 2026-02-15\n\n### Added\n- **Project Showcase**: Added a high-quality demo image to the main documentation.\n- **Documentation Restructure**: Migrated legal and contribution documents to a dedicated `res/docs/` directory for a cleaner project root.\n- **README Refresh**: Re-engineered the README with detailed feature breakdowns and improved aesthetic formatting.",
+  "notes": "## [1.2.1] - 2026-02-15\n\n### Added\n- **Project Showcase**: Integrated a high-definition tool demonstration image in the README.\n- **Root Cleanup**: Advanced project restructuring by moving ancillary documentation to `res/docs/`.\n- **README Refresh**: Re-authored the README with detailed feature descriptions and technical highlighting.\n\n## [1.2.0] - 2026-02-15\n- **Rank Tab**: Dedicated module for Rank overrides with live preview.\n- **UI Overhaul**: Master Tier aesthetics with gold-trim glassmorphism.",
   "pub_date": "2026-02-15T13:20:00Z",
   "platforms": {
     "windows-x86_64": {
