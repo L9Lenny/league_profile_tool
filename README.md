@@ -2,13 +2,12 @@
 
 A professional-grade, premium tool built with **Tauri v2** and **React** for seamless League of Legends profile customization via the LCU (League Client Update) API.
 
-[![Release](https://img.shields.io/github/v/release/L9Lenny/lol-profile-editor?color=c89b3c&label=latest&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/releases)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/release.yml?style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/actions)
-[![Security Scan](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/snyk.yml?label=snyk&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/actions/workflows/snyk.yml)
-[![SonarCloud Quality Gate](https://img.shields.io/sonar/quality_gate/L9Lenny_lol-profile-editor?server=https%3A%2F%2Fsonarcloud.io&style=flat-square)](https://sonarcloud.io/summary/new_code?id=L9Lenny_lol-profile-editor)
-[![Downloads](https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?color=0ac1ff&style=flat-square)](https://github.com/L9Lenny/lol-profile-editor/releases)
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
-[![License](https://img.shields.io/github/license/L9Lenny/lol-profile-editor?color=785a28&style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/L9Lenny/lol-profile-editor?style=for-the-badge&logo=github&color=c89b3c)](https://github.com/L9Lenny/lol-profile-editor/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/L9Lenny/lol-profile-editor/release.yml?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/L9Lenny/lol-profile-editor/actions)
+[![Snyk](https://img.shields.io/badge/snyk-monitored-4C4A73?style=for-the-badge&logo=snyk)](https://github.com/L9Lenny/lol-profile-editor/actions/workflows/snyk.yml)
+[![Quality Gate](https://img.shields.io/sonar/quality_gate/L9Lenny_lol-profile-editor?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarcloud)](https://sonarcloud.io/summary/new_code?id=L9Lenny_lol-profile-editor)
+[![Downloads](https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?style=for-the-badge&logo=github&color=0ac1ff)](https://github.com/L9Lenny/lol-profile-editor/releases)
+[![License](https://img.shields.io/github/license/L9Lenny/lol-profile-editor?style=for-the-badge&color=785a28)](LICENSE)
 
 ---
 
@@ -26,15 +25,25 @@ If this tool helped you customize your profile and you enjoy the Hextech experie
 
 ## ✨ Features
 
-- 🏆 **Rank Overrides**: Effortlessly modify your visible Solo/Duo rank (from Iron to Challenger) and divisions directly in the social engine and hover cards.
-- 🎨 **Hextech Glass UI**: A breathtaking, borderless interface featuring holographic grids, gold-trim glassmorphism, and smooth animations inspired by the official LoL client.
-- � **Profile Bio Management**: Update your chat status and biographical information with high-performance LCU bridge integration.
-- � **Smart LCU Sync**: Seamless, real-time discovery and connection to the League of Legends client without manual configuration.
-- 📜 **Technical Console**: A built-in developer logging system for real-time monitoring and debugging of LCU API interactions.
-- ⚙️ **Advanced Management**: 
-  - **Minimize to Tray**: Fully managed lifecycle to keep the tool active in the background.
-  - **Auto-Launch**: Option to start the toolkit automatically with Windows.
-  - **Update Intelligence**: Automated update beacons and one-click installation system.
+### � Core Functionality
+- **🏆 Rank Customization**: Modify your visible Solo/Duo rank from Iron to Challenger with live preview
+- **🖼️ Icon Library**: Access to 6,000+ profile icons from Data Dragon with smart search and HD previews
+- **💬 Profile Bio Management**: Update your chat status and biographical information in real-time
+- **📊 Live Preview**: See changes before applying them to your profile
+
+### 🎨 Premium Interface
+- **Hextech Glass UI**: Borderless design with holographic grids and gold-trim glassmorphism
+- **Smooth Animations**: Polished transitions and micro-interactions throughout
+- **Dark Theme**: Eye-friendly interface inspired by the official League client
+- **Responsive Layout**: Optimized for different screen sizes
+
+### ⚡ Advanced Features
+- **Smart LCU Sync**: Automatic discovery and connection to League Client (no manual configuration)
+- **Technical Console**: Built-in logging system for monitoring API interactions
+- **Minimize to Tray**: Keep the tool running in the background
+- **Auto-Launch**: Start automatically with Windows
+- **Auto-Updates**: One-click update system with secure signature verification
+- **Security First**: Continuous vulnerability scanning and code quality monitoring
 
 ## 🚀 Getting Started
 
