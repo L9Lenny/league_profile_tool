@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-15
+
+### Added
+- **Global Icon swapper**: Integrated the complete Data Dragon icon library (over 6,000 icons) with high-definition previews.
+- **Smart Search**: Real-time filtering by icon name or ID.
+
+### Changed
+* **UI Polishing**: Reworked search bar and icon grid styles for better density and premium aesthetic.
+
+
 ## [1.2.1] - 2026-02-15
 
 ### Added
