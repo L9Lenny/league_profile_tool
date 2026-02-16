@@ -55,6 +55,9 @@ function App() {
   const [visibleIconsCount, setVisibleIconsCount] = useState(100);
   const gridRef = useRef<HTMLDivElement>(null);
 
+  // Track previous connection state to detect changes
+  const prevLcuRef = useRef<LcuInfo | null>(null);
+
   const addLog = (msg: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs(prev => [{ time: timestamp, msg }, ...prev].slice(0, 50));
@@ -107,10 +110,18 @@ function App() {
   const checkConnection = async () => {
     try {
       const info = await invoke<LcuInfo>("get_lcu_connection");
-      if (!lcu && info) addLog("League client detected.");
+      // Only log if transitioning from disconnected to connected
+      if (!prevLcuRef.current && info) {
+        addLog("League client connected.");
+      }
+      prevLcuRef.current = info;
       setLcu(info);
     } catch (err) {
-      if (lcu) addLog("League client disconnected.");
+      // Only log if transitioning from connected to disconnected
+      if (prevLcuRef.current) {
+        addLog("League client disconnected.");
+      }
+      prevLcuRef.current = null;
       setLcu(null);
     }
   };
