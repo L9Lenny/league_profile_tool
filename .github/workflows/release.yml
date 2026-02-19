@@ -65,6 +65,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Validate release token
+        shell: bash
         run: |
           set -euo pipefail
           if [ -z "${RELEASE_TOKEN:-}" ]; then
