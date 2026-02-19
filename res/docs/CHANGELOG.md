@@ -7,11 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.7] - 2026-02-19
 
-### Fixed
-- **Release CI/CD**: Added token fallback (`RELEASE_PAT` -> `GITHUB_TOKEN`) in `.github/workflows/release.yml` to avoid `Resource not accessible by integration` when creating GitHub releases.
-
-## [1.3.6] - 2026-02-19
-
 ### Added
 - **Security CI**: Added automated VirusTotal scanning workflow for release assets (`.github/workflows/virustotal-report.yml`).
 - **Security Report**: Added versioned report output at `res/docs/SECURITY_REPORT.md`, automatically updated by CI.
