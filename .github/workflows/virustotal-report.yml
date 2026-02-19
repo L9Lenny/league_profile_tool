@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to scan (example: v1.2.3)"
+        description: "v1.3.6"
         required: false
         type: string
 
