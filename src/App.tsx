@@ -1032,7 +1032,14 @@ function App() {
                 if (newState) await enable(); else await disable();
                 setIsAutostartEnabled(newState);
                 addLog(`Auto-launch ${newState ? 'enabled' : 'disabled'}.`);
-              }}>
+              }} onKeyDown={async (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  const newState = !isAutostartEnabled;
+                  if (newState) await enable(); else await disable();
+                  setIsAutostartEnabled(newState);
+                  addLog(`Auto-launch ${newState ? 'enabled' : 'disabled'}.`);
+                }
+              }} role="button" tabIndex={0}>
                 <div className="settings-info">
                   <span className="settings-label">Auto-launch</span>
                   <p className="settings-desc">Launch the app automatically when your PC starts.</p>
@@ -1043,7 +1050,7 @@ function App() {
                 </label>
               </div>
 
-              <div className="settings-row" onClick={toggleMinimizeToTray} style={{ marginTop: '10px' }}>
+              <div className="settings-row" onClick={toggleMinimizeToTray} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleMinimizeToTray()} role="button" tabIndex={0} style={{ marginTop: '10px' }}>
                 <div className="settings-info">
                   <span className="settings-label">Minimize to Tray</span>
                   <p className="settings-desc">Close button will minimize the app to the system tray.</p>
