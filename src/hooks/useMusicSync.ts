@@ -165,11 +165,11 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
         };
 
         syncNowPlaying();
-        intervalId = window.setInterval(syncNowPlaying, clampPollInterval(musicBio.pollIntervalSec) * 1000);
+        intervalId = globalThis.setInterval(syncNowPlaying, clampPollInterval(musicBio.pollIntervalSec) * 1000);
 
         return () => {
             cancelled = true;
-            if (intervalId) window.clearInterval(intervalId);
+            if (intervalId) globalThis.clearInterval(intervalId);
         };
     }, [musicBio, lcu, addLog]);
 
