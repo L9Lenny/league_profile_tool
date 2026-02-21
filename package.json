@@ -10,6 +10,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
@@ -28,12 +30,18 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.3.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-window": "^2.0.0",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
     "all-contributors-cli": "^6.26.1",
+    "jsdom": "^28.1.0",
     "typescript": "~5.9.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "vitest": "^4.0.18"
   }
 }
