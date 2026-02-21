@@ -647,25 +647,25 @@ function App() {
     <div className="main-app">
       <nav className="nav-bar">
         <div className="nav-links">
-          <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
+          <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('home')} role="tab" tabIndex={0}>
             <Home size={16} /> <span>Home</span>
           </div>
-          <div className={`nav-item ${activeTab === 'bio' ? 'active' : ''}`} onClick={() => setActiveTab('bio')}>
+          <div className={`nav-item ${activeTab === 'bio' ? 'active' : ''}`} onClick={() => setActiveTab('bio')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('bio')} role="tab" tabIndex={0}>
             <ShieldCheck size={16} /> <span>Bio</span>
           </div>
-          <div className={`nav-item ${activeTab === 'music' ? 'active' : ''}`} onClick={() => setActiveTab('music')}>
+          <div className={`nav-item ${activeTab === 'music' ? 'active' : ''}`} onClick={() => setActiveTab('music')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('music')} role="tab" tabIndex={0}>
             <Disc3 size={16} /> <span>Music</span>
           </div>
-          <div className={`nav-item ${activeTab === 'rank' ? 'active' : ''}`} onClick={() => setActiveTab('rank')}>
+          <div className={`nav-item ${activeTab === 'rank' ? 'active' : ''}`} onClick={() => setActiveTab('rank')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('rank')} role="tab" tabIndex={0}>
             <Trophy size={16} /> <span>Rank</span>
           </div>
-          <div className={`nav-item ${activeTab === 'icons' ? 'active' : ''}`} onClick={() => setActiveTab('icons')}>
+          <div className={`nav-item ${activeTab === 'icons' ? 'active' : ''}`} onClick={() => setActiveTab('icons')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('icons')} role="tab" tabIndex={0}>
             <UserCircle size={16} /> <span>Icons</span>
           </div>
-          <div className={`nav-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
+          <div className={`nav-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('logs')} role="tab" tabIndex={0}>
             <Terminal size={16} /> <span>Logs</span>
           </div>
-          <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+          <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('settings')} role="tab" tabIndex={0}>
             <Settings size={16} /> <span>Settings</span>
             {latestVersion && clientVersion !== latestVersion && (
               <div className="nav-update-beacon"></div>
@@ -690,22 +690,22 @@ function App() {
               </div>
             </div>
             <div className="quick-start-grid">
-              <div className="feature-card" onClick={() => setActiveTab('bio')}>
+              <div className="feature-card" onClick={() => setActiveTab('bio')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('bio')} role="button" tabIndex={0}>
                 <div className="feature-icon"><Layout size={24} /></div>
                 <div className="feature-body"><h3>Profile Bio</h3><p>Update status message and biography.</p></div>
                 <ChevronRight size={18} className="feature-arrow" />
               </div>
-              <div className="feature-card" onClick={() => setActiveTab('music')}>
+              <div className="feature-card" onClick={() => setActiveTab('music')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('music')} role="button" tabIndex={0}>
                 <div className="feature-icon"><Disc3 size={24} /></div>
                 <div className="feature-body"><h3>Music Sync</h3><p>Auto-update bio with your current track.</p></div>
                 <ChevronRight size={18} className="feature-arrow" />
               </div>
-              <div className="feature-card" onClick={() => setActiveTab('rank')}>
+              <div className="feature-card" onClick={() => setActiveTab('rank')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('rank')} role="button" tabIndex={0}>
                 <div className="feature-icon"><Trophy size={24} /></div>
                 <div className="feature-body"><h3>Rank Overrides</h3><p>Modify visible Solo/Duo rankings.</p></div>
                 <ChevronRight size={18} className="feature-arrow" />
               </div>
-              <div className="feature-card" onClick={() => setActiveTab('icons')}>
+              <div className="feature-card" onClick={() => setActiveTab('icons')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab('icons')} role="button" tabIndex={0}>
                 <div className="feature-icon"><UserCircle size={24} /></div>
                 <div className="feature-body"><h3>Icon Swapper</h3><p>Equip hidden summoner icons instantly.</p></div>
                 <ChevronRight size={18} className="feature-arrow" />
@@ -944,6 +944,9 @@ function App() {
                     onClick={() => {
                       setSelectedIcon(icon.id);
                     }}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedIcon(icon.id)}
+                    role="button"
+                    tabIndex={0}
                     style={{
                       cursor: 'pointer', borderRadius: '10px', background: 'rgba(255,255,255,0.03)',
                       padding: '10px', textAlign: 'center', border: selectedIcon === icon.id ? '2px solid var(--hextech-gold)' : '2px solid transparent',
