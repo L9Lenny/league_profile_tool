@@ -97,6 +97,63 @@ async function fetchSonarQubeIssues() {
 }
 
 /**
+ * Create a GitHub label if it doesn't exist
+ */
+async function ensureLabel(name, color = 'f29513', description = '') {
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/labels`;
+  
+  // Try to create the label
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: {
+      name,
+      color,
+      description
+    }
+  };
+
+  try {
+    const response = await makeRequest(url, options);
+    return true;
+  } catch (error) {
+    // If label already exists (422), it's fine
+    if (error.message.includes('422')) {
+      return true;
+    }
+    console.warn(`⚠️  Warning: Failed to create label "${name}": ${error.message}`);
+    return false;
+  }
+}
+
+/**
+ * Ensure all required labels exist
+ */
+async function ensureAllLabels() {
+  console.log('🏷️  Ensuring GitHub labels exist...\n');
+  
+  const labelConfigs = [
+    { name: 'sonarqube', color: '0052cc', description: 'Issues created from SonarQube analysis' },
+    { name: 'blocker', color: 'd73a49', description: 'Blocker severity issue' },
+    { name: 'critical', color: 'ff6b6b', description: 'Critical severity issue' },
+    { name: 'major', color: 'ffc640', description: 'Major severity issue' },
+    { name: 'minor', color: 'fbca04', description: 'Minor severity issue' },
+    { name: 'info', color: '84b6eb', description: 'Info severity issue' },
+    { name: 'bug', color: 'd73a49', description: 'Bug type issue' },
+    { name: 'security', color: 'd73a49', description: 'Security vulnerability' },
+    { name: 'code-smell', color: '1f6feb', description: 'Code smell issue' }
+  ];
+
+  for (const label of labelConfigs) {
+    await ensureLabel(label.name, label.color, label.description);
+  }
+  
+  console.log('✅ Labels ready!\n');
+}
+
+/**
  * Get existing GitHub issues with sonarqube label
  */
 async function getExistingIssues() {
@@ -183,6 +240,9 @@ async function main() {
     console.log(`   - GitHub Repository: ${GITHUB_REPO}`);
     console.log(`   - SonarQube Project: ${SONAR_PROJECT_KEY}`);
     console.log(`   - SonarQube Host: ${SONAR_HOST}\n`);
+
+    // Ensure all labels exist first
+    await ensureAllLabels();
 
     // Fetch issues
     const sonarIssues = await fetchSonarQubeIssues();
