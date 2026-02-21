@@ -167,7 +167,7 @@ function App() {
     const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${encodeURIComponent(apiKey)}&format=json&limit=1`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
-    const payload = await response.json() as any;
+    const payload = await response.json();
     const recentTracks = payload?.recenttracks?.track;
     const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
     if (!track) return null;
@@ -419,7 +419,7 @@ function App() {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      const payload = await response.json() as any;
+      const payload = await response.json();
       const track = payload?.recenttracks?.track;
       if (!track) {
         throw new Error("Invalid response");
