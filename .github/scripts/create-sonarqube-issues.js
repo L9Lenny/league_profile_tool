@@ -296,7 +296,7 @@ async function main() {
     console.log(`   - Skipped: ${skipped}`);
     console.log(`   - Total: ${sonarIssues.length}`);
 
-    process.exit(created > 0 || sonarIssues.length === 0 ? 0 : 1);
+    process.exit(0);
   } catch (error) {
     console.error('❌ Fatal error:', error.message);
     process.exit(1);
