@@ -6,8 +6,8 @@ export function useToast() {
 
     const showToast = (text: string, type: string) => {
         setMessage({ text, type });
-        if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-        toastTimerRef.current = window.setTimeout(() => {
+        if (toastTimerRef.current) globalThis.clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = globalThis.setTimeout(() => {
             setMessage({ text: "", type: "" });
         }, 3000);
     };
