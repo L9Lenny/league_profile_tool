@@ -104,7 +104,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                         <div className="music-step-kicker">Step 3</div>
                         <h4>Enable Auto Bio</h4>
                         <p>Turn on automatic sync and keep your bio always updated.</p>
-                        <button type="button" className="primary-btn" onClick={enableMusicSync} disabled={!lcu || !canEnableCurrentSource}>
+                        <button type="button" className="primary-btn" onClick={enableMusicSync} disabled={!lcu}>
                             Enable Auto Bio
                         </button>
                     </div>
@@ -116,7 +116,10 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                         <input
                             id="lastfm-user"
                             value={musicBio.lastfmUsername}
-                            onChange={(e) => setMusicBio(prev => ({ ...prev, lastfmUsername: normalizeLastFmUsername(e.target.value) }))}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setMusicBio(prev => ({ ...prev, lastfmUsername: normalizeLastFmUsername(val) }));
+                            }}
                             placeholder="last.fm/user/yourname or yourname"
                         />
                     </div>
@@ -166,7 +169,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                             onChange={(e) => setMusicBio(prev => ({ ...prev, pollIntervalSec: clampPollInterval(Number(e.target.value)) }))}
                         />
                     </div>
-                    <button type="button" className="primary-btn" onClick={enableMusicSync} disabled={!lcu || !canEnableCurrentSource}>
+                    <button type="button" className="primary-btn" onClick={enableMusicSync} disabled={!lcu}>
                         {musicBio.enabled ? "Update Auto Bio" : "Connect & Enable"}
                     </button>
                     <button type="button" className="ghost-btn" onClick={disableMusicSync} disabled={!musicBio.enabled}>
