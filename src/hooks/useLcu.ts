@@ -16,14 +16,16 @@ export function useLcu(addLog: (msg: string) => void) {
             if (!prevLcuRef.current && info) {
                 addLog("League client connected.");
             }
-            prevLcuRef.current = info;
-            setLcu(info);
+            if (!prevLcuRef.current || prevLcuRef.current.port !== info.port || prevLcuRef.current.token !== info.token) {
+                prevLcuRef.current = info;
+                setLcu(info);
+            }
         } catch (err) {
             if (prevLcuRef.current) {
                 addLog("League client disconnected.");
+                prevLcuRef.current = null;
+                setLcu(null);
             }
-            prevLcuRef.current = null;
-            setLcu(null);
         }
     };
 
