@@ -6,7 +6,7 @@ Only the latest version of League Profile Editor is supported with security upda
 
 | Version | Supported          |
 |---------| ------------------ |
-| 1.3.x   | :white_check_mark: |
+| 1.4.x   | :white_check_mark: |
 | < 1.1.0 | :x:                |
 
 ## Reporting a Vulnerability
