@@ -76,6 +76,8 @@ jobs:
       
       - name: Compare and close resolved issues
         uses: actions/github-script@v7
+        env:
+          G_ISSUES: ${{ steps.get-issues.outputs.result }}
         with:
           script: |
             const fs = require('fs');
@@ -83,7 +85,7 @@ jobs:
             // Get list of issues from GitHub
             let githubIssues = [];
             try {
-              const issuesStr = '${{ steps.get-issues.outputs.result }}';
+              const issuesStr = process.env.G_ISSUES;
               githubIssues = JSON.parse(issuesStr) || [];
             } catch (e) {
               console.log('No GitHub issues to process');
