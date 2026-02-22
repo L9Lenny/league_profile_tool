@@ -23,10 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Testing
 - **🧪 Unit Tests**: Added comprehensive test suite for all tabs and hooks, reaching 80%+ code coverage to satisfy SonarCloud quality gate.
 
-### Removed
-- **🗑️ Cleanup**: Deleted `test-auto-close.bat` and `sync_labels.ps1` development-only scripts no longer needed.
-
----
 
 ## [1.3.7] - 2026-02-19
 

@@ -145,16 +145,12 @@ jobs:
                 }
                 
                 // Add comment
-                const commentBody = `## ✅ Resolved by PR
-
-This issue has been automatically detected as resolved by the latest code changes!
-
-**SonarQube Key**: ${sonarKey}
-
-The SonarQube analysis shows this issue is no longer present in the codebase.
-
----
-*This comment was automatically generated when the fix was detected.*`;
+                const commentBody = "## ✅ Resolved by PR\n\n" +
+                  "This issue has been automatically detected as resolved by the latest code changes!\n\n" +
+                  "**SonarQube Key**: " + sonarKey + "\n\n" +
+                  "The SonarQube analysis shows this issue is no longer present in the codebase.\n\n" +
+                  "---\n" +
+                  "*This comment was automatically generated when the fix was detected.*";
                 
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
