@@ -132,7 +132,7 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
         if (!musicBio.enabled || !lcu) return;
 
         let cancelled = false;
-        let intervalId: number | undefined;
+        let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
 
         const syncNowPlaying = async () => {
             if (cancelled || musicSyncRunningRef.current) return;
