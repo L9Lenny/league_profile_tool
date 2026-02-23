@@ -1,89 +1,125 @@
 name: Auto-Close Resolved Issues
 
 on:
+  push:
+    branches: [main, develop]
   pull_request:
-    types: [opened, synchronize, edited]
+    types: [closed]
     branches: [main, develop]
 
 jobs:
   close-issues:
+    # Trigger on push to main/develop OR when a PR is merged into them
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     
     permissions:
-      pull-requests: read
       issues: write
+      pull-requests: read
+      contents: read
       
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
-      - name: Extract issue numbers from commit messages and PR body
-        id: extract-issues
-        run: |
-          # Get all commit messages and PR body
-          COMMIT_MESSAGES=$(git log ${{ github.event.pull_request.base.sha }}..${{ github.sha }} --pretty=format:"%B")
-          PR_BODY="${{ github.event.pull_request.body }}"
-          
-          # Combine all text
-          ALL_TEXT="${COMMIT_MESSAGES}
-          ${PR_BODY}"
-          
-          # Extract issue numbers from "Fixes #XX", "Closes #XX", "Resolves #XX" patterns
-          ISSUES=$(echo "$ALL_TEXT" | grep -oE '(Fixes|Closes|Resolves|Fix|Close|Resolve):\s*#[0-9]+' | grep -oE '#[0-9]+' | sed 's/#//' | sort -u)
-          
-          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
-          
-          if [ -n "$ISSUES" ]; then
-            echo "Found issues: $ISSUES"
-          else
-            echo "No issues found"
-          fi
-      
-      - name: Close resolved issues
-        if: steps.extract-issues.outputs.issues != ''
+      - name: Extract issue numbers
+        id: extract
         uses: actions/github-script@v7
         with:
           script: |
-            const issues = '${{ steps.extract-issues.outputs.issues }}'.split('\n').filter(i => i.trim());
-            const prNumber = context.payload.pull_request.number;
-            const prUrl = context.payload.pull_request.html_url;
-            const prTitle = context.payload.pull_request.title;
+            const textToSearch = [];
+            
+            if (context.eventName === 'pull_request') {
+              const pr = context.payload.pull_request;
+              textToSearch.push(pr.title || '');
+              textToSearch.push(pr.body || '');
+              
+              // Get commit messages in this PR
+              try {
+                const { execSync } = require('child_process');
+                const commits = execSync(`git log ${pr.base.sha}..${pr.head.sha} --pretty=format:%B`).toString();
+                textToSearch.push(commits);
+              } catch (e) {
+                console.log('Could not get PR commits via git:', e.message);
+              }
+            } else {
+              // Push event
+              if (context.payload.head_commit) {
+                textToSearch.push(context.payload.head_commit.message);
+              }
+              if (context.payload.commits) {
+                context.payload.commits.forEach(c => textToSearch.push(c.message));
+              }
+            }
+            
+            const fullText = textToSearch.join('\n');
+            console.log('Searching for issue closure keywords in:\n', fullText);
+            
+            // Standard GitHub closure keywords: close, closes, closed, fix, fixes, fixed, resolve, resolves, resolved
+            // Followed by # and the issue number
+            const regex = /(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#(\d+)/gi;
+            const issues = new Set();
+            let match;
+            while ((match = regex.exec(fullText)) !== null) {
+              issues.add(match[1]);
+            }
+            
+            const results = Array.from(issues);
+            console.log('Found Issue Numbers:', results);
+            core.setOutput('issues', results.join(','));
+
+      - name: Close and Comment Issues
+        if: steps.extract.outputs.issues != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = '${{ steps.extract.outputs.issues }}'.split(',').filter(Boolean);
+            const isPR = context.eventName === 'pull_request';
+            
+            const sourceInfo = isPR 
+              ? `PR #${context.payload.pull_request.number}` 
+              : `commit ${context.sha.substring(0, 7)}`;
+            
+            const sourceUrl = isPR 
+              ? context.payload.pull_request.html_url 
+              : `${context.payload.repository.html_url}/commit/${context.sha}`;
 
             for (const issueNum of issues) {
-              if (!issueNum) continue;
-
               try {
+                const num = parseInt(issueNum);
+                
+                // Get issue to check status
                 const issue = await github.rest.issues.get({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: parseInt(issueNum)
+                  issue_number: num
                 });
-
+                
                 if (issue.data.state === 'closed') {
-                  console.log(`Issue #${issueNum} is already closed`);
+                  console.log(`Issue #${num} is already closed.`);
                   continue;
                 }
 
-                const commentBody = `## ✅ Resolved by PR\n\nThis issue has been resolved by PR #${prNumber}: **${prTitle}**\n\n[View PR →](${prUrl})\n\n---\n*This comment was automatically generated when the PR was opened.*`;
-
+                console.log(`Closing Issue #${num}...`);
+                
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: parseInt(issueNum),
-                  body: commentBody
+                  issue_number: num,
+                  body: `## ✅ Automatically Resolved\n\nThis issue was identified as resolved by ${sourceInfo}.\n\n[View Source →](${sourceUrl})`
                 });
 
                 await github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: parseInt(issueNum),
+                  issue_number: num,
                   state: 'closed'
                 });
-
-                console.log(`✅ Issue #${issueNum} closed and commented`);
-              } catch (error) {
-                console.error(`Error processing issue #${issueNum}:`, error.message);
+                
+                console.log(`✅ Successfully closed #${num}`);
+              } catch (e) {
+                console.error(`❌ Error processing issue #${issueNum}:`, e.message);
               }
             }
