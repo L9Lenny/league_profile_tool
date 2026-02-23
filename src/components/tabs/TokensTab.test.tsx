@@ -48,7 +48,7 @@ describe('TokensTab', () => {
 
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
         if (!slot1Wrapper) throw new Error("Slot 1 wrapper not found");
-        const slot1 = slot1Wrapper.querySelector('.token-slot') as HTMLElement;
+        const slot1 = slot1Wrapper.querySelector('button.token-slot') as HTMLElement;
         fireEvent.click(slot1);
 
         expect(screen.getByText('Select Token (Slot 1)')).toBeDefined();
@@ -70,7 +70,7 @@ describe('TokensTab', () => {
 
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
         if (!slot1Wrapper) throw new Error("Slot 1 wrapper not found");
-        fireEvent.click(slot1Wrapper.querySelector('.token-slot') as HTMLElement);
+        fireEvent.click(slot1Wrapper.querySelector('button.token-slot') as HTMLElement);
 
         const searchInput = screen.getByPlaceholderText('Search owned tokens...');
         fireEvent.change(searchInput, { target: { value: 'App' } });
@@ -88,9 +88,9 @@ describe('TokensTab', () => {
         // Open picker for slot 1
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
         if (!slot1Wrapper) throw new Error("Slot 1 wrapper not found");
-        fireEvent.click(slot1Wrapper.querySelector('.token-slot') as HTMLElement);
+        fireEvent.click(slot1Wrapper.querySelector('button.token-slot') as HTMLElement);
 
-        // Click remove (token-item-none)
+        // Click remove (token-item-none) - now a button
         fireEvent.click(screen.getByTitle('Remove token'));
 
         // Picker should close
@@ -154,7 +154,7 @@ describe('TokensTab', () => {
 
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
         if (!slot1Wrapper) throw new Error("Slot 1 wrapper not found");
-        fireEvent.click(slot1Wrapper.querySelector('.token-slot') as HTMLElement);
+        fireEvent.click(slot1Wrapper.querySelector('button.token-slot') as HTMLElement);
         expect(screen.getByText('No tokens found.')).toBeDefined();
     });
 
@@ -164,20 +164,21 @@ describe('TokensTab', () => {
             render(<TokensTab {...props} />);
         });
 
+        // Since token-slot is now a <button>, we click it via role lookup
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
-        const slot1 = slot1Wrapper?.querySelector('.token-slot') as HTMLElement;
+        const slot1 = slot1Wrapper?.querySelector('button.token-slot') as HTMLElement;
 
-        // Enter key to open picker
-        fireEvent.keyDown(slot1, { key: 'Enter', code: 'Enter' });
+        // Click to open picker
+        fireEvent.click(slot1);
         expect(screen.getByText('Select Token (Slot 1)')).toBeDefined();
 
-        // Escape key to close picker
+        // Click the overlay to close picker (the close X button has no accessible name text)
         const overlay = document.querySelector('.token-picker-overlay') as HTMLElement;
-        fireEvent.keyDown(overlay, { key: 'Escape', code: 'Escape' });
+        fireEvent.click(overlay);
         expect(screen.queryByText('Select Token (Slot 1)')).toBeNull();
 
-        // Space key to open picker again
-        fireEvent.keyDown(slot1, { key: ' ', code: 'Space' });
+        // Click again to reopen
+        fireEvent.click(slot1);
         expect(screen.getByText('Select Token (Slot 1)')).toBeDefined();
     });
 
@@ -200,7 +201,7 @@ describe('TokensTab', () => {
         });
 
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
-        fireEvent.click(slot1Wrapper?.querySelector('.token-slot') as HTMLElement);
+        fireEvent.click(slot1Wrapper?.querySelector('button.token-slot') as HTMLElement);
 
         expect(screen.getByAltText('Valid Token')).toBeDefined();
         // Check that only 1 valid token was added
@@ -229,7 +230,7 @@ describe('TokensTab', () => {
 
         // Open picker
         const slot1Wrapper = screen.getByText('Slot 1').parentElement;
-        fireEvent.click(slot1Wrapper?.querySelector('.token-slot') as HTMLElement);
+        fireEvent.click(slot1Wrapper?.querySelector('button.token-slot') as HTMLElement);
 
         const modal = document.querySelector('.token-picker-modal') as HTMLElement;
 

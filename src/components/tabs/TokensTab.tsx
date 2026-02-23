@@ -95,7 +95,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
 
                 const rawId = ch.id || ch.challengeId || (key ? Number.parseInt(key) : -1);
                 const idNum = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
-                const id = !Number.isNaN(idNum) ? idNum : -1;
+                const id = Number.isNaN(idNum) ? -1 : idNum;
                 const level = ch.currentLevel;
                 const name = ch.name;
 
@@ -161,17 +161,11 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
         const token = tokens.find(t => t?.id === tokenId);
         return (
             <div className="token-slot-wrapper">
-                <div
+                <button
+                    type="button"
                     className={`token-slot ${activePicker === slotIndex ? 'active' : ''}`}
                     onClick={() => !loading && setActivePicker(slotIndex)}
-                    onKeyDown={(e) => {
-                        if (!loading && (e.key === 'Enter' || e.key === ' ')) {
-                            e.preventDefault();
-                            setActivePicker(slotIndex);
-                        }
-                    }}
-                    role="button"
-                    tabIndex={0}
+                    disabled={loading}
                     title={token ? `${token.name} (${token.level})` : "Click to select a token"}
                 >
                     {token ? (
@@ -179,7 +173,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                     ) : (
                         <div className="token-placeholder">+</div>
                     )}
-                </div>
+                </button>
                 <span className="token-slot-label">Slot {slotIndex}</span>
             </div>
         );
@@ -236,15 +230,10 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                 <div
                     className="token-picker-overlay fadeIn"
                     onClick={() => setActivePicker(null)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') && setActivePicker(null)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label="Close picker"
                 >
                     <div
                         className="token-picker-modal"
                         onClick={e => e.stopPropagation()}
-                        onKeyDown={e => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
                     >
@@ -267,16 +256,14 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                         </div>
 
                         <div className="token-picker-grid">
-                            <div
+                            <button
+                                type="button"
                                 className="token-item-none"
                                 onClick={() => selectToken(-1)}
-                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && selectToken(-1)}
-                                role="button"
-                                tabIndex={0}
                                 title="Remove token"
                             >
                                 <div className="token-item-icon">✕</div>
-                            </div>
+                            </button>
                             {filteredTokens.length === 0 && hasFetched && (
                                 <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                                     <Info size={32} style={{ opacity: 0.3, marginBottom: '10px' }} />
@@ -284,19 +271,17 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                                 </div>
                             )}
                             {filteredTokens.map(t => (
-                                <div
+                                <button
                                     key={t.id}
+                                    type="button"
                                     className="token-item"
                                     onClick={() => selectToken(t.id)}
-                                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && selectToken(t.id)}
-                                    role="button"
-                                    tabIndex={0}
                                     title={`${t.name} (${t.level})\n${t.description}`}
                                 >
                                     <div className="token-item-icon">
                                         <img src={getTokenImgUrl(t.id, t.level)} alt={t.name} loading="lazy" />
                                     </div>
-                                </div>
+                                </button>
                             ))}
                         </div>
                     </div>

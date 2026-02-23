@@ -42,7 +42,11 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
     };
 
     const quickSetupLastFm = async () => {
-        try { await openUrl("https://www.last.fm/api/account/create"); } catch { }
+        try {
+            await openUrl("https://www.last.fm/api/account/create");
+        } catch (err) {
+            addLog(`Failed to open Last.fm setup: ${err}`);
+        }
     };
 
     const testLastFmSetup = async () => {

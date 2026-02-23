@@ -356,6 +356,9 @@ input[type="number"]:focus {
   cursor: pointer;
   transition: all 0.2s ease;
   aspect-ratio: 1;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
 }
 
 .token-item-none:hover {

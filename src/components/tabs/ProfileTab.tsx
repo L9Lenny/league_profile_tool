@@ -50,8 +50,10 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
             await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: bio });
             addLog(`Bio updated: "${bio}"`);
             showToast("Bio Updated!", "success");
-        } catch (err) {
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
             showToast("Failed to update bio", "error");
+            addLog(`Bio update failed: ${msg}`);
         } finally { setLoading(false); }
     };
 

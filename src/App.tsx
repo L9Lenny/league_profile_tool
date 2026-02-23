@@ -7,7 +7,7 @@ import {
   Award,
   Coffee,
   Disc3,
-  Github as GithubIcon,
+  Github,
   Home,
   Loader2,
   Settings,
@@ -114,8 +114,8 @@ function App() {
             new Promise((resolve) => setTimeout(resolve, 1200))
           ]);
         }
-      } catch {
-        // no-op
+      } catch (err: unknown) {
+        addLog(`Shutdown bio application failed: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
         await invoke("force_quit").catch(() => { });
       }
@@ -160,7 +160,7 @@ function App() {
           <NavItem icon={<Settings size={16} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hasUpdate={!!latestVersion && clientVersion !== latestVersion} />
         </div>
         <div className="nav-social">
-          <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top" aria-label="GitHub Repository"><GithubIcon size={18} /></a>
+          <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top" aria-label="GitHub Repository"><Github size={18} /></a>
           <a href="https://ko-fi.com/profumato" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Support on Ko-fi"><Coffee size={18} /></a>
         </div>
       </nav>
