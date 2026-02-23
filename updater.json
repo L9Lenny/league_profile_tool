@@ -1,19 +1,19 @@
 {
-    "version": "1.4.2",
-    "notes": "## [1.4.2] - 2026-02-22  ### Fixed - **🚀 Updater**: Migrated from CDN-cached `raw.githubusercontent` to GitHub Releases API to guarantee instant update detection upon launch. - **🔧 CI/CD**: Fixed a Syntax Error vulnerability in `auto-close-fixed-issues.yml` by using environment variables to securely pass JSON output to GitHub Scripts instead of unsafe inline interpolation.  ",
-    "pub_date": "2026-02-22T22:17:20Z",
+    "version": "1.5.0",
+    "notes": "## [1.5.0] - 2026-02-23  ### Added - **🏆 Profile Tokens**: Introduced a dedicated \"Tokens\" tab for customizing challenge medals on your profile. - **🖼️ Visual Picker**: New HD token selection grid powered by Community Dragon assets. - **🔄 Multi-Slot Assignment**: Added support for assigning the same token to multiple slots simultaneously. - **🔍 Smart Search**: Real-time filtering for owned tokens within the selection modal. - **📡 Sync Control**: Added a RotateCw icon for manual token synchronization and status badges for owned count.  ### Fixed - **🔒 LCU Bridge**: Hardened the backend whitelist to securely allow challenge-related endpoints. - **🧩 Data Parsing**: Improved LCU response handling to support both object-mapped and array-based token lists. - **♿ Accessibility**: Migrated UI modals to native `<dialog>` elements; resolved SonarCloud violations regarding non-interactive event listeners. - **🧹 Code Quality**: Removed deprecated Github icons, stabilized uncaught exceptions, and eliminated nested conditional statements.  ### Changed - **💎 UI Refinement**: Streamlined the Tokens tab by removing redundant labels and optimizing grid density for a cleaner look. - **📦 Dependencies (Dependabot)**: Bumped `actions/checkout` from 4 to 6.  ",
+    "pub_date": "2026-02-23T22:17:32Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.4.2/League.Profile.Tool_1.4.2_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.5.0/League.Profile.Tool_1.5.0_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.4.2/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.5.0/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.4.2/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.5.0/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
