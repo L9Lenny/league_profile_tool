@@ -157,4 +157,84 @@ describe('TokensTab', () => {
         fireEvent.click(slot1Wrapper.querySelector('.token-slot') as HTMLElement);
         expect(screen.getByText('No tokens found.')).toBeDefined();
     });
+
+    it('should handle keyboard navigation for slots and items', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const slot1Wrapper = screen.getByText('Slot 1').parentElement;
+        const slot1 = slot1Wrapper?.querySelector('.token-slot') as HTMLElement;
+
+        // Enter key to open picker
+        fireEvent.keyDown(slot1, { key: 'Enter', code: 'Enter' });
+        expect(screen.getByText('Select Token (Slot 1)')).toBeDefined();
+
+        // Escape key to close picker
+        const overlay = document.querySelector('.token-picker-overlay') as HTMLElement;
+        fireEvent.keyDown(overlay, { key: 'Escape', code: 'Escape' });
+        expect(screen.queryByText('Select Token (Slot 1)')).toBeNull();
+
+        // Space key to open picker again
+        fireEvent.keyDown(slot1, { key: ' ', code: 'Space' });
+        expect(screen.getByText('Select Token (Slot 1)')).toBeDefined();
+    });
+
+    it('should handle complex token data parsing', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockImplementation((_m, endpoint) => {
+            if (endpoint === '/lol-challenges/v1/challenges/local-player') return Promise.resolve([
+                { id: "100", challengeId: 100, name: "Valid Token", currentLevel: "DIAMOND", description: "Desc" },
+                { id: -5, name: "Invalid ID", currentLevel: "GOLD" },
+                { id: 200, name: "No Level", currentLevel: "NONE" },
+                { id: 300, currentLevel: "GOLD" }, // No name
+                null,
+                {}
+            ]);
+            return Promise.resolve({});
+        });
+
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const slot1Wrapper = screen.getByText('Slot 1').parentElement;
+        fireEvent.click(slot1Wrapper?.querySelector('.token-slot') as HTMLElement);
+
+        expect(screen.getByAltText('Valid Token')).toBeDefined();
+        // Check that only 1 valid token was added
+        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Loaded 1 selectable tokens"));
+    });
+
+    it('should handle refresh button click', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const refreshBtn = screen.getByTitle('Refresh tokens');
+        await act(async () => {
+            fireEvent.click(refreshBtn);
+        });
+
+        expect(props.addLog).toHaveBeenCalledWith("Fetching tokens from LCU...");
+    });
+
+    it('should stop propagation when clicking modal content', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        // Open picker
+        const slot1Wrapper = screen.getByText('Slot 1').parentElement;
+        fireEvent.click(slot1Wrapper?.querySelector('.token-slot') as HTMLElement);
+
+        const modal = document.querySelector('.token-picker-modal') as HTMLElement;
+
+        fireEvent.click(modal);
+        // Picker should still be open
+        expect(screen.getByText('Select Token (Slot 1)')).toBeDefined();
+    });
 });

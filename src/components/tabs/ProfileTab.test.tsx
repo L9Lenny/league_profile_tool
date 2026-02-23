@@ -64,4 +64,53 @@ describe('ProfileTab', () => {
         expect(props.setLoading).toHaveBeenCalledWith(true);
         expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.anything());
     });
+
+    it('should handle bio update failure', async () => {
+        const props = createProps();
+        vi.mocked(invoke).mockRejectedValueOnce(new Error("Fail"));
+        render(<ProfileTab {...props} />);
+
+        fireEvent.change(screen.getByLabelText('New Status Message'), { target: { value: 'test' } });
+
+        await act(async () => {
+            fireEvent.click(screen.getByText('APPLY BIO'));
+        });
+
+        expect(props.showToast).toHaveBeenCalledWith("Failed to update bio", "error");
+    });
+
+    it('should handle availability update failure', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn()
+            .mockResolvedValueOnce({ availability: 'chat' }) // initial fetch
+            .mockRejectedValueOnce(new Error("Fail")); // apply call
+
+        await act(async () => {
+            render(<ProfileTab {...props} />);
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getByText('APPLY'));
+        });
+
+        expect(props.showToast).toHaveBeenCalledWith("Failed to update status", "error");
+    });
+
+    it('should show warning when LCU is missing', () => {
+        const props = createProps() as any;
+        props.lcu = null;
+        render(<ProfileTab {...props} />);
+        expect(screen.getByText(/Start League of Legends to enable this feature/i)).toBeDefined();
+    });
+
+    it('should handle unknown availability status mapping', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockResolvedValue({ availability: 'dnd' });
+
+        await act(async () => {
+            render(<ProfileTab {...props} />);
+        });
+
+        expect(screen.getByText('DND')).toBeDefined();
+    });
 });

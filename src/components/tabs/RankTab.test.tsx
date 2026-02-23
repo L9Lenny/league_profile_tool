@@ -47,4 +47,23 @@ describe('RankTab', () => {
 
         expect(mockProps.setLoading).toHaveBeenCalledWith(true);
     });
+
+    it('should handle apply errors gracefully', async () => {
+        const { invoke } = await import('@tauri-apps/api/core');
+        vi.mocked(invoke).mockRejectedValueOnce(new Error("RPC Error"));
+        render(<RankTab {...mockProps} />);
+
+        await act(async () => {
+            fireEvent.click(screen.getByText('APPLY'));
+        });
+
+        expect(mockProps.showToast).toHaveBeenCalledWith(expect.stringContaining("Rank apply failed"), "error");
+        expect(mockProps.addLog).toHaveBeenCalledWith(expect.stringContaining("Rank override failed"));
+    });
+
+    it('should disable apply button when LCU is missing', () => {
+        render(<RankTab {...mockProps} lcu={null} />);
+        const applyBtn = screen.getByText('APPLY') as HTMLButtonElement;
+        expect(applyBtn.disabled).toBe(true);
+    });
 });

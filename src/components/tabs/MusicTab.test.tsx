@@ -80,4 +80,47 @@ describe('MusicTab', () => {
         expect(mockProps.applyIdleBio).toHaveBeenCalled();
         expect(mockProps.setMusicBio).toHaveBeenCalled();
     });
+
+    it('should handle normalization edge cases', () => {
+        render(<MusicTab {...mockProps} />);
+        const userInput = screen.getByLabelText(/Username/i);
+
+        // Empty value
+        fireEvent.change(userInput, { target: { value: '   ' } });
+        expect(mockProps.setMusicBio).toHaveBeenCalled();
+
+        // Non-URL value
+        fireEvent.change(userInput, { target: { value: 'just_a_name' } });
+        const updateFn = mockProps.setMusicBio.mock.calls[1][0];
+        expect(updateFn({}).lastfmUsername).toBe('just_a_name');
+    });
+
+    it('should handle Last.fm validation failure', async () => {
+        const musicBio = { ...defaultMusicBioSettings(), lastfmUsername: 'user', lastfmApiKey: 'key' };
+        vi.mocked(fetch).mockRejectedValueOnce(new Error("Network Error"));
+
+        render(<MusicTab {...mockProps} musicBio={musicBio} />);
+
+        const connectBtn = screen.getByText('Test Last.fm Connection');
+        await act(async () => {
+            fireEvent.click(connectBtn);
+        });
+
+        expect(mockProps.showToast).toHaveBeenCalledWith("Last.fm validation failed", "error");
+    });
+
+    it('should handle interval changes', () => {
+        render(<MusicTab {...mockProps} />);
+        const intervalInput = screen.getByLabelText(/Sync Interval/i);
+
+        fireEvent.change(intervalInput, { target: { value: '30' } });
+        expect(mockProps.setMusicBio).toHaveBeenCalled();
+    });
+
+    it('should prevent enabling without credentials', () => {
+        render(<MusicTab {...mockProps} musicBio={defaultMusicBioSettings()} />);
+        const enableBtn = screen.getByText('Connect & Enable');
+        fireEvent.click(enableBtn);
+        expect(mockProps.showToast).toHaveBeenCalledWith("Complete account fields first", "error");
+    });
 });

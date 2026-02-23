@@ -30,6 +30,9 @@ describe('HomeTab', () => {
         fireEvent.click(screen.getByText('Music Sync').closest('button')!);
         expect(mockProps.setActiveTab).toHaveBeenCalledWith('music');
 
+        fireEvent.click(screen.getByText('Profile Tokens').closest('button')!);
+        expect(mockProps.setActiveTab).toHaveBeenCalledWith('tokens');
+
         fireEvent.click(screen.getByText('Rank Overrides').closest('button')!);
         expect(mockProps.setActiveTab).toHaveBeenCalledWith('rank');
 
