@@ -53,8 +53,9 @@ impl AppSettings {
 
 #[tauri::command]
 fn set_minimize_to_tray(state: tauri::State<AppSettings>, enabled: bool) {
-    let mut minimize = state.minimize_to_tray.lock().unwrap();
-    *minimize = enabled;
+    if let Ok(mut minimize) = state.minimize_to_tray.lock() {
+        *minimize = enabled;
+    }
     
     // Save to config file
     let settings = Settings {
@@ -65,7 +66,7 @@ fn set_minimize_to_tray(state: tauri::State<AppSettings>, enabled: bool) {
 
 #[tauri::command]
 fn get_minimize_to_tray(state: tauri::State<AppSettings>) -> bool {
-    *state.minimize_to_tray.lock().unwrap()
+    *state.minimize_to_tray.lock().unwrap_or_else(|e| e.into_inner())
 }
 
 #[tauri::command]
@@ -219,7 +220,9 @@ pub fn run() {
             
             // Load saved settings
             let saved_settings = app_settings.load_settings();
-            *app_settings.minimize_to_tray.lock().unwrap() = saved_settings.minimize_to_tray;
+            if let Ok(mut minimize) = app_settings.minimize_to_tray.lock() {
+                *minimize = saved_settings.minimize_to_tray;
+            }
             
             app.manage(app_settings);
             

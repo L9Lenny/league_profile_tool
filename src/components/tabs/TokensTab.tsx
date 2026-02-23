@@ -38,7 +38,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                 setSlot2(tops[1]?.id ?? -1);
                 setSlot3(tops[2]?.id ?? -1);
             } else if (summaryRes?.selectedChallengesString) {
-                const split = summaryRes.selectedChallengesString.split(',').filter(Boolean).map((s: string) => parseInt(s));
+                const split = summaryRes.selectedChallengesString.split(',').filter(Boolean).map((s: string) => Number.parseInt(s));
                 setSlot1(split[0] ?? -1);
                 setSlot2(split[1] ?? -1);
                 setSlot3(split[2] ?? -1);
@@ -80,8 +80,8 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                 const [key, ch] = entry;
                 if (!ch || typeof ch !== 'object') return;
 
-                const rawId = ch.id || ch.challengeId || (typeof key === 'string' ? parseInt(key) : key);
-                const idNum = typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10);
+                const rawId = ch.id || ch.challengeId || (typeof key === 'string' ? Number.parseInt(key) : key);
+                const idNum = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
                 const id = !isNaN(idNum) ? idNum : -1;
                 const level = ch.currentLevel;
                 const name = ch.name;
