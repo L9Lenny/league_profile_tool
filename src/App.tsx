@@ -7,7 +7,7 @@ import {
   Award,
   Coffee,
   Disc3,
-  Github,
+  Github as GithubIcon,
   Home,
   Loader2,
   Settings,
@@ -157,10 +157,10 @@ function App() {
           <NavItem icon={<Trophy size={16} />} label="Rank" active={activeTab === 'rank'} onClick={() => setActiveTab('rank')} />
           <NavItem icon={<UserCircle size={16} />} label="Icons" active={activeTab === 'icons'} onClick={() => setActiveTab('icons')} />
           <NavItem icon={<Terminal size={16} />} label="Logs" active={activeTab === 'logs'} onClick={() => setActiveTab('logs')} />
-          <NavItem icon={<Settings size={16} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hasUpdate={latestVersion && clientVersion !== latestVersion} />
+          <NavItem icon={<Settings size={16} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hasUpdate={!!latestVersion && clientVersion !== latestVersion} />
         </div>
         <div className="nav-social">
-          <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top"><Github size={18} /></a>
+          <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top"><GithubIcon size={18} /></a>
           <a href="https://ko-fi.com/profumato" target="_blank" rel="noreferrer" className="social-link-top"><Coffee size={18} /></a>
         </div>
       </nav>
@@ -195,7 +195,7 @@ function App() {
   );
 }
 
-function NavItem({ icon, label, active, onClick, hasUpdate }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void, hasUpdate?: any }) {
+function NavItem({ icon, label, active, onClick, hasUpdate }: Readonly<{ icon: React.ReactNode, label: string, active: boolean, onClick: () => void, hasUpdate?: boolean }>) {
   return (
     <div className={`nav-item ${active ? 'active' : ''}`} onClick={onClick} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()} role="tab" tabIndex={0}>
       {icon} <span>{label}</span>

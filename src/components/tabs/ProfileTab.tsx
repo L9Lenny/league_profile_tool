@@ -28,9 +28,9 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
     const refreshAvailability = async () => {
         if (!lcu) return;
         try {
-            const chatRes = await lcuRequest("GET", "/lol-chat/v1/me");
-            if ((chatRes as any)?.availability) {
-                setAvailability((chatRes as any).availability);
+            const chatRes: any = await lcuRequest("GET", "/lol-chat/v1/me");
+            if (chatRes?.availability) {
+                setAvailability(chatRes.availability);
             }
         } catch (err) {
             addLog(`Status sync failed: ${err}`);
