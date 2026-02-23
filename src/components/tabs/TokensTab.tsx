@@ -46,11 +46,8 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
     useEffect(() => {
         const dialog = dialogRef.current;
         if (!dialog) return;
-        if (activePicker !== null) {
-            if (!dialog.open) dialog.showModal();
-        } else {
-            if (dialog.open) dialog.close();
-        }
+        if (activePicker !== null && !dialog.open) dialog.showModal();
+        if (activePicker === null && dialog.open) dialog.close();
     }, [activePicker]);
 
     // Handle native Escape key via the 'cancel' event
