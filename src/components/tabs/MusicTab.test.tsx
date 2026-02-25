@@ -32,7 +32,7 @@ describe('MusicTab', () => {
         const musicBio = { ...defaultMusicBioSettings(), lastfmUsername: 'user', lastfmApiKey: 'key' };
         render(<MusicTab {...mockProps} musicBio={musicBio} />);
 
-        const enableBtn = screen.getByText('Enable Auto Bio', { selector: 'button.primary-btn' });
+        const enableBtn = screen.getByText('START SYNC');
         fireEvent.click(enableBtn);
 
         expect(mockProps.setMusicBio).toHaveBeenCalled();
@@ -48,7 +48,10 @@ describe('MusicTab', () => {
 
         render(<MusicTab {...mockProps} musicBio={musicBio} />);
 
-        const connectBtn = screen.getByText('Test Last.fm Connection');
+        const guideBtn = screen.getByText('Quick Setup Guide');
+        fireEvent.click(guideBtn);
+
+        const connectBtn = screen.getByText('Test Setup');
         await act(async () => {
             fireEvent.click(connectBtn);
         });
@@ -72,7 +75,7 @@ describe('MusicTab', () => {
         const musicBio = { ...defaultMusicBioSettings(), enabled: true };
         render(<MusicTab {...mockProps} musicBio={musicBio} />);
 
-        const disableBtn = screen.getByText('Disable');
+        const disableBtn = screen.getByText('DISABLE');
         await act(async () => {
             fireEvent.click(disableBtn);
         });
@@ -101,7 +104,10 @@ describe('MusicTab', () => {
 
         render(<MusicTab {...mockProps} musicBio={musicBio} />);
 
-        const connectBtn = screen.getByText('Test Last.fm Connection');
+        const guideBtn = screen.getByText('Quick Setup Guide');
+        fireEvent.click(guideBtn);
+
+        const connectBtn = screen.getByText('Test Setup');
         await act(async () => {
             fireEvent.click(connectBtn);
         });
@@ -119,7 +125,7 @@ describe('MusicTab', () => {
 
     it('should prevent enabling without credentials', () => {
         render(<MusicTab {...mockProps} musicBio={defaultMusicBioSettings()} />);
-        const enableBtn = screen.getByText('Connect & Enable');
+        const enableBtn = screen.getByText('START SYNC');
         fireEvent.click(enableBtn);
         expect(mockProps.showToast).toHaveBeenCalledWith("Complete account fields first", "error");
     });
