@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
 import { isEnabled } from "@tauri-apps/plugin-autostart";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { SiGithub, SiKofi } from "react-icons/si";
+import { SiGithub, SiKofi, SiDiscord } from "react-icons/si";
 import {
   Award,
   Disc3,
@@ -161,6 +161,7 @@ function App() {
         <div className="nav-social">
           <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top" aria-label="GitHub Repository"><SiGithub size={18} /></a>
           <a href="https://ko-fi.com/profumato" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Support on Ko-fi"><SiKofi size={24} /></a>
+          <a href="https://discord.gg/CcaARTSdz5" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Join our Discord server"><SiDiscord size={20} /></a>
         </div>
       </nav>
 
