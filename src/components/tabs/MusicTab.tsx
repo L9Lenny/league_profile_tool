@@ -13,6 +13,33 @@ interface MusicTabProps {
     applyIdleBio: () => Promise<void>;
 }
 
+const normalizeLastFmUsername = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    const lastFmUsernameRegex = /last\.fm\/user\/([^/?#]+)/i;
+    const match = lastFmUsernameRegex.exec(trimmed);
+    return match ? decodeURIComponent(match[1]) : trimmed;
+};
+
+const StatusBadge: React.FC<{
+    ok: boolean;
+    label: string;
+    dotColor?: string;
+    showGlow?: boolean;
+}> = ({ ok, label, dotColor, showGlow }) => {
+    const defaultDotColor = ok ? '#00ff88' : '#ffb347';
+    const finalDotColor = dotColor || defaultDotColor;
+    const glow = showGlow !== undefined ? showGlow : ok;
+    return (
+        <span className={`music-badge ${ok ? "ok" : "warn"}`} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div className="status-dot" style={{
+                background: finalDotColor,
+                boxShadow: glow ? `0 0 5px ${finalDotColor}` : 'none'
+            }}></div> {label}
+        </span>
+    );
+};
+
 const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToast, addLog, applyIdleBio }) => {
     const [lastFmCheckLoading, setLastFmCheckLoading] = useState(false);
 
@@ -21,14 +48,6 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
 
     // Auto-hide help if already setup
     const [showHelp, setShowHelp] = useState(!(musicBio.lastfmUsername.trim() && musicBio.lastfmApiKey.trim()));
-
-    const normalizeLastFmUsername = (value: string) => {
-        const trimmed = value.trim();
-        if (!trimmed) return "";
-        const lastFmUsernameRegex = /last\.fm\/user\/([^/?#]+)/i;
-        const match = lastFmUsernameRegex.exec(trimmed);
-        return match ? decodeURIComponent(match[1]) : trimmed;
-    };
 
     const enableMusicSync = () => {
         if (!canEnableCurrentSource) {
@@ -45,28 +64,23 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
         showToast("Music sync disabled", "success");
     };
 
-    const quickSetupLastFm = async () => {
-        try {
-            await openUrl("https://www.last.fm/api/account/create");
-        } catch (err) {
-            addLog(`Failed to open Last.fm setup: ${err}`);
-        }
-    };
-
-    const testLastFmSetup = async () => {
+    const handleTestLastFm = async () => {
         const username = musicBio.lastfmUsername.trim();
         const apiKey = musicBio.lastfmApiKey.trim();
         if (!username || !apiKey) {
             showToast("Insert Last.fm username and API key", "error");
             return;
         }
+
         setLastFmCheckLoading(true);
         try {
             const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${encodeURIComponent(apiKey)}&format=json&limit=1`;
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
             const payload = await response.json();
             if (!payload?.recenttracks?.track) throw new Error("Invalid response");
+
             showToast("Last.fm connected", "success");
             addLog("Last.fm credentials validated.");
         } catch (err) {
@@ -74,6 +88,14 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
             addLog(`Last.fm validation failed: ${err}`);
         } finally {
             setLastFmCheckLoading(false);
+        }
+    };
+
+    const openSetup = async () => {
+        try {
+            await openUrl("https://www.last.fm/api/account/create");
+        } catch (err) {
+            addLog(`Failed to open Last.fm setup: ${err}`);
         }
     };
 
@@ -87,15 +109,14 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                     </div>
 
                     <div className="music-badges" style={{ margin: 0, gap: '6px' }}>
-                        <span className={`music-badge ${lcu ? "ok" : "warn"}`} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <div className="status-dot" style={{ background: lcu ? '#00ff88' : '#ffb347', boxShadow: lcu ? '0 0 5px #00ff88' : 'none' }}></div> LCU
-                        </span>
-                        <span className={`music-badge ${canEnableCurrentSource ? "ok" : "warn"}`} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <div className="status-dot" style={{ background: canEnableCurrentSource ? '#00ff88' : '#ffb347', boxShadow: canEnableCurrentSource ? '0 0 5px #00ff88' : 'none' }}></div> Last.fm
-                        </span>
-                        <span className={`music-badge ${musicIsActive ? "ok" : "warn"}`} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <div className="status-dot" style={{ background: musicBio.enabled ? '#00ff88' : '#a09b8c', boxShadow: musicBio.enabled ? '0 0 5px #00ff88' : 'none' }}></div> Auto Bio
-                        </span>
+                        <StatusBadge ok={!!lcu} label="LCU" />
+                        <StatusBadge ok={canEnableCurrentSource} label="Last.fm" />
+                        <StatusBadge
+                            ok={musicIsActive}
+                            label="Auto Bio"
+                            dotColor={musicBio.enabled ? '#00ff88' : '#a09b8c'}
+                            showGlow={musicBio.enabled}
+                        />
                     </div>
                 </div>
 
@@ -123,7 +144,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                                     <div className="music-step-kicker">Step 1</div>
                                     <h4>Get Last.fm API Key</h4>
                                     <p style={{ fontSize: '0.75rem' }}>Create your API key in one click.</p>
-                                    <button type="button" className="ghost-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} onClick={quickSetupLastFm}>
+                                    <button type="button" className="ghost-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} onClick={openSetup}>
                                         <ExternalLink size={12} /> Open Last.fm
                                     </button>
                                 </div>
@@ -131,7 +152,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                                     <div className="music-step-kicker">Step 2</div>
                                     <h4>Connect Account</h4>
                                     <p style={{ fontSize: '0.75rem' }}>Paste username and API key below.</p>
-                                    <button type="button" className="ghost-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} onClick={testLastFmSetup} disabled={lastFmCheckLoading || !canEnableCurrentSource}>
+                                    <button type="button" className="ghost-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} onClick={handleTestLastFm} disabled={lastFmCheckLoading || !canEnableCurrentSource}>
                                         <Activity size={12} /> {lastFmCheckLoading ? "Checking..." : "Test Setup"}
                                     </button>
                                 </div>
