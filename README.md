@@ -5,7 +5,7 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 <p align="center">
 
 <a href="https://github.com/L9Lenny/league_profile_tool/releases">
-  <img src="https://img.shields.io/github/v/release/L9Lenny/league_profile_tool?style=flat-square&logo=github&color=2f81f7&cacheSeconds=0" alt="Latest Release"/>
+  <img src="https://img.shields.io/github/release/L9Lenny/league_profile_tool.svg?style=flat-square" alt="Latest Release"/>
 </a>
 
 <a href="https://github.com/L9Lenny/league_profile_tool/actions">
