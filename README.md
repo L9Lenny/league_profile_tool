@@ -21,7 +21,7 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 </a>
 
 <a href="https://github.com/L9Lenny/league_profile_tool/releases">
-  <img src="https://img.shields.io/github/downloads/L9Lenny/league_profile_tool/total?style=flat-square&logo=github&color=8250df&cacheSeconds=0" alt="Total Downloads"/>
+  <img src="https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?style=flat-square&logo=github&color=8250df&cacheSeconds=0" alt="Total Downloads"/>
 </a>
 
 <a href="LICENSE">
