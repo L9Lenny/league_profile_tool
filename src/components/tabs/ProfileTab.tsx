@@ -11,8 +11,10 @@ interface ProfileTabProps {
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<any>;
 }
 
+const SAVED_BIO_KEY = "profile_saved_bio_v1";
+
 const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
-    const [bio, setBio] = useState("");
+    const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
 
     const statusLabel = (value: string) => {
@@ -25,21 +27,48 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         }
     };
 
-    const refreshAvailability = async () => {
-        if (!lcu) return;
+    const refreshProfileData = async (currentLcu: LcuInfo, attempt = 0) => {
+        const MAX_ATTEMPTS = 4;
+        const RETRY_DELAY_MS = 2000;
+
         try {
             const chatRes: any = await lcuRequest("GET", "/lol-chat/v1/me");
             if (chatRes?.availability) {
                 setAvailability(chatRes.availability);
             }
+
+            const lcuBio: string = chatRes?.statusMessage || "";
+            const savedBio = localStorage.getItem(SAVED_BIO_KEY) ?? "";
+
+            if (lcuBio) {
+                // LCU has a bio set — trust it and show it
+                setBio(lcuBio);
+            } else if (savedBio) {
+                // LCU returned empty (client was restarted) — restore the saved bio
+                addLog(`Bio was cleared by League client. Restoring: "${savedBio}"`);
+                try {
+                    await invoke("update_bio", { port: currentLcu.port, token: currentLcu.token, newBio: savedBio });
+                    setBio(savedBio);
+                    addLog(`Bio restored successfully.`);
+                } catch (restoreErr) {
+                    addLog(`Bio restore failed: ${restoreErr}`);
+                    setBio(savedBio); // still show it in the UI even if restore failed
+                }
+            }
         } catch (err) {
-            addLog(`Status sync failed: ${err}`);
+            if (attempt < MAX_ATTEMPTS) {
+                const delay = RETRY_DELAY_MS * (attempt + 1);
+                addLog(`Profile sync failed (attempt ${attempt + 1}/${MAX_ATTEMPTS}), retrying in ${delay / 1000}s...`);
+                setTimeout(() => refreshProfileData(currentLcu, attempt + 1), delay);
+            } else {
+                addLog(`Profile sync failed after ${MAX_ATTEMPTS} attempts: ${err}`);
+            }
         }
     };
 
     useEffect(() => {
         if (lcu) {
-            refreshAvailability();
+            refreshProfileData(lcu);
         }
     }, [lcu]);
 
@@ -48,6 +77,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         setLoading(true);
         try {
             await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: bio });
+            localStorage.setItem(SAVED_BIO_KEY, bio);
             addLog(`Bio updated: "${bio}"`);
             showToast("Bio Updated!", "success");
         } catch (err: unknown) {
@@ -65,7 +95,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         if (next) setAvailability(next);
         setLoading(true);
         try {
-            await lcuRequest("PUT", "/lol-chat/v1/me", { availability: target });
+            await lcuRequest("PATCH", "/lol-chat/v1/me", { availability: target });
             showToast(`Status set to ${statusLabel(target)}`, "success");
             addLog(`Status updated: ${statusLabel(target)}.`);
         } catch (err) {
@@ -80,7 +110,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
     return (
         <div className="tab-content fadeIn">
             <div className="card">
-                <h3 className="card-title">Profile Bio & Status</h3>
+                <h3 className="card-title">Profile Bio &amp; Status</h3>
                 <div className="input-group">
                     <label htmlFor="bio-input">New Status Message</label>
                     <textarea

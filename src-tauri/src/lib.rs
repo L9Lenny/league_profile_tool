@@ -78,6 +78,7 @@ fn is_allowed_lcu_request(method: &str, endpoint: &str) -> bool {
     matches!(
         (method, endpoint),
         ("PUT", "/lol-chat/v1/me")
+            | ("PATCH", "/lol-chat/v1/me")
             | ("GET", "/lol-chat/v1/me")
             | ("PUT", "/lol-summoner/v1/current-summoner/icon")
             | ("GET", "/lol-challenges/v1/summary-player-data/local-player")
