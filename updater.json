@@ -1,7 +1,7 @@
 {
     "version": "1.5.3",
-    "notes": "## [1.5.3] - 2026-03-07  ### Fixed - **Profile Bio Persistence**: Implemented a local storage mechanism and auto-restore logic to prevent the profile bio from being reset to empty upon client restarts. - **LCU API Compatibility**: Fixed 405 Method Not Allowed errors during status updates by correctly implementing the PUT method for the /lol-chat/v1/me endpoint. - **Race Condition (Startup)**: Added an exponential backoff retry system to profile synchronization, ensuring successful connection even if the LCU chat service is not immediately ready after client launch. - **Backend Sync**: Aligned backend Cargo versioning with the main application version. ### Changed - **Dependencies**: Merged several security and maintenance updates via Dependabot (lucide-react, react-icons, types/node, etc.).",
-    "pub_date": "2026-03-07T22:20:00Z",
+    "notes": "## [1.5.3] - 2026-03-07  ### Fixed - **Profile Bio Persistence**: Implemented a local storage mechanism and auto-restore logic to prevent the profile bio from being reset to empty upon client restarts. - **LCU API Compatibility**: Fixed `405 Method Not Allowed` errors during status updates by correctly implementing the `PUT` method for the `/lol-chat/v1/me` endpoint. - **Race Condition (Startup)**: Added an exponential backoff retry system to profile synchronization, ensuring successful connection even if the LCU chat service is not immediately ready after client launch. - **Backend Sync**: Aligned backend Cargo versioning with the main application version.  ### Changed - **Dependencies**: Merged several security and maintenance updates via Dependabot (lucide-react, react-icons, types/node, etc.).   ",
+    "pub_date": "2026-03-07T21:28:40Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
