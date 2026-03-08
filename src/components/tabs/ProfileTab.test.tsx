@@ -119,7 +119,7 @@ describe('ProfileTab', () => {
         });
 
         expect(props.setLoading).toHaveBeenCalledWith(true);
-        expect(props.lcuRequest).toHaveBeenCalledWith("PATCH", "/lol-chat/v1/me", expect.anything());
+        expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.anything());
     });
 
     it('should handle bio update failure', async () => {

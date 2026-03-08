@@ -27,12 +27,23 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         }
     };
 
+    const syncInProgressRef = React.useRef<string | null>(null);
+
     const refreshProfileData = async (currentLcu: LcuInfo, attempt = 0) => {
-        const MAX_ATTEMPTS = 4;
+        const connectionId = `${currentLcu.port}-${currentLcu.token}`;
+
+        // If lcu disconnected or a new connection started, abort this cycle
+        if (!lcu || syncInProgressRef.current !== connectionId) return;
+
+        const MAX_ATTEMPTS = 6;
         const RETRY_DELAY_MS = 2000;
 
         try {
             const chatRes: any = await lcuRequest("GET", "/lol-chat/v1/me");
+
+            // Re-verify connection hasn't changed during the async call
+            if (syncInProgressRef.current !== connectionId) return;
+
             if (chatRes?.availability) {
                 setAvailability(chatRes.availability);
             }
@@ -40,35 +51,49 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
             const lcuBio: string = chatRes?.statusMessage || "";
             const savedBio = localStorage.getItem(SAVED_BIO_KEY) ?? "";
 
-            if (lcuBio) {
-                // LCU has a bio set — trust it and show it
+            if (lcuBio && lcuBio.trim() !== "") {
                 setBio(lcuBio);
-            } else if (savedBio) {
-                // LCU returned empty (client was restarted) — restore the saved bio
-                addLog(`Bio was cleared by League client. Restoring: "${savedBio}"`);
+                localStorage.setItem(SAVED_BIO_KEY, lcuBio); // Update cache with actual LCU state
+            } else if (savedBio && savedBio.trim() !== "") {
+                addLog(`Bio is empty in client. Restoring saved bio (Attempt ${attempt + 1})...`);
                 try {
                     await invoke("update_bio", { port: currentLcu.port, token: currentLcu.token, newBio: savedBio });
                     setBio(savedBio);
-                    addLog(`Bio restored successfully.`);
+                    addLog(`Bio restore command sent.`);
+
+                    // Small verification delay
+                    setTimeout(async () => {
+                        if (syncInProgressRef.current !== connectionId) return;
+                        const verify: any = await lcuRequest("GET", "/lol-chat/v1/me");
+                        if (verify?.statusMessage === savedBio) {
+                            addLog(`Bio restoration verified successfully.`);
+                        } else {
+                            addLog(`Bio restoration could not be verified, client might be lagging.`);
+                        }
+                    }, 1500);
                 } catch (restoreErr) {
                     addLog(`Bio restore failed: ${restoreErr}`);
-                    setBio(savedBio); // still show it in the UI even if restore failed
+                    setBio(savedBio);
                 }
             }
         } catch (err) {
-            if (attempt < MAX_ATTEMPTS) {
+            if (attempt < MAX_ATTEMPTS && lcu && syncInProgressRef.current === connectionId) {
                 const delay = RETRY_DELAY_MS * (attempt + 1);
-                addLog(`Profile sync failed (attempt ${attempt + 1}/${MAX_ATTEMPTS}), retrying in ${delay / 1000}s...`);
+                addLog(`LCU Chat not ready (attempt ${attempt + 1}/${MAX_ATTEMPTS}). Retrying in ${delay / 1000}s...`);
                 setTimeout(() => refreshProfileData(currentLcu, attempt + 1), delay);
-            } else {
-                addLog(`Profile sync failed after ${MAX_ATTEMPTS} attempts: ${err}`);
+            } else if (attempt >= MAX_ATTEMPTS) {
+                addLog(`Profile sync failed after ${MAX_ATTEMPTS} attempts. LCU service might be unavailable.`);
             }
         }
     };
 
     useEffect(() => {
         if (lcu) {
+            const connectionId = `${lcu.port}-${lcu.token}`;
+            syncInProgressRef.current = connectionId;
             refreshProfileData(lcu);
+        } else {
+            syncInProgressRef.current = null;
         }
     }, [lcu]);
 
@@ -95,7 +120,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         if (next) setAvailability(next);
         setLoading(true);
         try {
-            await lcuRequest("PATCH", "/lol-chat/v1/me", { availability: target });
+            await lcuRequest("PUT", "/lol-chat/v1/me", { availability: target });
             showToast(`Status set to ${statusLabel(target)}`, "success");
             addLog(`Status updated: ${statusLabel(target)}.`);
         } catch (err) {
