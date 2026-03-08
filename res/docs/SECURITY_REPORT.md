@@ -1,18 +1,18 @@
 # Security Report
 
 - Repository: `L9Lenny/league_profile_tool`
-- Release Tag: `v1.5.3`
-- Release Name: League Profile Tool v1.5.3
-- Published At: 2026-03-07T21:24:59Z
-- Generated At (UTC): 2026-03-07T21:25:05Z
+- Release Tag: `v1.5.4`
+- Release Name: League Profile Tool v1.5.4
+- Published At: 2026-03-08T01:05:58Z
+- Generated At (UTC): 2026-03-08T01:06:06Z
 - Source: [VirusTotal](https://www.virustotal.com/)
 
 ## Asset Scan Results
 
 | Asset | Verdict | Malicious | Suspicious | Undetected | Harmless | Report |
 |---|---:|---:|---:|---:|---:|---|
-| `League.Profile.Tool_1.5.3_aarch64.dmg` | clean | 0 | 0 | 29 | 66 | [open](https://www.virustotal.com/gui/url/aHR0cHM6Ly9naXRodWIuY29tL0w5TGVubnkvbGVhZ3VlX3Byb2ZpbGVfdG9vbC9yZWxlYXNlcy9kb3dubG9hZC92MS41LjMvTGVhZ3VlLlByb2ZpbGUuVG9vbF8xLjUuM19hYXJjaDY0LmRtZw/detection) |
-| `League.Profile.Tool_aarch64.app.tar.gz` | clean | 0 | 0 | 30 | 65 | [open](https://www.virustotal.com/gui/url/aHR0cHM6Ly9naXRodWIuY29tL0w5TGVubnkvbGVhZ3VlX3Byb2ZpbGVfdG9vbC9yZWxlYXNlcy9kb3dubG9hZC92MS41LjMvTGVhZ3VlLlByb2ZpbGUuVG9vbF9hYXJjaDY0LmFwcC50YXIuZ3o/detection) |
+| `League.Profile.Tool_1.5.4_aarch64.dmg` | clean | 0 | 0 | 30 | 65 | [open](https://www.virustotal.com/gui/url/aHR0cHM6Ly9naXRodWIuY29tL0w5TGVubnkvbGVhZ3VlX3Byb2ZpbGVfdG9vbC9yZWxlYXNlcy9kb3dubG9hZC92MS41LjQvTGVhZ3VlLlByb2ZpbGUuVG9vbF8xLjUuNF9hYXJjaDY0LmRtZw/detection) |
+| `League.Profile.Tool_aarch64.app.tar.gz` | clean | 0 | 0 | 30 | 65 | [open](https://www.virustotal.com/gui/url/aHR0cHM6Ly9naXRodWIuY29tL0w5TGVubnkvbGVhZ3VlX3Byb2ZpbGVfdG9vbC9yZWxlYXNlcy9kb3dubG9hZC92MS41LjQvTGVhZ3VlLlByb2ZpbGUuVG9vbF9hYXJjaDY0LmFwcC50YXIuZ3o/detection) |
 
 ## Notes
 
