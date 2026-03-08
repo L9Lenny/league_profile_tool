@@ -1,7 +1,7 @@
 {
     "version": "1.5.4",
     "notes": "## [1.5.4] - 2026-03-08  ### Fixed - **LCU API (Status Update)**: Resolved `405 Method Not Allowed` when updating chat availability by switching from `PATCH` to `PUT` method, ensuring compatibility with newer League client versions.  ",
-    "pub_date": "2026-03-08T01:10:46Z",
+    "pub_date": "2026-03-08T01:17:34Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
