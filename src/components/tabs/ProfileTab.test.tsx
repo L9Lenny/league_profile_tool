@@ -81,7 +81,7 @@ describe('ProfileTab', () => {
             render(<ProfileTab {...props} />);
         });
 
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining('retrying in 2s'));
+        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining('Retrying in 2s'));
 
         // Advance timers so retry fires
         await act(async () => {
