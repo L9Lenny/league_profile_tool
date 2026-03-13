@@ -36,32 +36,126 @@ body {
 
 .main-app {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Sidebar layout */
   height: 100vh;
   background: radial-gradient(circle at center, #091428 0%, #010a13 100%);
 }
 
-/* Nav Styles */
+/* Nav Styles (Sidebar) */
 .nav-bar {
+  width: 240px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.45);
+  border-right: 1px solid var(--glass-border);
+  border-bottom: none;
+  padding: 0;
+  height: 100%;
+  flex-shrink: 0;
+  backdrop-filter: blur(20px);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.sidebar-collapsed .nav-bar {
+  width: 68px;
+}
+
+.nav-header {
+  padding: 24px;
+  display: flex;
   align-items: center;
-  padding: 0 15px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.4);
-  border-bottom: 1px solid var(--glass-border);
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  margin-bottom: 10px;
+  min-height: 80px;
+}
+
+.sidebar-collapsed .nav-header {
+  padding: 24px 0;
+  justify-content: center;
+}
+
+.nav-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.nav-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--hextech-gold);
+}
+
+.nav-logo {
+  color: var(--hextech-gold);
+  filter: drop-shadow(0 0 8px rgba(200, 155, 60, 0.4));
+}
+
+.nav-title {
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  color: var(--text-primary);
+  text-transform: uppercase;
 }
 
 .nav-links {
   display: flex;
-  gap: 2px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-collapsed .nav-links {
+  padding: 10px 8px;
+}
+
+.nav-links::-webkit-scrollbar {
+  width: 0; /* Hide scrollbar but keep functionality */
+}
+
+.nav-category {
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+.nav-category:first-of-type {
+  margin-top: 0;
+}
+
+.sidebar-collapsed .nav-category {
+  margin-top: 15px;
+}
+
+.nav-category-title {
+  color: var(--hextech-gold-dark);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 0 12px;
+  margin-bottom: 8px;
+  white-space: nowrap;
 }
 
 .nav-social {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 15px;
-  padding-right: 10px;
+  gap: 20px;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .social-link-top {
@@ -82,32 +176,45 @@ body {
   color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 1.5px;
+  font-size: 0.78rem;
+  letter-spacing: 1px;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 12px;
+  transition: all 0.2s ease;
   position: relative;
+  white-space: nowrap;
+}
+
+.nav-item.collapsed {
+  justify-content: center;
+  padding: 12px 0;
+  gap: 0;
+}
+
+.nav-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  flex-shrink: 0;
 }
 
 .nav-item.active {
   color: var(--hextech-gold-light);
-  background: linear-gradient(180deg, rgba(200, 155, 60, 0.1) 0%, rgba(200, 155, 60, 0.02) 100%);
+  background: rgba(200, 155, 60, 0.1);
+  box-shadow: inset 2px 0 0 var(--hextech-gold);
+}
+
+.nav-item.collapsed.active {
+  box-shadow: inset 3px 0 0 var(--hextech-gold);
 }
 
 .nav-item.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 15%;
-  right: 15%;
-  height: 2px;
-  background: var(--hextech-gold);
-  box-shadow: 0 0 10px var(--hextech-gold), 0 0 20px var(--hextech-gold-dark);
+  display: none; /* Removed horizontal indicator */
 }
 
 .nav-update-beacon {
@@ -186,11 +293,19 @@ body {
 }
 
 /* Content Area */
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
+}
+
 .content-area {
   flex: 1;
-  padding: 20px;
-  overflow: hidden;
-  /* Strict no-scroll for borderless feel */
+  padding: 30px;
+  overflow-y: auto;
+  position: relative;
 }
 
 .tab-content {

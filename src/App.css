@@ -230,6 +230,43 @@ input:not([type]):focus {
   opacity: 0.4;
 }
 
+.home-hero {
+  text-align: center;
+  padding: 40px 20px 20px;
+  background: transparent;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.home-back-btn {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(200, 155, 60, 0.1);
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  color: var(--hextech-gold-light);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.home-back-btn:hover {
+  background: rgba(200, 155, 60, 0.2);
+  border-color: var(--hextech-gold);
+  color: white;
+  transform: translateX(-4px);
+  box-shadow: 0 0 15px rgba(200, 155, 60, 0.25);
+}
+
 /* ── Token Picker Modal ── */
 .token-picker-dialog {
   border: none;

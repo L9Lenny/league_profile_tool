@@ -5,16 +5,18 @@ import { isEnabled } from "@tauri-apps/plugin-autostart";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { SiGithub, SiKofi, SiDiscord } from "react-icons/si";
 import {
-  Award,
-  Disc3,
-  Home,
-  Image,
-  Loader2,
-  Settings,
-  ShieldCheck,
-  Terminal,
-  Trophy,
-  UserCircle
+    Award,
+    Disc3,
+    Home,
+    Image,
+    Loader2,
+    Settings,
+    ShieldCheck,
+    Terminal,
+    Trophy,
+    UserCircle,
+    Menu,
+    ChevronLeft
 } from 'lucide-react';
 import "./App.css";
 
@@ -44,6 +46,7 @@ function App() {
   const [latestVersion, setLatestVersion] = useState("");
   const [isAutostartEnabled, setIsAutostartEnabled] = useState(false);
   const [minimizeToTray, setMinimizeToTray] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { message, showToast } = useToast();
   const { logs, addLog, exportLogs, clearLogs } = useLogs();
@@ -148,47 +151,80 @@ function App() {
   }
 
   return (
-    <div className="main-app">
+    <div className={`main-app ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
       <nav className="nav-bar">
-        <div className="nav-links">
-          <NavItem icon={<Home size={16} />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
-          <NavItem icon={<ShieldCheck size={16} />} label="Profile" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
-          <NavItem icon={<Image size={16} />} label="Background" active={activeTab === 'background'} onClick={() => setActiveTab('background')} />
-          <NavItem icon={<Disc3 size={16} />} label="Music" active={activeTab === 'music'} onClick={() => setActiveTab('music')} />
-          <NavItem icon={<Award size={16} />} label="Tokens" active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')} />
-          <NavItem icon={<Trophy size={16} />} label="Rank" active={activeTab === 'rank'} onClick={() => setActiveTab('rank')} />
-          <NavItem icon={<UserCircle size={16} />} label="Icons" active={activeTab === 'icons'} onClick={() => setActiveTab('icons')} />
-          <NavItem icon={<Terminal size={16} />} label="Logs" active={activeTab === 'logs'} onClick={() => setActiveTab('logs')} />
-          <NavItem icon={<Settings size={16} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hasUpdate={!!latestVersion && clientVersion !== latestVersion} />
+        <div className="nav-header">
+          {!isCollapsed && (
+            <>
+              <ShieldCheck className="nav-logo" size={24} />
+              <span className="nav-title">LP TOOL</span>
+            </>
+          )}
+          <button 
+            className="nav-toggle-btn" 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            title={isCollapsed ? "Expand Menu" : "Collapse Menu"}
+          >
+            {isCollapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
+          </button>
         </div>
+        <div className="nav-links">
+          <div className="nav-category">
+            {!isCollapsed && <div className="nav-category-title">General</div>}
+            <NavItem icon={<Home size={18} />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} collapsed={isCollapsed} />
+          </div>
+
+          <div className="nav-category">
+            {!isCollapsed && <div className="nav-category-title">Customization</div>}
+            <NavItem icon={<ShieldCheck size={18} />} label="Profile Bio" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} collapsed={isCollapsed} />
+            <NavItem icon={<Image size={18} />} label="Background" active={activeTab === 'background'} onClick={() => setActiveTab('background')} collapsed={isCollapsed} />
+            <NavItem icon={<UserCircle size={18} />} label="Icons" active={activeTab === 'icons'} onClick={() => setActiveTab('icons')} collapsed={isCollapsed} />
+            <NavItem icon={<Award size={18} />} label="Tokens" active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')} collapsed={isCollapsed} />
+          </div>
+
+          <div className="nav-category">
+            {!isCollapsed && <div className="nav-category-title">Enhancements</div>}
+            <NavItem icon={<Disc3 size={18} />} label="Music Sync" active={activeTab === 'music'} onClick={() => setActiveTab('music')} collapsed={isCollapsed} />
+            <NavItem icon={<Trophy size={18} />} label="Rank Overrides" active={activeTab === 'rank'} onClick={() => setActiveTab('rank')} collapsed={isCollapsed} />
+          </div>
+
+          <div className="nav-category">
+            {!isCollapsed && <div className="nav-category-title">System</div>}
+            <NavItem icon={<Terminal size={18} />} label="System Logs" active={activeTab === 'logs'} onClick={() => setActiveTab('logs')} collapsed={isCollapsed} />
+            <NavItem icon={<Settings size={18} />} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} hasUpdate={!!latestVersion && clientVersion !== latestVersion} collapsed={isCollapsed} />
+          </div>
+        </div>
+
         <div className="nav-social">
           <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top" aria-label="GitHub Repository"><SiGithub size={18} /></a>
-          <a href="https://ko-fi.com/profumato" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Support on Ko-fi"><SiKofi size={24} /></a>
-          <a href="https://discord.gg/CcaARTSdz5" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Join our Discord server"><SiDiscord size={20} /></a>
+          {!isCollapsed && <a href="https://ko-fi.com/profumato" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Support on Ko-fi"><SiKofi size={24} /></a>}
+          {!isCollapsed && <a href="https://discord.gg/CcaARTSdz5" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Join our Discord server"><SiDiscord size={20} /></a>}
         </div>
       </nav>
 
-      <main className="content-area">
-        {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} />}
-        {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-        {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-        {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
-        {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-        {activeTab === 'rank' && <RankTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} />}
-        {activeTab === 'icons' && <IconTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} {...icons} />}
-        {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
-        {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} />}
-      </main>
+      <div className="main-container">
+        <main className="content-area">
+          {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} />}
+          {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
+          {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'rank' && <RankTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} />}
+          {activeTab === 'icons' && <IconTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} {...icons} />}
+          {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
+          {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} />}
+        </main>
 
-      <footer className="status-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div className={`status-dot ${lcu ? 'online' : 'offline'}`}></div>
-          <span style={{ textTransform: 'uppercase', fontWeight: 700, fontSize: '0.7rem' }}>{lcu ? 'LCU Connected' : 'Waiting...'}</span>
-        </div>
-        <div style={{ marginLeft: 'auto', opacity: 0.5, fontSize: '0.65rem', letterSpacing: '2px' }}>
-          LEAGUE PROFILE TOOL v{clientVersion}
-        </div>
-      </footer>
+        <footer className="status-bar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className={`status-dot ${lcu ? 'online' : 'offline'}`}></div>
+            <span style={{ textTransform: 'uppercase', fontWeight: 700, fontSize: '0.7rem' }}>{lcu ? 'LCU Connected' : 'Waiting...'}</span>
+          </div>
+          <div style={{ marginLeft: 'auto', opacity: 0.5, fontSize: '0.65rem', letterSpacing: '2px' }}>
+            LEAGUE PROFILE TOOL v{clientVersion}
+          </div>
+        </footer>
+      </div>
 
       {message.text && (
         <div className={`toast ${message.type}`}>
@@ -199,14 +235,21 @@ function App() {
   );
 }
 
-function NavItem({ icon, label, active, onClick, hasUpdate }: Readonly<{ icon: React.ReactNode, label: string, active: boolean, onClick: () => void, hasUpdate?: boolean }>) {
+function NavItem({ icon, label, active, onClick, hasUpdate, collapsed }: Readonly<{ icon: React.ReactNode, label: string, active: boolean, onClick: () => void, hasUpdate?: boolean, collapsed?: boolean }>) {
   return (
-    <div className={`nav-item ${active ? 'active' : ''}`} onClick={onClick} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()} role="tab" tabIndex={0}>
-      {icon} <span>{label}</span>
+    <div 
+      className={`nav-item ${active ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`} 
+      onClick={onClick} 
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()} 
+      role="tab" 
+      tabIndex={0}
+      title={collapsed ? label : undefined}
+    >
+      <div className="nav-item-icon">{icon}</div>
+      {!collapsed && <span>{label}</span>}
       {hasUpdate && <div className="nav-update-beacon"></div>}
     </div>
   );
 }
 
 export default App;
-

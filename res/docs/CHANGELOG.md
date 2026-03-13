@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- **🗂️ Categorized Navigation**: Migrated from a horizontal top-bar to a premium vertical sidebar with grouped categories (Customization, Enhancements, System).
+- **↔️ Collapsible Sidebar**: Added support for collapsing the navigation rail to maximize workspace, featuring icon-only mode and smooth transitions.
+- **🏠 Smart Home Dashboard**: Completely redesigned home page with hierarchical category navigation and improved drill-down UX.
 - **🖼️ Profile Background**: New dedicated tab to set any champion skin as your profile background.
-- **🛠️ UX Refinement**: Reorganized Background tab with a stable top-aligned "Direct ID" entry for better accessibility.
-- **📱 Preview Strip**: Added a compact selection preview below the skin grid for immediate feedback before applying.
-- **⚡ Performance optimized**: Background skins are lazily loaded per champion to ensure instant UI response.
-- **📡 Current BG Sync**: Automatic detection and display of your current profile background ID.
+- **⚡ Performance optimized**: Background skins are lazily loaded per champion for instant UI response.
+- **📡 Current BG Sync**: Automatic detection and display of your currently equipped profile background.
 - **🔍 Global Champion Search**: Rapid filtering by champion name to quickly find your favorite skins.
 
 ## [1.5.4] - 2026-03-08
