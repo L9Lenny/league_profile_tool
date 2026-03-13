@@ -1,19 +1,19 @@
 {
-    "version": "1.5.4",
-    "notes": "## [1.5.4] - 2026-03-08  ### Fixed - **LCU API (Status Update)**: Resolved `405 Method Not Allowed` when updating chat availability by switching from `PATCH` to `PUT` method, ensuring compatibility with newer League client versions.  ",
-    "pub_date": "2026-03-08T01:17:34Z",
+    "version": "1.6.0",
+    "notes": "## [1.6.0] - 2026-03-13 ### Added - **🗂️ Categorized Navigation**: Migrated from a horizontal top-bar to a premium vertical sidebar with grouped categories (Customization, Enhancements, System). - **↔️ Collapsible Sidebar**: Added support for collapsing the navigation rail to maximize workspace, featuring icon-only mode and smooth transitions. - **🏠 Smart Home Dashboard**: Completely redesigned home page with hierarchical category navigation and improved drill-down UX. - **🖼️ Profile Background**: New dedicated tab to set any champion skin as your profile background. - **⚡ Performance optimized**: Background skins are lazily loaded per champion for instant UI response. - **📡 Current BG Sync**: Automatic detection and display of your currently equipped profile background. - **🔍 Global Champion Search**: Rapid filtering by champion name to quickly find your favorite skins.  ### Changed - **🧪 Robust Testing**: Updated all unit tests to align with the new hierarchical navigation and sidebar states. - **🛡️ Error Handling**: Improved LCU API exception handling in Profile sync to provide clearer log messages and reliable retries. - **🧹 Code Quality**: Refactored `refreshProfileData` and `BackgroundTab` to reduce cognitive complexity and resolve code smells (Number methods, ternary extraction). - **🧪 Expanded Test Suite**: Added 9 new unit tests covering `BackgroundTab` and asynchronous bio verification, reaching 92 total passing tests. - **⚡ CI Optimization**: Replaced hardcoded wait times in GitHub Actions with `sonar.qualitygate.wait` for faster and more reliable SonarCloud analysis. - **♿ Accessibility & UX**: Enhanced contrast for the Home navigation buttons and removed duplicate CSS declarations for a cleaner, more accessible interface.  ",
+    "pub_date": "2026-03-13T17:46:46Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.5.4/League.Profile.Tool_1.5.4_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.0/League.Profile.Tool_1.6.0_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.5.4/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.0/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.5.4/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.0/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
