@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- **🖼️ Profile Background**: New dedicated tab to set any champion skin as your profile background.
+- **⚡ Performance optimized**: Background skins are lazily loaded per champion to ensure instant UI response.
+- **📡 Current BG Sync**: Automatic detection and display of your current profile background ID.
+- **🔍 Global Champion Search**: Rapid filtering by champion name to quickly find your favorite skins.
+
 ## [1.5.4] - 2026-03-08
 
 ### Fixed

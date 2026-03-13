@@ -8,6 +8,7 @@ import {
   Award,
   Disc3,
   Home,
+  Image,
   Loader2,
   Settings,
   ShieldCheck,
@@ -32,6 +33,7 @@ import RankTab from "./components/tabs/RankTab";
 import IconTab from "./components/tabs/IconTab";
 import LogsTab from "./components/tabs/LogsTab";
 import TokensTab from "./components/tabs/TokensTab";
+import BackgroundTab from "./components/tabs/BackgroundTab";
 import SettingsTab from "./components/tabs/SettingsTab";
 
 function App() {
@@ -151,6 +153,7 @@ function App() {
         <div className="nav-links">
           <NavItem icon={<Home size={16} />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
           <NavItem icon={<ShieldCheck size={16} />} label="Profile" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+          <NavItem icon={<Image size={16} />} label="Background" active={activeTab === 'background'} onClick={() => setActiveTab('background')} />
           <NavItem icon={<Disc3 size={16} />} label="Music" active={activeTab === 'music'} onClick={() => setActiveTab('music')} />
           <NavItem icon={<Award size={16} />} label="Tokens" active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')} />
           <NavItem icon={<Trophy size={16} />} label="Rank" active={activeTab === 'rank'} onClick={() => setActiveTab('rank')} />
@@ -168,6 +171,7 @@ function App() {
       <main className="content-area">
         {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} />}
         {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+        {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
         {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
         {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
         {activeTab === 'rank' && <RankTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} />}

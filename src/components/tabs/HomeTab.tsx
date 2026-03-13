@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Layout, Disc3, Trophy, UserCircle, Award } from 'lucide-react';
+import { ChevronRight, Layout, Disc3, Image, Trophy, UserCircle, Award } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
 interface HomeTabProps {
@@ -23,6 +23,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab }) =
                 <button type="button" className="feature-card" onClick={() => setActiveTab('profile')}>
                     <div className="feature-icon"><Layout size={24} /></div>
                     <div className="feature-body"><h3>Profile Bio</h3><p>Update status message and biography.</p></div>
+                    <ChevronRight size={18} className="feature-arrow" />
+                </button>
+                <button type="button" className="feature-card" onClick={() => setActiveTab('background')}>
+                    <div className="feature-icon"><Image size={24} /></div>
+                    <div className="feature-body"><h3>Background</h3><p>Set any champion skin as your profile background.</p></div>
                     <ChevronRight size={18} className="feature-arrow" />
                 </button>
                 <button type="button" className="feature-card" onClick={() => setActiveTab('tokens')}>
