@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
-import { Search, Image, Loader2, Sparkles } from 'lucide-react';
+import { Search, Image, Loader2, Sparkles, Hash } from 'lucide-react';
 
 interface BackgroundTabProps {
     lcu: LcuInfo | null;
@@ -41,6 +41,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
     const [loadingChamps, setLoadingChamps] = useState(false);
     const [loadingSkins, setLoadingSkins] = useState(false);
     const [champsLoaded, setChampsLoaded] = useState(false);
+    const [directId, setDirectId] = useState('');
     const skinCacheRef = useRef<Map<number, SkinEntry[]>>(new Map());
     const skinGridRef = useRef<HTMLDivElement>(null);
 
@@ -147,26 +148,53 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
         }
     };
 
-    const [directId, setDirectId] = useState('');
-
     return (
         <div className="tab-content fadeIn">
+            {/* 1. Direct Skin ID Card (Always at the top) */}
+            <div className="card" style={{ marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <Hash size={18} style={{ color: 'var(--hextech-gold)' }} />
+                    <h3 className="card-title" style={{ margin: 0 }}>Direct Skin ID</h3>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                        <input
+                            type="number"
+                            id="direct-skin-id-input"
+                            placeholder="Enter specific skin ID (e.g. 147001)"
+                            value={directId}
+                            onChange={(e) => setDirectId(e.target.value)}
+                            style={{ width: '100%', padding: '10px' }}
+                        />
+                    </div>
+                    <button
+                        className="primary-btn"
+                        onClick={() => {
+                            const id = parseInt(directId, 10);
+                            if (!isNaN(id) && id > 0) applyBackground(id, `Skin ${id}`);
+                        }}
+                        disabled={!lcu || loading || !directId.trim()}
+                        style={{ padding: '10px 25px' }}
+                    >
+                        APPLY
+                    </button>
+                </div>
+            </div>
+
+            {/* 2. Main Browser Card */}
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                             <Image size={20} style={{ color: 'var(--hextech-gold)' }} />
                             <h3 className="card-title" style={{ margin: 0 }}>Profile Background</h3>
                         </div>
-                        <p className="music-subtitle" style={{ margin: 0 }}>Choose a champion skin to set as your profile background.</p>
+                        <p className="music-subtitle" style={{ margin: 0 }}>Browse champions and select a skin.</p>
                     </div>
                     {lcu && currentBgId !== null && (
-                        <div className="bg-current-indicator">
-                            <div className="bg-current-badge">
-                                <Sparkles size={16} style={{ color: 'var(--hextech-gold)' }} />
-                            </div>
-                            <div className="bg-current-info">
-                                <span className="bg-current-label">Current Background</span>
+                        <div className="bg-current-indicator" style={{ margin: 0 }}>
+                            <div className="bg-current-info" style={{ textAlign: 'right' }}>
+                                <span className="bg-current-label">CURRENT BACKGROUND</span>
                                 <span className="bg-current-value">ID: {currentBgId}</span>
                             </div>
                         </div>
@@ -251,6 +279,16 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                             </div>
                         )}
 
+                        {selectedSkin && (
+                            <div className="bg-preview-strip fadeIn">
+                                <img src={cdnUrl(selectedSkin.splashPath)} className="bg-preview-thumb" alt="" />
+                                <div className="bg-preview-text">
+                                    <span className="bg-preview-name">{selectedSkin.name}</span>
+                                    <span className="bg-preview-meta">ID: {selectedSkin.id}</span>
+                                </div>
+                            </div>
+                        )}
+
                         <button
                             className="primary-btn"
                             id="apply-background-btn"
@@ -262,35 +300,6 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                         </button>
                     </>
                 )}
-            </div>
-
-            {/* Direct Skin ID */}
-            <div className="card" style={{ marginTop: '12px' }}>
-                <h3 className="card-title">Direct Skin ID</h3>
-                <p className="music-subtitle" style={{ marginBottom: '10px' }}>
-                    Enter a specific skin ID to set as your profile background.
-                </p>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                        type="number"
-                        id="direct-skin-id-input"
-                        placeholder="e.g. 147001"
-                        value={directId}
-                        onChange={(e) => setDirectId(e.target.value)}
-                        style={{ flex: 2 }}
-                    />
-                    <button
-                        className="primary-btn"
-                        onClick={() => {
-                            const id = parseInt(directId, 10);
-                            if (!isNaN(id) && id > 0) applyBackground(id, `Skin ${id}`);
-                        }}
-                        disabled={!lcu || loading || !directId.trim()}
-                        style={{ flex: 1 }}
-                    >
-                        APPLY
-                    </button>
-                </div>
             </div>
 
             {!lcu && (

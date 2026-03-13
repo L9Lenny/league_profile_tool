@@ -247,6 +247,49 @@ input:not([type]):focus {
   backdrop-filter: blur(5px);
 }
 
+.bg-current-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hextech-gold-light);
+}
+
+/* ── Selection Preview Strip ── */
+.bg-preview-strip {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(200, 155, 60, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bg-preview-thumb {
+  width: 50px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bg-preview-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.bg-preview-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hextech-gold-light);
+}
+
+.bg-preview-meta {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
 .token-picker-modal {
   background: var(--league-blue-deep);
   border: 1px solid var(--hextech-gold-dark);

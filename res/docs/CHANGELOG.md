@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - **🖼️ Profile Background**: New dedicated tab to set any champion skin as your profile background.
+- **🛠️ UX Refinement**: Reorganized Background tab with a stable top-aligned "Direct ID" entry for better accessibility.
+- **📱 Preview Strip**: Added a compact selection preview below the skin grid for immediate feedback before applying.
 - **⚡ Performance optimized**: Background skins are lazily loaded per champion to ensure instant UI response.
 - **📡 Current BG Sync**: Automatic detection and display of your current profile background ID.
 - **🔍 Global Champion Search**: Rapid filtering by champion name to quickly find your favorite skins.
