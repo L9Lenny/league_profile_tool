@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
-import { Search, Image, Loader2, Sparkles, Hash } from 'lucide-react';
+import { Search, Image, Loader2, Hash } from 'lucide-react';
 
 interface BackgroundTabProps {
     lcu: LcuInfo | null;
@@ -192,10 +192,10 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                         <p className="music-subtitle" style={{ margin: 0 }}>Browse champions and select a skin.</p>
                     </div>
                     {lcu && currentBgId !== null && (
-                        <div className="bg-current-indicator" style={{ margin: 0 }}>
-                            <div className="bg-current-info" style={{ textAlign: 'right' }}>
-                                <span className="bg-current-label">CURRENT BACKGROUND</span>
-                                <span className="bg-current-value">ID: {currentBgId}</span>
+                        <div className="bg-current-equipped">
+                            <div className="bg-current-equipped-info">
+                                <span className="bg-current-equipped-label">EQUIPPED BACKGROUND</span>
+                                <span className="bg-current-equipped-value">{currentBgId === 0 ? 'DEFAULT' : `ID ${currentBgId}`}</span>
                             </div>
                         </div>
                     )}

@@ -620,52 +620,40 @@ button.bg-skin-item:focus {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.bg-current-indicator {
+/* ── Equipped Background Indicator ── */
+.bg-current-equipped {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(200, 155, 60, 0.05);
-  border: 1px solid rgba(200, 155, 60, 0.2);
-  padding: 10px 14px;
+  background: rgba(200, 155, 60, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  padding: 8px 16px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin: 0;
+  transition: all 0.2s ease;
 }
 
-.bg-current-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  border: 1px solid var(--hextech-gold);
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
+.bg-current-equipped:hover {
+  background: rgba(200, 155, 60, 0.12);
+  border-color: rgba(200, 155, 60, 0.5);
 }
 
-.bg-current-badge img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.bg-current-info {
+.bg-current-equipped-info {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
-.bg-current-label {
-  font-size: 0.65rem;
+.bg-current-equipped-label {
+  font-size: 0.55rem;
+  font-weight: 800;
   color: var(--text-secondary);
-  text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
-.bg-current-value {
-  font-size: 0.9rem;
+.bg-current-equipped-value {
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--hextech-gold-light);
 }
