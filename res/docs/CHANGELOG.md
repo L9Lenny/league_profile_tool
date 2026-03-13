@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **🧪 Robust Testing**: Updated all unit tests to align with the new hierarchical navigation and sidebar states.
 - **🛡️ Error Handling**: Improved LCU API exception handling in Profile sync to provide clearer log messages and reliable retries.
+- **🧹 Code Quality**: Refactored `refreshProfileData` in ProfileTab to reduce cognitive complexity through sub-function extraction.
 
 ## [1.5.4] - 2026-03-08
 
