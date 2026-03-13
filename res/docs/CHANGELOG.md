@@ -18,7 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **🧪 Robust Testing**: Updated all unit tests to align with the new hierarchical navigation and sidebar states.
 - **🛡️ Error Handling**: Improved LCU API exception handling in Profile sync to provide clearer log messages and reliable retries.
-- **🧹 Code Quality**: Refactored `refreshProfileData` in ProfileTab to reduce cognitive complexity through sub-function extraction.
+- **🧹 Code Quality**: Refactored `refreshProfileData` and `BackgroundTab` to reduce cognitive complexity and resolve code smells (Number methods, ternary extraction).
+- **🧪 Expanded Test Suite**: Added 9 new unit tests covering `BackgroundTab` and asynchronous bio verification, reaching 92 total passing tests.
+- **⚡ CI Optimization**: Replaced hardcoded wait times in GitHub Actions with `sonar.qualitygate.wait` for faster and more reliable SonarCloud analysis.
+- **♿ Accessibility & UX**: Enhanced contrast for the Home navigation buttons and removed duplicate CSS declarations for a cleaner, more accessible interface.
 
 ## [1.5.4] - 2026-03-08
 
