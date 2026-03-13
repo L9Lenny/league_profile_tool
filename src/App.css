@@ -531,7 +531,6 @@ input:not([type]):focus {
 }
 
 button.bg-champ-item {
-  border: none;
   margin: 0;
   font: inherit;
   color: inherit;
@@ -590,7 +589,6 @@ button.bg-champ-item:focus {
 }
 
 button.bg-skin-item {
-  border: none;
   margin: 0;
   font: inherit;
   color: inherit;

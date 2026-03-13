@@ -201,45 +201,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                     )}
                 </div>
 
-                {!selectedChampion ? (
-                    <>
-                        <div style={{ marginBottom: '12px', position: 'relative', width: '100%' }}>
-                            <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                            <input
-                                type="text"
-                                id="bg-search-input"
-                                placeholder="Search by champion name..."
-                                value={champSearch}
-                                onChange={(e) => setChampSearch(e.target.value)}
-                                style={{ width: '100%', padding: '8px 10px 8px 35px', fontSize: '0.85rem' }}
-                            />
-                        </div>
-
-                        {loadingChamps && (
-                            <div style={{ textAlign: 'center', padding: '30px' }}>
-                                <Loader2 className="intel-spinner" size={32} style={{ color: 'var(--hextech-gold)', marginBottom: '10px' }} />
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Loading champions...</p>
-                            </div>
-                        )}
-
-                        {champsLoaded && (
-                            <div className="bg-champ-grid">
-                                {filteredChampions.map(champ => (
-                                    <button
-                                        key={champ.id}
-                                        type="button"
-                                        className="bg-champ-item"
-                                        onClick={() => selectChampion(champ)}
-                                        title={champ.name}
-                                    >
-                                        <img src={cdnUrl(champ.squarePortraitPath)} alt={champ.name} loading="lazy" />
-                                        <div className="bg-champ-name">{champ.name}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                ) : (
+                {selectedChampion ? (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                             <button
@@ -298,6 +260,44 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                         >
                             {loading ? 'APPLYING...' : selectedSkin ? `APPLY — ${selectedSkin.name}` : 'SELECT A SKIN'}
                         </button>
+                    </>
+                ) : (
+                    <>
+                        <div style={{ marginBottom: '12px', position: 'relative', width: '100%' }}>
+                            <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                            <input
+                                type="text"
+                                id="bg-search-input"
+                                placeholder="Search by champion name..."
+                                value={champSearch}
+                                onChange={(e) => setChampSearch(e.target.value)}
+                                style={{ width: '100%', padding: '8px 10px 8px 35px', fontSize: '0.85rem' }}
+                            />
+                        </div>
+
+                        {loadingChamps && (
+                            <div style={{ textAlign: 'center', padding: '30px' }}>
+                                <Loader2 className="intel-spinner" size={32} style={{ color: 'var(--hextech-gold)', marginBottom: '10px' }} />
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Loading champions...</p>
+                            </div>
+                        )}
+
+                        {champsLoaded && (
+                            <div className="bg-champ-grid">
+                                {filteredChampions.map(champ => (
+                                    <button
+                                        key={champ.id}
+                                        type="button"
+                                        className="bg-champ-item"
+                                        onClick={() => selectChampion(champ)}
+                                        title={champ.name}
+                                    >
+                                        <img src={cdnUrl(champ.squarePortraitPath)} alt={champ.name} loading="lazy" />
+                                        <div className="bg-champ-name">{champ.name}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </>
                 )}
             </div>
