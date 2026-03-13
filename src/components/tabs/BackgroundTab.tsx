@@ -148,6 +148,13 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
         }
     };
 
+    // Correctly extract the label logic
+    const getApplyButtonLabel = () => {
+        if (loading) return 'APPLYING...';
+        if (selectedSkin) return `APPLY — ${selectedSkin.name}`;
+        return 'SELECT A SKIN';
+    };
+
     return (
         <div className="tab-content fadeIn">
             {/* 1. Direct Skin ID Card (Always at the top) */}
@@ -170,8 +177,8 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                     <button
                         className="primary-btn"
                         onClick={() => {
-                            const id = parseInt(directId, 10);
-                            if (!isNaN(id) && id > 0) applyBackground(id, `Skin ${id}`);
+                            const id = Number.parseInt(directId, 10);
+                            if (!Number.isNaN(id) && id > 0) applyBackground(id, `Skin ${id}`);
                         }}
                         disabled={!lcu || loading || !directId.trim()}
                         style={{ padding: '10px 25px' }}
@@ -258,7 +265,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                             disabled={!lcu || loading || !selectedSkin}
                             style={{ width: '100%', marginTop: '12px' }}
                         >
-                            {loading ? 'APPLYING...' : selectedSkin ? `APPLY — ${selectedSkin.name}` : 'SELECT A SKIN'}
+                            {getApplyButtonLabel()}
                         </button>
                     </>
                 ) : (

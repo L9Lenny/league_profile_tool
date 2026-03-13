@@ -260,11 +260,11 @@ input:not([type]):focus {
 }
 
 .home-back-btn:hover {
-  background: rgba(200, 155, 60, 0.2);
+  background: var(--hextech-gold);
   border-color: var(--hextech-gold);
-  color: white;
+  color: var(--league-blue-deep);
   transform: translateX(-4px);
-  box-shadow: 0 0 15px rgba(200, 155, 60, 0.25);
+  box-shadow: 0 0 15px rgba(200, 155, 60, 0.4);
 }
 
 /* ── Token Picker Modal ── */
