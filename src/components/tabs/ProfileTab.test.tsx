@@ -172,4 +172,24 @@ describe('ProfileTab', () => {
 
         expect(screen.getByText('DND')).toBeDefined();
     });
+    it('should verify bio restoration after timeout', async () => {
+        vi.useFakeTimers();
+        localStorage.setItem('profile_saved_bio_v1', 'Target Bio');
+        const props = createProps();
+        props.lcuRequest = vi.fn()
+            .mockResolvedValueOnce({ availability: 'chat', statusMessage: '' }) // initial sync
+            .mockResolvedValueOnce({ availability: 'chat', statusMessage: 'Target Bio' }); // verification call
+
+        await act(async () => {
+            render(<ProfileTab {...props} />);
+        });
+
+        // Verification call happens after 1500ms
+        await act(async () => {
+            vi.advanceTimersByTime(1500);
+        });
+
+        expect(props.addLog).toHaveBeenCalledWith('Bio restoration verified successfully.');
+        vi.useRealTimers();
+    });
 });
