@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **📡 Current BG Sync**: Automatic detection and display of your currently equipped profile background.
 - **🔍 Global Champion Search**: Rapid filtering by champion name to quickly find your favorite skins.
 
+### Changed
+- **🧪 Robust Testing**: Updated all unit tests to align with the new hierarchical navigation and sidebar states.
+- **🛡️ Error Handling**: Improved LCU API exception handling in Profile sync to provide clearer log messages and reliable retries.
+
 ## [1.5.4] - 2026-03-08
 
 ### Fixed

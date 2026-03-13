@@ -21,22 +21,32 @@ describe('HomeTab', () => {
         expect(screen.getByText('WAITING FOR CLIENT')).toBeDefined();
     });
 
-    it('should navigate to different tabs when feature cards are clicked', () => {
+    it('should navigate through categories to reach features', () => {
         render(<HomeTab {...mockProps} />);
 
+        // Click on Customization category
+        fireEvent.click(screen.getByText('Customization').closest('button')!);
+        expect(screen.getByText('Back to Categories')).toBeDefined();
+        
+        // Now Profile Bio should be visible
         fireEvent.click(screen.getByText('Profile Bio').closest('button')!);
         expect(mockProps.setActiveTab).toHaveBeenCalledWith('profile');
 
+        // Go back
+        fireEvent.click(screen.getByText(/Back to Categories/i));
+        expect(screen.getByText('Customization')).toBeDefined();
+
+        // Click on Enhancements category
+        fireEvent.click(screen.getByText('Enhancements').closest('button')!);
         fireEvent.click(screen.getByText('Music Sync').closest('button')!);
         expect(mockProps.setActiveTab).toHaveBeenCalledWith('music');
+    });
 
-        fireEvent.click(screen.getByText('Profile Tokens').closest('button')!);
-        expect(mockProps.setActiveTab).toHaveBeenCalledWith('tokens');
-
-        fireEvent.click(screen.getByText('Rank Overrides').closest('button')!);
-        expect(mockProps.setActiveTab).toHaveBeenCalledWith('rank');
-
-        fireEvent.click(screen.getByText('Icon Swapper').closest('button')!);
-        expect(mockProps.setActiveTab).toHaveBeenCalledWith('icons');
+    it('should reach System features through its category', () => {
+        render(<HomeTab {...mockProps} />);
+        
+        fireEvent.click(screen.getByText('System').closest('button')!);
+        fireEvent.click(screen.getByText('System Logs').closest('button')!);
+        expect(mockProps.setActiveTab).toHaveBeenCalledWith('logs');
     });
 });

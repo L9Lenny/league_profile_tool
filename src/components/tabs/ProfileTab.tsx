@@ -77,12 +77,13 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
                 }
             }
         } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
             if (attempt < MAX_ATTEMPTS && lcu && syncInProgressRef.current === connectionId) {
                 const delay = RETRY_DELAY_MS * (attempt + 1);
-                addLog(`LCU Chat not ready (attempt ${attempt + 1}/${MAX_ATTEMPTS}). Retrying in ${delay / 1000}s...`);
+                addLog(`LCU API error: ${errorMessage}. Retrying in ${delay / 1000}s (attempt ${attempt + 1}/${MAX_ATTEMPTS})...`);
                 setTimeout(() => refreshProfileData(currentLcu, attempt + 1), delay);
             } else if (attempt >= MAX_ATTEMPTS) {
-                addLog(`Profile sync failed after ${MAX_ATTEMPTS} attempts. LCU service might be unavailable.`);
+                addLog(`Profile sync failed after ${MAX_ATTEMPTS} attempts: ${errorMessage}`);
             }
         }
     };
