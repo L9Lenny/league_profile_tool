@@ -208,7 +208,10 @@ async function createGitHubIssue(title, body, issueLabels) {
  * Check if issue already exists
  */
 function issueExists(issues, sonarKey) {
-  return issues.some(issue => issue.title.includes(sonarKey));
+  return issues.some(issue => 
+    (issue.title && issue.title.includes(sonarKey)) || 
+    (issue.body && issue.body.includes(sonarKey))
+  );
 }
 
 /**
@@ -227,7 +230,8 @@ function formatIssueBody(sonarIssue) {
     `[View in SonarCloud](${SONAR_HOST}/project/issues?id=${SONAR_PROJECT_KEY}&issues=${sonarIssue.key})`,
     '',
     '---',
-    '*This issue was automatically created from SonarQube analysis.*'
+    '*This issue was automatically created from SonarQube analysis.*',
+    `<!-- sonarIssueKey: ${sonarIssue.key} -->`
   ];
 
   return lines.filter(Boolean).join('\n');
@@ -280,7 +284,8 @@ async function main() {
         issueTypeLabels[sonarIssue.type] || ''
       ].filter(Boolean);
 
-      const title = `[${sonarIssue.severity}] ${sonarIssue.message.substring(0, 100)} (${sonarKey})`;
+      // Create a cleaner title without the raw code and severity brackets (severity is already in labels)
+      const title = `SonarQube: ${sonarIssue.message.substring(0, 120)}`;
       const body = formatIssueBody(sonarIssue);
 
       try {
