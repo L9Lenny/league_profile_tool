@@ -130,8 +130,14 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                     const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
                     if (cdRes.ok) {
                         const cdData = await cdRes.json();
-                        defs = cdData;
-                        setChallengeDefs(cdData);
+                        const record: Record<number, { name: string, description: string }> = {};
+                        if (Array.isArray(cdData)) {
+                            cdData.forEach((def: any) => {
+                                record[def.id] = { name: def.name, description: def.description };
+                            });
+                        }
+                        defs = record;
+                        setChallengeDefs(record);
                     }
                 } catch (e) {
                     addLog(`Failed to fetch English definitions: ${e}`);
