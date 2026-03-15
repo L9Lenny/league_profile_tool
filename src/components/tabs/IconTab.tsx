@@ -13,7 +13,6 @@ interface IconTabProps {
     visibleIcons: Icon[];
     iconSearchTerm: string;
     setIconSearchTerm: (term: string) => void;
-    ddragonVersion: string;
     handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
     gridRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -21,7 +20,7 @@ interface IconTabProps {
 const IconTab: React.FC<IconTabProps> = ({
     lcu, loading, setLoading, showToast, addLog,
     visibleIcons, iconSearchTerm, setIconSearchTerm,
-    ddragonVersion, handleScroll, gridRef
+    handleScroll, gridRef
 }) => {
     const [selectedIcon, setSelectedIcon] = useState<number | null>(null);
 

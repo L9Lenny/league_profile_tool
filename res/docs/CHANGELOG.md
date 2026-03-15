@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI/CD**: Simplified automatic SonarQube issue titles and moved the issue key to the body for cleaner issue tracking.
 
 ### Fixed
+- **UI**: Resolved a build error in `IconTab` caused by an unused `ddragonVersion` variable after the performance optimization.
 - **CI/CD**: Fixed a race condition in the VirusTotal reporting workflow that caused only macOS assets to be scanned.
 
 ## [1.6.1] - 2026-03-14

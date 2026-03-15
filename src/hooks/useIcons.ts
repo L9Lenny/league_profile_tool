@@ -17,7 +17,6 @@ export function useIcons(addLog: (msg: string) => void) {
         return [];
     });
     const [iconSearchTerm, setIconSearchTerm] = useState("");
-    const [ddragonVersion, setDdragonVersion] = useState(() => localStorage.getItem("ddragon_version") || "14.3.1");
     const [visibleIconsCount, setVisibleIconsCount] = useState(100);
     const deferredSearchTerm = useDeferredValue(iconSearchTerm);
     const gridRef = useRef<HTMLDivElement>(null);
@@ -45,13 +44,11 @@ export function useIcons(addLog: (msg: string) => void) {
                     const parsed = JSON.parse(cachedIcons);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         setAllIcons(parsed);
-                        setDdragonVersion(latest);
                         // Skip fetching from Community Dragon if version matches
                         return;
                     }
                 }
 
-                setDdragonVersion(latest);
                 const locale = "en_gb";
                 addLog(`Refreshing icon database (v${latest})...`);
 
@@ -117,7 +114,6 @@ export function useIcons(addLog: (msg: string) => void) {
         allIcons,
         iconSearchTerm,
         setIconSearchTerm,
-        ddragonVersion,
         visibleIcons,
         handleScroll,
         gridRef
