@@ -44,20 +44,24 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 
 ## ✨ Main Features
 
+- **🗂️ Categorized Navigation**: Premium vertical sidebar with grouped categories (Customization, Enhancements, System).
+- **🏠 Smart Home Dashboard**: Redesigned home page with hierarchical navigation and improved drill-down UX.
+- **🖼️ Profile Background**: Dedicated tab to set any champion skin as your profile background with lazy loading.
 - **🆕 Profile Tokens**: Customize your 3 challenge medals with a visual image picker.
-- **🎵 Music Integration**: Synchronize your profile bio with the song you're listening to on **Last.fm**.
+- **🎵 Music Integration**: Synchronize your profile bio with your **Last.fm** scrobbles.
 - **🏆 Rank Mirror**: Customize your visible **Solo/Duo rank** with live draft previews.
 - **🖼️ Icon Swapper**: Browse and apply **6,000+ profile icons** from the Data Dragon library.
 - **📝 Presence Control**: Edit **bio/chat status** and set LCU presence (**Online, Away, Mobile, Offline**).
-- **🛠️ Troubleshooting**: Export internal system logs for advanced support.
 - **🔄 Auto-Updater**: Built-in update detection with secure ED25519 signatures.
+- **↔️ Collapsible Sidebar**: Support for icon-only mode with smooth transitions.
 
 ## ⚡ Quick Start (Users)
 
 1. Download the latest build from [Releases](https://github.com/L9Lenny/league_profile_tool/releases).
 2. Start League of Legends client.
 3. Open **League Profile Tool**.
-4. Apply your desired customizations directly through the Hextech-inspired UI.
+4. Join our [Discord Server](https://discord.gg/G3M4X3B) (Optional) for support and updates.
+5. Apply your desired customizations directly through the Hextech-inspired UI.
 
 ## 🛠️ Development
 

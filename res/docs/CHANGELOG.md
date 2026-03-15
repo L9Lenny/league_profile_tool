@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Documentation**: Overhauled `README.md` to reflect the latest navigation features and profile background customization options.
+- **Community**: Integrated official Discord server link in README for better user support.
 - **CI/CD**: Simplified automatic SonarQube issue titles and moved the issue key to the body for cleaner issue tracking.
 
 ### Fixed
