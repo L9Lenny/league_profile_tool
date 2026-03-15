@@ -20,17 +20,14 @@ describe('useIcons', () => {
         const { result } = renderHook(() => useIcons(mockAddLog));
 
         expect(result.current.allIcons).toEqual(cachedIcons);
-        expect(result.current.ddragonVersion).toBe('14.0.1');
     });
 
-    it('should fetch icons from Data Dragon', async () => {
+    it('should fetch icons from Community Dragon', async () => {
         const mockVersions = ['14.4.1'];
-        const mockIconsData = {
-            data: {
-                '1': { id: '1', name: 'First Icon' },
-                '2': { id: '2', name: 'Second Icon' }
-            }
-        };
+        const mockIconsData = [
+            { id: 1, title: 'First Icon' },
+            { id: 2, title: 'Second Icon' }
+        ];
 
         vi.mocked(fetch)
             .mockResolvedValueOnce({ ok: true, json: async () => mockVersions } as Response)
@@ -42,7 +39,6 @@ describe('useIcons', () => {
             expect(result.current.allIcons.length).toBe(2);
         });
 
-        expect(result.current.ddragonVersion).toBe('14.4.1');
         expect(result.current.allIcons[0].name).toBe('First Icon');
     });
 

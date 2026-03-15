@@ -20,7 +20,6 @@ describe('IconTab', () => {
         ],
         iconSearchTerm: '',
         setIconSearchTerm: vi.fn(),
-        ddragonVersion: '14.4.1',
         visibleIcons: [
             { id: 1, name: 'Icon One' },
             { id: 2, name: 'Icon Two' }
