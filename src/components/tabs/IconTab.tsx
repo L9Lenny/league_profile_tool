@@ -76,7 +76,8 @@ const IconTab: React.FC<IconTabProps> = ({
                     onScroll={handleScroll}
                     style={{
                         display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-                        gap: '8px', maxHeight: '350px', overflowY: 'auto', paddingRight: '10px'
+                        gap: '8px', maxHeight: '420px', overflowY: 'auto', paddingRight: '10px',
+                        contentVisibility: 'auto'
                     }}
                 >
                     {visibleIcons.map((icon) => (
@@ -91,9 +92,31 @@ const IconTab: React.FC<IconTabProps> = ({
                                 transition: 'all 0.2s ease'
                             }}
                         >
-                            <img src={`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${icon.id}.png`} alt={icon.name} style={{ width: '100%', borderRadius: '6px', marginBottom: '8px' }} loading="lazy" />
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{icon.name}</div>
-                            <div style={{ fontSize: '0.5rem', opacity: 0.5 }}>ID: {icon.id}</div>
+                            <img 
+                                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${icon.id}.jpg`} 
+                                alt={icon.name} 
+                                style={{ width: '100%', borderRadius: '6px', marginBottom: '8px', aspectRatio: '1/1', background: 'rgba(255,255,255,0.02)' }} 
+                                loading="lazy" 
+                            />
+                            <div 
+                                title={icon.name}
+                                style={{ 
+                                    fontSize: '0.65rem', 
+                                    color: 'var(--text-secondary)', 
+                                    fontWeight: 600, 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis', 
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    lineHeight: '1.2',
+                                    height: '2.4em',
+                                    marginBottom: '4px'
+                                }}
+                            >
+                                {icon.name}
+                            </div>
+                            <div style={{ fontSize: '0.55rem', opacity: 0.5 }}>ID: {icon.id}</div>
                         </button>
                     ))}
                 </div>

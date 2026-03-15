@@ -5,11 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+
+## [1.6.2] - 2026-03-15
+
+### Added
+- **🔍 Descriptive Icon Names**: Switched to Community Dragon as the primary data source, providing real names (e.g., "Blue Minion Bruiser") for over 6,000 icons instead of generic IDs.
+- **🌎 English-First Search**: Forced English (en_gb) as the default language for both Icons and Tokens/Challenges metadata, ensuring consistent search results regardless of client locale.
+- **⚡ Supercharged Icon Loading**: Implemented a version-aware local cache that skips large 2.5MB metadata fetches if the version hasn't changed, making the app startup nearly instantaneous.
+- **🖼️ Faster Previews**: Migrated icon previews from Data Dragon PNGs to Community Dragon JPGs for significantly faster loading and reduced bandwidth.
+- **🏷️ Tooltip Details**: Added hover titles to all icons in the grid to display their full descriptive names.
+- **Community**: Integrated official Discord server link in README for better user support.
 
 ### Changed
+- **🚀 UI Performance**: Added `content-visibility: auto` optimizations and direct cache-initialization for the icon grid, providing a butter-smooth scrolling experience even with thousands of items.
+- **🧩 Global Token Sync**: Updated the Tokens tab to fetch English challenge definitions from Community Dragon, enabling unified search and display for all profile badges.
+- **🧹 Architecture**: Refactored `useIcons` and `TokensTab` for better modularity and reduced dependency on the active LCU connection for metadata fetching.
 - **Documentation**: Overhauled `README.md` to reflect the latest navigation features and profile background customization options.
-- **Community**: Integrated official Discord server link in README for better user support.
 - **CI/CD**: Simplified automatic SonarQube issue titles and moved the issue key to the body for cleaner issue tracking.
 
 ### Fixed

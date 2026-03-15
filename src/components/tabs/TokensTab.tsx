@@ -40,6 +40,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
     const [activePicker, setActivePicker] = useState<number | null>(null);
     const [hasFetched, setHasFetched] = useState(false);
     const [fetching, setFetching] = useState(false);
+    const [challengeDefs, setChallengeDefs] = useState<Record<number, { name: string, description: string }>>({});
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     // Open/close native dialog based on activePicker state
@@ -121,6 +122,22 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
 
             addLog(`Analyzing ${entries.length} items from LCU...`);
 
+            // Fetch English definitions if not already loaded
+            let defs = challengeDefs;
+            if (Object.keys(defs).length === 0) {
+                try {
+                    addLog("Fetching English challenge definitions from Community Dragon...");
+                    const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
+                    if (cdRes.ok) {
+                        const cdData = await cdRes.json();
+                        defs = cdData;
+                        setChallengeDefs(cdData);
+                    }
+                } catch (e) {
+                    addLog(`Failed to fetch English definitions: ${e}`);
+                }
+            }
+
             entries.forEach(([key, value]) => {
                 const ch = value as LcuChallengeData;
                 if (!ch || typeof ch !== 'object') return;
@@ -129,14 +146,18 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
                 const idNum = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
                 const id = Number.isNaN(idNum) ? -1 : idNum;
                 const level = ch.currentLevel;
-                const name = ch.name;
+                
+                // Use English name/desc from Community Dragon if available
+                const cdDef = defs[id];
+                const name = cdDef?.name || ch.name;
+                const description = cdDef?.description || ch.description || "";
 
                 if (id > 0 && level && level !== 'NONE' && name) {
                     tokenList.push({
                         id,
                         name,
                         level,
-                        description: ch.description || ""
+                        description
                     });
                 }
             });
