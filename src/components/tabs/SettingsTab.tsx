@@ -61,7 +61,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                                 <p className="update-desc-hero">A fresh build of the toolkit is ready to be installed (<b>v{latestVersion}</b>).</p>
                             </div>
                         </div>
-                        <a href="https://github.com/L9Lenny/lol-profile-editor/releases/latest" target="_blank" rel="noreferrer" className="update-action-btn-hero">
+                        <a href="https://github.com/L9Lenny/league_profile_tool/releases/latest" target="_blank" rel="noreferrer" className="update-action-btn-hero">
                             UPDATE NOW
                         </a>
                     </div>

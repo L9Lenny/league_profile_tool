@@ -5,12 +5,12 @@ First off, thank you for considering contributing to League Profile Tool! It's p
 ## How Can I Help?
 
 ### Reporting Bugs
-- Use the [Bug Report Template](https://github.com/L9Lenny/lol-profile-editor/issues/new?template=bug_report.md).
+- Use the [Bug Report Template](https://github.com/L9Lenny/league_profile_tool/issues/new?template=bug_report.md).
 - Include as much detail as possible (logs from the "Logs" tab are very helpful!).
 
 ### Suggesting Enhancements
 - Check the issues list to see if the idea has already been suggested.
-- Use the [Feature Request Template](https://github.com/L9Lenny/lol-profile-editor/issues/new?template=feature_request.md).
+- Use the [Feature Request Template](https://github.com/L9Lenny/league_profile_tool/issues/new?template=feature_request.md).
 
 ### Pull Requests
 1. Fork the repo and create your branch from `main`.

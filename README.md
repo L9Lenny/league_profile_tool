@@ -21,7 +21,7 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 </a>
 
 <a href="https://github.com/L9Lenny/league_profile_tool/releases">
-  <img src="https://img.shields.io/github/downloads/L9Lenny/lol-profile-editor/total?style=flat-square&logo=github&color=8250df&cacheSeconds=0" alt="Total Downloads"/>
+  <img src="https://img.shields.io/github/downloads/L9Lenny/league_profile_tool/total?style=flat-square&logo=github&color=8250df&cacheSeconds=0" alt="Total Downloads"/>
 </a>
 
 <a href="LICENSE">
@@ -74,8 +74,8 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 ### Run locally
 
 ```bash
-git clone https://github.com/L9Lenny/lol-profile-editor.git
-cd lol-profile-editor
+git clone https://github.com/L9Lenny/league_profile_tool.git
+cd league_profile_tool
 npm ci
 npm run tauri dev
 ```
@@ -139,7 +139,7 @@ If the project is useful to you, you can support it here:
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/L9Lenny"><img src="https://avatars.githubusercontent.com/u/74313264?v=4?s=100" width="100px;" alt="L9Lenny"/><br /><sub><b>L9Lenny</b></sub></a><br /><a href="https://github.com/L9Lenny/lol-profile-editor/commits?author=L9Lenny" title="Code">💻</a> <a href="#design-L9Lenny" title="Design">🎨</a> <a href="#maintenance-L9Lenny" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/L9Lenny"><img src="https://avatars.githubusercontent.com/u/74313264?v=4?s=100" width="100px;" alt="L9Lenny"/><br /><sub><b>L9Lenny</b></sub></a><br /><a href="https://github.com/L9Lenny/league_profile_tool/commits?author=L9Lenny" title="Code">💻</a> <a href="#design-L9Lenny" title="Design">🎨</a> <a href="#maintenance-L9Lenny" title="Maintenance">🚧</a></td>
     </tr>
   </tbody>
 </table>

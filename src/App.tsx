@@ -72,7 +72,7 @@ function App() {
         setIsAutostartEnabled(autostart);
         setMinimizeToTray(tray);
 
-        fetch('https://api.github.com/repos/L9Lenny/lol-profile-editor/releases/latest', {
+        fetch('https://api.github.com/repos/L9Lenny/league_profile_tool/releases/latest', {
           signal: controller.signal
         })
           .then(res => res.ok ? res.json() : Promise.reject(new Error("Failed to load latest release from GitHub API")))
@@ -196,7 +196,7 @@ function App() {
         </div>
 
         <div className="nav-social">
-          <a href="https://github.com/L9Lenny/lol-profile-editor" target="_blank" rel="noreferrer" className="social-link-top" aria-label="GitHub Repository"><SiGithub size={18} /></a>
+          <a href="https://github.com/L9Lenny/league_profile_tool" target="_blank" rel="noreferrer" className="social-link-top" aria-label="GitHub Repository"><SiGithub size={18} /></a>
           {!isCollapsed && <a href="https://ko-fi.com/profumato" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Support on Ko-fi"><SiKofi size={24} /></a>}
           {!isCollapsed && <a href="https://discord.gg/CcaARTSdz5" target="_blank" rel="noreferrer" className="social-link-top" aria-label="Join our Discord server"><SiDiscord size={20} /></a>}
         </div>
