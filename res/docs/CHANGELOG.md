@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.6.3] - 2026-04-27
+
+### Added
+- **Infrastructure**: Fixed repository references to the new `league_profile_tool` name in README, docs, and application code.
+- **Dependencies**: Merged several Dependabot updates for both frontend and backend (vite, vitest, jsdom, tauri-plugins).
+
 ## [1.6.2] - 2026-03-15
 
 ### Added
