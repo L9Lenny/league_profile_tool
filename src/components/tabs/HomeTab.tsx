@@ -13,8 +13,7 @@ import {
     Layers,
     Sparkles,
     Cpu,
-    Users,
-    MessageSquare
+    Users
 } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
@@ -51,7 +50,6 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab }) =
             icon: <Layers size={24} />,
             options: [
                 { id: 'profile', title: 'Profile Bio', desc: 'Update status message and biography.', icon: <Layout size={24} /> },
-                { id: 'presence', title: 'Presence Manager', desc: 'Customize your status and visibility.', icon: <MessageSquare size={24} /> },
                 { id: 'background', title: 'Background', desc: 'Set any champion skin as your background.', icon: <Image size={24} /> },
                 { id: 'icons', title: 'Icon Swapper', desc: 'Equip hidden summoner icons instantly.', icon: <UserCircle size={24} /> },
                 { id: 'tokens', title: 'Profile Tokens', desc: 'Customize your profile badges.', icon: <Award size={24} /> },
