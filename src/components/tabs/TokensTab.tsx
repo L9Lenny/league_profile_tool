@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
-import { X, Search, Award, Info, RotateCw } from 'lucide-react';
+import { X, Search, Award, Info, RotateCw, Trash2, Layers, CheckCircle2 } from 'lucide-react';
 
 interface TokensTabProps {
     lcu: LcuInfo | null;
@@ -11,11 +11,6 @@ interface TokensTabProps {
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
 }
 
-interface LcuSummaryResponse {
-    topChallenges?: Array<{ id: number }>;
-    selectedChallengesString?: string;
-}
-
 interface TokenDef {
     id: number;
     name: string;
@@ -23,181 +18,102 @@ interface TokenDef {
     description: string;
 }
 
-interface LcuChallengeData {
-    id?: number;
-    challengeId?: number;
-    currentLevel?: string;
-    name?: string;
-    description?: string;
-}
+const TIERS = ["ALL", "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 
 const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
     const [tokens, setTokens] = useState<TokenDef[]>([]);
-    const [slot1, setSlot1] = useState<number>(-1);
-    const [slot2, setSlot2] = useState<number>(-1);
-    const [slot3, setSlot3] = useState<number>(-1);
+    const [selectedSlot, setSelectedSlot] = useState<number>(1);
+    const [slots, setSlots] = useState<[number, number, number]>([-1, -1, -1]);
     const [search, setSearch] = useState("");
-    const [activePicker, setActivePicker] = useState<number | null>(null);
-    const [hasFetched, setHasFetched] = useState(false);
+    const [tierFilter, setTierFilter] = useState("ALL");
     const [fetching, setFetching] = useState(false);
     const [challengeDefs, setChallengeDefs] = useState<Record<number, { name: string, description: string }>>({});
-    const dialogRef = useRef<HTMLDialogElement>(null);
 
-    // Open/close native dialog based on activePicker state
-    useEffect(() => {
-        const dialog = dialogRef.current;
-        if (!dialog) return;
-        if (activePicker !== null && !dialog.open) dialog.showModal();
-        if (activePicker === null && dialog.open) dialog.close();
-    }, [activePicker]);
-
-    // Handle native Escape key via the 'cancel' event and backdrop clicks
-    useEffect(() => {
-        const dialog = dialogRef.current;
-        if (!dialog) return;
-        const handleCancel = (e: Event) => {
-            e.preventDefault();
-            setActivePicker(null);
-            setSearch("");
-        };
-        const handleBackdropClick = (e: MouseEvent) => {
-            if (e.target === dialog) {
-                setActivePicker(null);
-                setSearch("");
-            }
-        };
-        dialog.addEventListener('cancel', handleCancel);
-        dialog.addEventListener('click', handleBackdropClick);
-        return () => {
-            dialog.removeEventListener('cancel', handleCancel);
-            dialog.removeEventListener('click', handleBackdropClick);
-        };
-    }, []);
-
-    const fetchTopChallenges = React.useCallback(async () => {
+    const fetchCurrentSelection = async () => {
         if (!lcu) return;
         try {
-            const summaryRes = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player") as LcuSummaryResponse;
-            if (summaryRes?.topChallenges && Array.isArray(summaryRes.topChallenges)) {
-                const tops = summaryRes.topChallenges;
-                setSlot1(tops[0]?.id ?? -1);
-                setSlot2(tops[1]?.id ?? -1);
-                setSlot3(tops[2]?.id ?? -1);
-            } else if (summaryRes?.selectedChallengesString) {
-                const split = summaryRes.selectedChallengesString.split(',').filter(Boolean).map((s: string) => Number.parseInt(s));
-                setSlot1(split[0] ?? -1);
-                setSlot2(split[1] ?? -1);
-                setSlot3(split[2] ?? -1);
+            const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
+            if (summary?.topChallenges && Array.isArray(summary.topChallenges)) {
+                setSlots([
+                    summary.topChallenges[0]?.id ?? -1,
+                    summary.topChallenges[1]?.id ?? -1,
+                    summary.topChallenges[2]?.id ?? -1
+                ]);
             }
         } catch (err) {
             addLog(`Failed to fetch current tokens: ${err}`);
         }
-    }, [lcu, lcuRequest]);
+    };
 
-    const fetchTokens = React.useCallback(async () => {
+    const fetchTokens = async () => {
         if (!lcu) return;
         setFetching(true);
         try {
-            addLog("Fetching tokens from LCU...");
-            const challengesRes = await lcuRequest("GET", "/lol-challenges/v1/challenges/local-player");
-
-            if (!challengesRes) {
-                addLog("Empty response from challenges API.");
-                setFetching(false);
-                return;
-            }
-
-            const tokenList: TokenDef[] = [];
-
-            let entries: [string, unknown][] = [];
-            if (Array.isArray(challengesRes)) {
-                entries = challengesRes.map((ch: LcuChallengeData) => [String(ch?.id || ch?.challengeId || ""), ch]);
-            } else if (challengesRes && typeof challengesRes === 'object') {
-                entries = Object.entries(challengesRes);
-            } else {
-                addLog("Invalid response format for tokens.");
-                setFetching(false);
-                return;
-            }
-
-            addLog(`Analyzing ${entries.length} items from LCU...`);
-
-            // Fetch English definitions if not already loaded
+            addLog("Syncing challenges from LCU...");
+            const challenges: any = await lcuRequest("GET", "/lol-challenges/v1/challenges/local-player");
+            
+            // Fetch definitions from Community Dragon for accurate English names
             let defs = challengeDefs;
             if (Object.keys(defs).length === 0) {
-                try {
-                    addLog("Fetching English challenge definitions from Community Dragon...");
-                    const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
-                    if (cdRes.ok) {
-                        const cdData = await cdRes.json();
-                        const record: Record<number, { name: string, description: string }> = {};
-                        if (Array.isArray(cdData)) {
-                            cdData.forEach((def: any) => {
-                                record[def.id] = { name: def.name, description: def.description };
-                            });
-                        }
-                        defs = record;
-                        setChallengeDefs(record);
-                    }
-                } catch (e) {
-                    addLog(`Failed to fetch English definitions: ${e}`);
+                const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
+                if (cdRes.ok) {
+                    const cdData = await cdRes.json();
+                    const record: Record<number, { name: string, description: string }> = {};
+                    cdData.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
+                    defs = record;
+                    setChallengeDefs(record);
                 }
             }
 
-            entries.forEach(([key, value]) => {
-                const ch = value as LcuChallengeData;
-                if (!ch || typeof ch !== 'object') return;
+            const tokenList: TokenDef[] = [];
+            const entries = Array.isArray(challenges) ? challenges : Object.values(challenges || {});
 
-                const rawId = ch.id || ch.challengeId || (key ? Number.parseInt(key) : -1);
-                const idNum = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
-                const id = Number.isNaN(idNum) ? -1 : idNum;
+            entries.forEach((ch: any) => {
+                const id = ch.id || ch.challengeId;
                 const level = ch.currentLevel;
-                
-                // Use English name/desc from Community Dragon if available
                 const cdDef = defs[id];
                 const name = cdDef?.name || ch.name;
-                const description = cdDef?.description || ch.description || "";
 
                 if (id > 0 && level && level !== 'NONE' && name) {
                     tokenList.push({
                         id,
                         name,
                         level,
-                        description
+                        description: cdDef?.description || ch.description || ""
                     });
                 }
             });
 
-            tokenList.sort((a, b) => a.name.localeCompare(b.name));
-            setTokens(tokenList);
-            addLog(`Loaded ${tokenList.length} selectable tokens.`);
+            setTokens(tokenList.sort((a, b) => a.name.localeCompare(b.name)));
+            addLog(`Loaded ${tokenList.length} unlocked tokens.`);
+            fetchCurrentSelection();
         } catch (err) {
-            addLog(`Error fetching tokens: ${err}`);
-            showToast("Failed to load tokens", "error");
+            addLog(`Error syncing tokens: ${err}`);
         } finally {
             setFetching(false);
-            setHasFetched(true);
         }
-    }, [lcu, lcuRequest, addLog, showToast]);
+    };
 
     useEffect(() => {
-        if (lcu && !hasFetched && !fetching) {
-            fetchTokens();
-            fetchTopChallenges();
-        } else if (!lcu) {
-            setTokens([]);
-            setHasFetched(false);
-        }
-    }, [lcu, hasFetched, fetching, fetchTokens, fetchTopChallenges]);
+        if (lcu) fetchTokens();
+    }, [lcu]);
 
-    const applyTokens = async () => {
+    const filteredTokens = useMemo(() => {
+        return tokens.filter(t => {
+            const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase());
+            const matchesTier = tierFilter === "ALL" || t.level.toUpperCase() === tierFilter;
+            return matchesSearch && matchesTier;
+        });
+    }, [tokens, search, tierFilter]);
+
+    const handleApply = async () => {
         if (!lcu) return;
         setLoading(true);
         try {
-            const payload = [slot1, slot2, slot3].filter(id => id !== -1);
-            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { challengeIds: payload });
-            showToast("Profile tokens updated!", "success");
-            addLog(`Tokens updated: [${payload.join(", ")}]`);
+            const challengeIds = slots.filter(id => id !== -1);
+            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { challengeIds });
+            showToast("Tokens updated successfully!", "success");
+            addLog(`Equipped tokens: [${challengeIds.join(", ")}]`);
         } catch (err) {
             showToast("Failed to update tokens", "error");
             addLog(`Tokens update failed: ${err}`);
@@ -206,147 +122,200 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
         }
     };
 
+    const fillAllSlots = (id: number) => {
+        setSlots([id, id, id]);
+        showToast("Token applied to all slots!", "success");
+    };
+
+    const clearAll = () => {
+        setSlots([-1, -1, -1]);
+        showToast("All slots cleared locally", "info");
+    };
+
+    const setSlot = (id: number) => {
+        const newSlots = [...slots] as [number, number, number];
+        newSlots[selectedSlot - 1] = id;
+        setSlots(newSlots);
+    };
+
     const getTokenImgUrl = (id: number, level: string) => {
+        if (id === -1) return "";
         return `https://raw.communitydragon.org/latest/game/assets/challenges/config/${id}/tokens/${level.toLowerCase()}.png`;
     };
 
-    const filteredTokens = tokens.filter(t => {
-        const nameMatch = (t?.name || "").toLowerCase().includes(search.toLowerCase());
-        const idMatch = (t?.id?.toString() || "").includes(search);
-        return nameMatch || idMatch;
-    });
-
-    const renderTokenSlot = (slotIndex: number, tokenId: number) => {
-        const token = tokens.find(t => t?.id === tokenId);
-        return (
-            <div className="token-slot-wrapper">
-                <button
-                    type="button"
-                    className={`token-slot ${activePicker === slotIndex ? 'active' : ''}`}
-                    onClick={() => !loading && setActivePicker(slotIndex)}
-                    disabled={loading}
-                    title={token ? `${token.name} (${token.level})` : "Click to select a token"}
-                >
-                    {token ? (
-                        <img src={getTokenImgUrl(token.id, token.level)} alt={token.name} />
-                    ) : (
-                        <div className="token-placeholder">+</div>
-                    )}
-                </button>
-                <span className="token-slot-label">Slot {slotIndex}</span>
-            </div>
-        );
-    };
-
-    const selectToken = (id: number) => {
-        if (activePicker === 1) setSlot1(id);
-        if (activePicker === 2) setSlot2(id);
-        if (activePicker === 3) setSlot3(id);
-        setActivePicker(null);
-        setSearch("");
-    };
-
-    const closePicker = () => {
-        setActivePicker(null);
-        setSearch("");
-    };
-
     return (
-        <div className="tab-content fadeIn">
-            <div className="card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Award size={20} style={{ color: 'var(--hextech-gold)' }} />
-                        <h3 className="card-title" style={{ margin: 0 }}>Profile Tokens</h3>
-                    </div>
-                    <button
-                        className={`refresh-icon-btn ${fetching ? 'loading' : ''}`}
-                        onClick={() => fetchTokens()}
-                        disabled={!lcu || loading || fetching}
-                        title="Refresh tokens"
+        <div className="tab-content fadeIn" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '20px', alignItems: 'start' }}>
+            
+            {/* LEFT SIDEBAR: Selection & Controls */}
+            <div className="card" style={{ position: 'sticky', top: '0', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Layers size={20} color="var(--hextech-gold)" />
+                    <h3 className="card-title" style={{ margin: 0 }}>Active Selection</h3>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
+                    {[1, 2, 3].map(i => {
+                        const tokenId = slots[i-1];
+                        const token = tokens.find(t => t.id === tokenId);
+                        return (
+                            <div 
+                                key={i} 
+                                onClick={() => setSelectedSlot(i)}
+                                style={{ 
+                                    width: '100px', 
+                                    height: '100px', 
+                                    borderRadius: '50%', 
+                                    background: 'rgba(0,0,0,0.4)', 
+                                    border: `2px ${selectedSlot === i ? 'solid' : 'dashed'} ${selectedSlot === i ? 'var(--hextech-gold)' : 'rgba(200, 155, 60, 0.3)'}`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    position: 'relative',
+                                    boxShadow: selectedSlot === i ? '0 0 15px rgba(200, 155, 60, 0.2)' : 'none'
+                                }}
+                            >
+                                {tokenId !== -1 ? (
+                                    <img src={getTokenImgUrl(tokenId, token?.level || 'IRON')} alt="Token" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                                ) : (
+                                    <span style={{ fontSize: '1.5rem', opacity: 0.2 }}>+</span>
+                                )}
+                                <div style={{ 
+                                    position: 'absolute', 
+                                    bottom: '-5px', 
+                                    right: '-5px', 
+                                    background: 'var(--league-blue-deep)', 
+                                    border: '1px solid var(--hextech-gold)',
+                                    borderRadius: '50%',
+                                    width: '24px',
+                                    height: '24px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 'bold',
+                                    color: 'var(--hextech-gold)'
+                                }}>{i}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button className="primary-btn" onClick={handleApply} disabled={!lcu || loading} style={{ width: '100%' }}>
+                        {loading ? 'SYNCING...' : 'APPLY CHANGES'}
+                    </button>
+                    <button 
+                        onClick={clearAll}
+                        style={{ background: 'transparent', border: '1px solid rgba(255, 80, 80, 0.3)', color: '#ff6b6b', fontSize: '0.7rem', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     >
-                        <RotateCw size={16} />
+                        <Trash2 size={14} /> CLEAR ALL SLOTS
                     </button>
                 </div>
-                <p className="music-subtitle">Click on a slot to select one of your owned tokens.</p>
+                
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'center', fontStyle: 'italic' }}>
+                    *Select a slot then pick a token from the grid.
+                </div>
+            </div>
 
-                <div className="token-slots-container">
-                    {renderTokenSlot(1, slot1)}
-                    {renderTokenSlot(2, slot2)}
-                    {renderTokenSlot(3, slot3)}
+            {/* MAIN CONTENT: Token Grid & Search */}
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Award size={24} color="var(--hextech-gold)" />
+                        <h3 className="card-title" style={{ margin: 0 }}>Unlocked Tokens</h3>
+                    </div>
+                    <button 
+                        className={`refresh-icon-btn ${fetching ? 'loading' : ''}`}
+                        onClick={fetchTokens}
+                        disabled={!lcu || fetching}
+                    >
+                        <RotateCw size={18} />
+                    </button>
                 </div>
 
-                <div className="music-badges" style={{ justifyContent: 'center', marginBottom: '20px' }}>
-                    <div className="music-badge ok" style={{ fontSize: '0.6rem' }}>{tokens.length} Owned</div>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+                    <div className="token-picker-search" style={{ flex: 1, padding: '8px 15px', borderRadius: '8px' }}>
+                        <Search size={18} color="var(--text-secondary)" />
+                        <input 
+                            type="text" 
+                            placeholder="Search by token name..." 
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', marginLeft: '10px' }}
+                        />
+                    </div>
+                    <select 
+                        value={tierFilter} 
+                        onChange={(e) => setTierFilter(e.target.value)}
+                        style={{ 
+                            background: 'rgba(0,0,0,0.3)', 
+                            border: '1px solid var(--glass-border)', 
+                            color: 'white', 
+                            padding: '0 15px', 
+                            borderRadius: '8px',
+                            fontSize: '0.8rem'
+                        }}
+                    >
+                        {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
                 </div>
 
-                <button className="primary-btn" onClick={applyTokens} disabled={!lcu || loading} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    {loading ? 'APPLYING...' : 'APPLY TO PROFILE'}
-                </button>
+                <div style={{ 
+                    flex: 1, 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', 
+                    gap: '15px',
+                    overflowY: 'auto',
+                    maxHeight: '500px',
+                    paddingRight: '10px'
+                }}>
+                    {filteredTokens.length === 0 ? (
+                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
+                            <Info size={40} style={{ opacity: 0.2, marginBottom: '15px' }} />
+                            <p>No tokens found for your criteria.</p>
+                        </div>
+                    ) : (
+                        filteredTokens.map(token => (
+                            <div 
+                                key={token.id}
+                                className="token-item"
+                                onClick={() => setSlot(token.id)}
+                                onContextMenu={(e) => { e.preventDefault(); fillAllSlots(token.id); }}
+                                style={{ 
+                                    padding: '15px', 
+                                    background: slots.includes(token.id) ? 'rgba(200, 155, 60, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                                    border: '1px solid',
+                                    borderColor: slots.includes(token.id) ? 'var(--hextech-gold)' : 'transparent',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    textAlign: 'center',
+                                    transition: 'all 0.2s',
+                                    position: 'relative'
+                                }}
+                                title={`${token.name} (${token.level})\nRight click to fill all 3 slots.`}
+                            >
+                                <img src={getTokenImgUrl(token.id, token.level)} alt={token.name} style={{ width: '64px', height: '64px', margin: '0 auto 10px' }} />
+                                <div style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{token.name}</div>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{token.level}</div>
+                                
+                                {slots.includes(token.id) && (
+                                    <div style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                                        <CheckCircle2 size={14} color="var(--hextech-gold)" />
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
 
             {!lcu && (
-                <div className="card" style={{ borderStyle: 'dashed', opacity: 0.7, textAlign: 'center' }}>
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>League client must be open to change tokens.</p>
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px' }}>
+                    <p style={{ color: '#ff3232', fontSize: '0.8rem' }}>⚠ League client connection required to manage tokens.</p>
                 </div>
             )}
-
-            {/* Native <dialog> — handles Escape, role=dialog, aria-modal natively */}
-            <dialog
-                ref={dialogRef}
-                className="token-picker-dialog"
-                aria-label={`Select Token for Slot ${activePicker}`}
-            >
-                <div className="token-picker-modal">
-                    <div className="token-picker-header">
-                        <h3>Select Token (Slot {activePicker})</h3>
-                        <button onClick={closePicker} className="token-picker-close" aria-label="Close picker">
-                            <X size={20} />
-                        </button>
-                    </div>
-
-                    <div className="token-picker-search">
-                        <Search size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search owned tokens..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            autoFocus
-                        />
-                    </div>
-
-                    <div className="token-picker-grid">
-                        <button
-                            type="button"
-                            className="token-item-none"
-                            onClick={() => selectToken(-1)}
-                            title="Remove token"
-                        >
-                            <div className="token-item-icon">✕</div>
-                        </button>
-                        {filteredTokens.length === 0 && hasFetched && (
-                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                                <Info size={32} style={{ opacity: 0.3, marginBottom: '10px' }} />
-                                <p>No tokens found.</p>
-                            </div>
-                        )}
-                        {filteredTokens.map(t => (
-                            <button
-                                key={t.id}
-                                type="button"
-                                className="token-item"
-                                onClick={() => selectToken(t.id)}
-                                title={`${t.name} (${t.level})\n${t.description}`}
-                            >
-                                <div className="token-item-icon">
-                                    <img src={getTokenImgUrl(t.id, t.level)} alt={t.name} loading="lazy" />
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </dialog>
         </div>
     );
 };
