@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Users, Play, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Users, Play, RefreshCw, CheckCircle2, UserCheck } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
 interface LobbyTabProps {
@@ -15,11 +15,9 @@ interface Friend {
     summonerId: number;
     summonerName: string;
     availability: string;
-    statusMessage: string;
 }
 
 const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
-    const [names, setNames] = useState("");
     const [friends, setFriends] = useState<Friend[]>([]);
     const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
     const [isRefreshingFriends, setIsRefreshingFriends] = useState(false);
@@ -30,16 +28,15 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
         try {
             const res: any = await lcuRequest("GET", "/lol-chat/v1/friends");
             if (Array.isArray(res)) {
-                // Filter only online friends
-                const online = res
-                    .filter(f => f.availability !== "offline")
+                // Filter only Online (chat) or DND (dnd) friends
+                const available = res
+                    .filter(f => f.availability === "chat" || f.availability === "dnd")
                     .map(f => ({
                         summonerId: f.summonerId,
                         summonerName: f.name || f.gameName || "Unknown",
-                        availability: f.availability,
-                        statusMessage: f.statusMessage
+                        availability: f.availability
                     }));
-                setFriends(online);
+                setFriends(available);
             }
         } catch (err) {
             addLog(`Failed to fetch friends: ${err}`);
@@ -52,23 +49,11 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
         if (lcu) refreshFriends();
     }, [lcu]);
 
-    const handleInviteAll = async () => {
-        if (!lcu) return;
+    const sendInvites = async (namesToInvite: string[]) => {
+        if (!lcu || namesToInvite.length === 0) return;
         
-        // Parse names from textarea
-        const pastedNames = names.split('\n')
-            .map(n => n.trim())
-            .filter(n => n.length > 0);
-        
-        const allToInvite = [...new Set([...pastedNames, ...selectedFriends])];
-
-        if (allToInvite.length === 0) {
-            showToast("No players to invite", "error");
-            return;
-        }
-
         setLoading(true);
-        addLog(`Attempting to invite ${allToInvite.length} players...`);
+        addLog(`Attempting to invite ${namesToInvite.length} players...`);
 
         try {
             // Check if we are in a lobby
@@ -76,16 +61,15 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                 await lcuRequest("GET", "/lol-lobby/v2/lobby");
             } catch (err) {
                 addLog("Not in a lobby. Creating a Normal 5v5 lobby first...");
-                await lcuRequest("POST", "/lol-lobby/v2/lobby", { queueId: 430 }); // Normal Blind
+                await lcuRequest("POST", "/lol-lobby/v2/lobby", { queueId: 430 }); 
             }
 
             // Send invitations
-            const invitations = allToInvite.map(name => ({ toSummonerName: name }));
+            const invitations = namesToInvite.map(name => ({ toSummonerName: name }));
             await lcuRequest("POST", "/lol-lobby/v2/lobby/invitations", invitations);
             
-            showToast(`Invited ${allToInvite.length} players!`, "success");
-            addLog(`Sent invitations to: ${allToInvite.join(", ")}`);
-            setNames("");
+            showToast(`Invited ${namesToInvite.length} players!`, "success");
+            addLog(`Sent invitations to: ${namesToInvite.join(", ")}`);
             setSelectedFriends([]);
         } catch (err) {
             showToast("Failed to send invitations", "error");
@@ -95,104 +79,95 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
         }
     };
 
+    const handleInviteSelected = () => sendInvites(selectedFriends);
+    
+    const handleInviteAllAvailable = () => {
+        const allNames = friends.map(f => f.summonerName);
+        if (allNames.length === 0) {
+            showToast("No available friends to invite", "error");
+            return;
+        }
+        sendInvites(allNames);
+    };
+
     const toggleFriend = (name: string) => {
         setSelectedFriends(prev => 
             prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
         );
     };
 
+    const selectAll = () => {
+        setSelectedFriends(friends.map(f => f.summonerName));
+    };
+
     const statusColor = (availability: string) => {
-        switch(availability) {
-            case 'chat': return '#00ff88';
-            case 'away': return '#ffb347';
-            case 'dnd': return '#ff4e50';
-            default: return '#888';
-        }
+        return availability === 'chat' ? '#00ff88' : '#ff4e50';
     };
 
     return (
         <div className="tab-content fadeIn">
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '15px' }}>
-                {/* Left Column: Manual Entry */}
-                <div className="card">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                        <UserPlus size={20} color="var(--hextech-gold)" />
-                        <h3 className="card-title" style={{ margin: 0 }}>Mass Invite</h3>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', minHeight: '450px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Users size={24} color="var(--hextech-gold)" />
+                        <div>
+                            <h3 className="card-title" style={{ margin: 0 }}>Lobby Manager</h3>
+                            <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Quick Invite Online &amp; DND Friends</p>
+                        </div>
                     </div>
-                    
-                    <div className="input-group">
-                        <label>Summoner Names (One per line)</label>
-                        <textarea
-                            style={{ 
-                                background: 'rgba(0, 0, 0, 0.3)', 
-                                minHeight: '200px',
-                                fontFamily: 'monospace',
-                                fontSize: '0.8rem'
-                            }}
-                            placeholder="Player1#EUW&#10;Player2#NA1&#10;..."
-                            value={names}
-                            onChange={(e) => setNames(e.target.value)}
-                            disabled={!lcu || loading}
-                        />
-                    </div>
-
-                    <div style={{ marginTop: '15px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         <button 
                             className="primary-btn" 
-                            onClick={handleInviteAll} 
-                            disabled={!lcu || loading || (names.trim() === "" && selectedFriends.length === 0)}
-                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                            onClick={selectAll} 
+                            disabled={!lcu || loading || friends.length === 0}
+                            style={{ padding: '6px 12px', fontSize: '0.7rem' }}
                         >
-                            <Play size={16} /> SEND ALL INVITATIONS
+                            SELECT ALL
                         </button>
-                    </div>
-                </div>
-
-                {/* Right Column: Friends List */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Users size={20} color="var(--hextech-gold)" />
-                            <h3 className="card-title" style={{ margin: 0 }}>Online Friends</h3>
-                        </div>
                         <button 
                             className={`refresh-icon-btn ${isRefreshingFriends ? 'loading' : ''}`}
                             onClick={refreshFriends}
                             disabled={!lcu || isRefreshingFriends}
                         >
-                            <RefreshCw size={16} />
+                            <RefreshCw size={18} />
                         </button>
                     </div>
+                </div>
 
-                    <div style={{ 
-                        flex: 1, 
-                        overflowY: 'auto', 
-                        maxHeight: '320px',
-                        background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '8px',
-                        padding: '5px'
-                    }}>
-                        {friends.length === 0 ? (
-                            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                                {lcu ? "No online friends found." : "Waiting for LCU..."}
-                            </div>
-                        ) : (
-                            friends.map(friend => (
+                <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    background: 'rgba(0,0,0,0.25)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--glass-border)',
+                    padding: '8px',
+                    marginBottom: '20px'
+                }}>
+                    {friends.length === 0 ? (
+                        <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                            <div style={{ marginBottom: '10px', opacity: 0.3 }}><Users size={48} style={{ margin: '0 auto' }} /></div>
+                            <p style={{ fontSize: '0.85rem' }}>
+                                {lcu ? "No friends currently Online or DND." : "Connecting to League Client..."}
+                            </p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                            {friends.map(friend => (
                                 <div 
                                     key={friend.summonerId}
                                     onClick={() => toggleFriend(friend.summonerName)}
                                     style={{ 
-                                        padding: '8px 12px',
-                                        margin: '2px 0',
-                                        borderRadius: '6px',
+                                        padding: '10px 14px',
+                                        borderRadius: '8px',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '10px',
+                                        gap: '12px',
                                         cursor: 'pointer',
-                                        background: selectedFriends.includes(friend.summonerName) ? 'rgba(200, 155, 60, 0.15)' : 'transparent',
+                                        background: selectedFriends.includes(friend.summonerName) ? 'rgba(200, 155, 60, 0.12)' : 'rgba(255, 255, 255, 0.02)',
                                         border: '1px solid',
-                                        borderColor: selectedFriends.includes(friend.summonerName) ? 'rgba(200, 155, 60, 0.4)' : 'transparent',
-                                        transition: 'all 0.2s'
+                                        borderColor: selectedFriends.includes(friend.summonerName) ? 'var(--hextech-gold)' : 'transparent',
+                                        transition: 'all 0.2s',
+                                        position: 'relative'
                                     }}
                                 >
                                     <div style={{ 
@@ -200,18 +175,35 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                                         height: '8px', 
                                         borderRadius: '50%', 
                                         background: statusColor(friend.availability),
-                                        boxShadow: `0 0 5px ${statusColor(friend.availability)}`
+                                        boxShadow: `0 0 8px ${statusColor(friend.availability)}`
                                     }} />
-                                    <span style={{ fontSize: '0.85rem', flex: 1 }}>{friend.summonerName}</span>
-                                    {selectedFriends.includes(friend.summonerName) && <CheckCircle2 size={14} color="var(--hextech-gold)" />}
+                                    <span style={{ fontSize: '0.85rem', flex: 1, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {friend.summonerName}
+                                    </span>
+                                    {selectedFriends.includes(friend.summonerName) && <UserCheck size={16} color="var(--hextech-gold)" />}
                                 </div>
-                            ))
-                        )}
-                    </div>
-                    
-                    <div style={{ marginTop: '10px', fontSize: '0.65rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
-                        Selected: {selectedFriends.length}
-                    </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <button 
+                        className="primary-btn" 
+                        onClick={handleInviteSelected} 
+                        disabled={!lcu || loading || selectedFriends.length === 0}
+                        style={{ background: 'transparent', border: '1px solid var(--hextech-gold)', color: 'var(--hextech-gold)' }}
+                    >
+                        INVITE SELECTED ({selectedFriends.length})
+                    </button>
+                    <button 
+                        className="primary-btn" 
+                        onClick={handleInviteAllAvailable} 
+                        disabled={!lcu || loading || friends.length === 0}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    >
+                        <Play size={18} /> INVITE ALL AVAILABLE ({friends.length})
+                    </button>
                 </div>
             </div>
 
