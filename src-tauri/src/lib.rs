@@ -86,6 +86,10 @@ fn is_allowed_lcu_request(method: &str, endpoint: &str) -> bool {
             | ("POST", "/lol-challenges/v1/update-player-preferences")
             | ("POST", "/lol-summoner/v1/current-summoner/summoner-profile")
             | ("GET", "/lol-summoner/v1/current-summoner/summoner-profile")
+            | ("POST", "/lol-lobby/v2/lobby")
+            | ("POST", "/lol-lobby/v2/lobby/invitations")
+            | ("GET", "/lol-lobby/v2/lobby")
+            | ("GET", "/lol-chat/v1/friends")
     )
 }
 

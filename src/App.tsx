@@ -38,6 +38,7 @@ import LogsTab from "./components/tabs/LogsTab";
 import TokensTab from "./components/tabs/TokensTab";
 import BackgroundTab from "./components/tabs/BackgroundTab";
 import SettingsTab from "./components/tabs/SettingsTab";
+import LobbyTab from "./components/tabs/LobbyTab";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -189,6 +190,7 @@ function App() {
             {!isCollapsed && <div className="nav-category-title">Enhancements</div>}
             <NavItem icon={<Disc3 size={18} />} label="Music Sync" active={activeTab === 'music'} onClick={() => setActiveTab('music')} collapsed={isCollapsed} />
             <NavItem icon={<Trophy size={18} />} label="Rank Overrides" active={activeTab === 'rank'} onClick={() => setActiveTab('rank')} collapsed={isCollapsed} />
+            <NavItem icon={<Users size={18} />} label="Lobby Manager" active={activeTab === 'lobby'} onClick={() => setActiveTab('lobby')} collapsed={isCollapsed} />
           </div>
 
           <div className="nav-category">
@@ -213,6 +215,7 @@ function App() {
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
           {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'rank' && <RankTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} />}
+          {activeTab === 'lobby' && <LobbyTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'icons' && <IconTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} {...icons} />}
           {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
           {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} />}
