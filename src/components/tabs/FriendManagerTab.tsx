@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, Trash2, Search, Filter, UserMinus, CheckSquare, Square, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, Trash2, Search, RefreshCw, CheckSquare, Square, AlertCircle } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
 interface FriendManagerTabProps {
@@ -18,7 +18,6 @@ interface Friend {
     availability: string;
     statusMessage: string;
     icon: number;
-    groupId: number;
     groupName: string;
 }
 
@@ -42,7 +41,6 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                     availability: f.availability,
                     statusMessage: f.statusMessage,
                     icon: f.icon,
-                    groupId: f.groupId,
                     groupName: f.groupName
                 })));
             }
@@ -71,20 +69,12 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
         setSelected(next);
     };
 
-    const selectOffline = () => {
-        const offlineIds = friends
-            .filter(f => f.availability === 'offline' || f.availability === 'mobile')
-            .map(f => f.id);
-        setSelected(new Set(offlineIds));
-    };
-
     const deleteSelected = async () => {
         if (!lcu || selected.size === 0) return;
-        if (!confirm(`Are you sure you want to remove ${selected.size} friends? This action cannot be undone.`)) return;
+        if (!confirm(`Are you sure you want to remove ${selected.size} friends?`)) return;
 
         setLoading(true);
         let successCount = 0;
-        let failCount = 0;
         setProgress({ current: 0, total: selected.size });
 
         for (const id of selected) {
@@ -93,14 +83,11 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                 successCount++;
                 setProgress(prev => ({ ...prev, current: prev.current + 1 }));
             } catch (err) {
-                failCount++;
                 addLog(`Failed to delete friend ${id}: ${err}`);
             }
         }
 
-        showToast(`Successfully removed ${successCount} friends.`, successCount > 0 ? "success" : "error");
-        if (failCount > 0) addLog(`Failed to remove ${failCount} friends.`);
-        
+        showToast(`Successfully removed ${successCount} friends.`, "success");
         setSelected(new Set());
         fetchFriends();
         setLoading(false);
@@ -113,29 +100,24 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <Users size={24} color="var(--hextech-gold)" />
-                        <h3 className="card-title" style={{ margin: 0 }}>Smart Friend Cleaner</h3>
+                        <h3 className="card-title" style={{ margin: 0 }}>Friend List Manager</h3>
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <div className="token-picker-search" style={{ width: '250px' }}>
                             <Search size={16} />
                             <input 
                                 type="text" 
-                                placeholder="Search friends or groups..." 
+                                placeholder="Search friends..." 
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        <button 
-                            className={`refresh-icon-btn ${fetching ? 'loading' : ''}`}
-                            onClick={fetchFriends}
-                            disabled={fetching}
-                        >
+                        <button className={`refresh-icon-btn ${fetching ? 'loading' : ''}`} onClick={fetchFriends}>
                             <RefreshCw size={18} />
                         </button>
                     </div>
                 </div>
 
-                {/* Bulk Actions Bar */}
                 <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
@@ -146,32 +128,15 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                     marginBottom: '15px',
                     border: '1px solid rgba(255,255,255,0.05)'
                 }}>
-                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
                         <button 
                             className="secondary-btn" 
-                            style={{ 
-                                padding: '6px 12px', fontSize: '0.7rem', 
-                                background: 'rgba(255,255,255,0.08)', color: 'white', 
-                                border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
+                            style={{ padding: '6px 12px', fontSize: '0.7rem', background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer' }}
                             onClick={() => setSelected(new Set(selected.size === filteredFriends.length ? [] : filteredFriends.map(f => f.id)))}
                         >
-                            {selected.size === filteredFriends.length ? "DESELECT ALL" : "SELECT ALL"}
+                            {selected.size === filteredFriends.length ? "DESELECT ALL" : "SELECT ALL VISIBLE"}
                         </button>
-                        <button 
-                            className="secondary-btn" 
-                            style={{ 
-                                padding: '6px 12px', fontSize: '0.7rem', 
-                                background: 'rgba(200, 155, 60, 0.1)', color: 'var(--hextech-gold)', 
-                                border: '1px solid var(--hextech-gold)', borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                            onClick={selectOffline}
-                        >
-                            SELECT INACTIVE (OFFLINE/MOBILE)
-                        </button>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'center', marginLeft: '10px' }}>
                             Selected: <strong style={{ color: 'var(--hextech-gold)' }}>{selected.size}</strong>
                         </span>
                     </div>
@@ -195,91 +160,60 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                     </button>
                 </div>
 
-                {/* Progress Bar for Deletion */}
                 {loading && progress.total > 0 && (
                     <div style={{ marginBottom: '15px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--hextech-gold)', marginBottom: '5px' }}>
-                            <span>DELETING FRIENDS...</span>
+                            <span>REMOVING FRIENDS...</span>
                             <span>{progress.current} / {progress.total}</span>
                         </div>
                         <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-                            <div style={{ 
-                                width: `${(progress.current / progress.total) * 100}%`, 
-                                height: '100%', 
-                                background: 'var(--hextech-gold)',
-                                transition: 'width 0.3s ease-out',
-                                boxShadow: '0 0 10px var(--hextech-gold)'
-                            }} />
+                            <div style={{ width: `${(progress.current / progress.total) * 100}%`, height: '100%', background: 'var(--hextech-gold)', transition: 'width 0.3s ease-out' }} />
                         </div>
                     </div>
                 )}
 
-                {/* Friends List */}
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-                    gap: '10px',
-                    maxHeight: '550px',
-                    overflowY: 'auto',
-                    paddingRight: '5px'
-                }}>
-                    {filteredFriends.length === 0 ? (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '100px', color: 'var(--text-secondary)' }}>
-                            <p>No friends found.</p>
-                        </div>
-                    ) : (
-                        filteredFriends.map(friend => (
-                            <div 
-                                key={friend.id}
-                                className={`feature-card ${selected.has(friend.id) ? 'active' : ''}`}
-                                onClick={() => toggleSelect(friend.id)}
-                                style={{ 
-                                    padding: '12px', 
-                                    cursor: 'pointer', 
-                                    border: selected.has(friend.id) ? '1px solid #ff4e50' : '1px solid rgba(255,255,255,0.05)',
-                                    background: selected.has(friend.id) ? 'rgba(255, 78, 80, 0.05)' : 'rgba(0,0,0,0.2)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px'
-                                }}
-                            >
-                                <div style={{ color: selected.has(friend.id) ? '#ff4e50' : 'var(--text-secondary)' }}>
-                                    {selected.has(friend.id) ? <CheckSquare size={20} /> : <Square size={20} />}
-                                </div>
-                                
-                                <div style={{ position: 'relative' }}>
-                                    <img 
-                                        src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${friend.icon}.jpg`}
-                                        alt=""
-                                        style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.1)' }}
-                                    />
-                                    <div style={{ 
-                                        position: 'absolute', bottom: 0, right: 0, width: '12px', height: '12px', 
-                                        borderRadius: '50%', background: friend.availability === 'chat' ? '#00ff88' : friend.availability === 'away' ? '#ffcc00' : '#888',
-                                        border: '2px solid black'
-                                    }} />
-                                </div>
-
-                                <div style={{ flex: 1, overflow: 'hidden' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {friend.name}
-                                    </div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-                                        {friend.groupName || "No Group"} • {friend.availability.toUpperCase()}
-                                    </div>
-                                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px', maxHeight: '550px', overflowY: 'auto' }}>
+                    {filteredFriends.map(friend => (
+                        <div 
+                            key={friend.id}
+                            className={`feature-card ${selected.has(friend.id) ? 'active' : ''}`}
+                            onClick={() => toggleSelect(friend.id)}
+                            style={{ 
+                                padding: '12px', 
+                                border: selected.has(friend.id) ? '1px solid #ff4e50' : '1px solid rgba(255,255,255,0.05)',
+                                background: selected.has(friend.id) ? 'rgba(255, 78, 80, 0.05)' : 'rgba(0,0,0,0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <div style={{ color: selected.has(friend.id) ? '#ff4e50' : 'var(--text-secondary)' }}>
+                                {selected.has(friend.id) ? <CheckSquare size={20} /> : <Square size={20} />}
                             </div>
-                        ))
-                    )}
+                            
+                            <div style={{ position: 'relative' }}>
+                                <img src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${friend.icon}.jpg`} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+                                <div style={{ 
+                                    position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', 
+                                    background: friend.availability === 'chat' ? '#00ff88' : friend.availability === 'away' ? '#ffcc00' : '#888',
+                                    border: '1.5px solid black'
+                                }} />
+                            </div>
+
+                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{friend.name}</div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{friend.availability.toUpperCase()} {friend.groupName ? ` • ${friend.groupName}` : ''}</div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '15px', background: 'rgba(255, 78, 80, 0.05)', border: '1px solid rgba(255, 78, 80, 0.2)' }}>
+            <div className="card" style={{ marginTop: '15px', background: 'rgba(255, 78, 80, 0.05)', border: '1px solid rgba(255, 78, 80, 0.2)', padding: '12px' }}>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                     <AlertCircle size={20} color="#ff4e50" />
-                    <p style={{ fontSize: '0.8rem', margin: 0, color: '#ff4e50' }}>
-                        <strong>Warning:</strong> Deleting friends is permanent. Deleted friends will not be notified, but you will disappear from their friend list.
-                    </p>
+                    <p style={{ fontSize: '0.8rem', margin: 0, color: '#ff4e50' }}><strong>Warning:</strong> Action is permanent. Friends will not be notified.</p>
                 </div>
             </div>
         </div>
