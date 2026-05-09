@@ -14,8 +14,7 @@ import {
     Sparkles,
     Cpu,
     Users,
-    UserMinus,
-    ExternalLink
+    UserMinus
 } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
@@ -23,7 +22,7 @@ interface HomeTabProps {
     lcu: LcuInfo | null;
     clientVersion: string;
     setActiveTab: (tab: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<any>;
+    lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
 }
 
 interface SummonerInfo {

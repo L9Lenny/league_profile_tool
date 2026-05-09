@@ -17,8 +17,7 @@ import {
     UserCircle,
     Menu,
     ChevronLeft,
-    Users,
-    MessageSquare
+    Users
 } from 'lucide-react';
 import "./App.css";
 

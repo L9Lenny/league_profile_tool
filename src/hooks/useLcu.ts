@@ -35,15 +35,15 @@ export function useLcu(addLog: (msg: string) => void) {
         return () => clearInterval(interval);
     }, []);
 
-    const lcuRequest = useCallback(async (method: string, endpoint: string, body?: Record<string, unknown>): Promise<unknown> => {
+    const lcuRequest = useCallback(async (method: string, endpoint: string, body?: any): Promise<unknown> => {
         if (!lcu) throw new Error("LCU not connected");
-        const payload: Record<string, unknown> = {
+        const payload: Record<string, any> = {
             method,
             endpoint,
             port: lcu.port,
             token: lcu.token
         };
-        if (body) payload.body = body;
+        if (body !== undefined) payload.body = body;
         return invoke("lcu_request", payload);
     }, [lcu]);
 

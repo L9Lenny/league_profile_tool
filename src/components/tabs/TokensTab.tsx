@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
-import { X, Search, Award, Info, RotateCw, Trash2, Layers, CheckCircle2 } from 'lucide-react';
+import { Search, Award, Info, RotateCw, Trash2, Layers, CheckCircle2 } from 'lucide-react';
 
 interface TokensTabProps {
     lcu: LcuInfo | null;
