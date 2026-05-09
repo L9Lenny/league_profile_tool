@@ -148,18 +148,28 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                 }}>
                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                         <button 
-                            className="music-badge" 
-                            style={{ cursor: 'pointer' }}
+                            className="secondary-btn" 
+                            style={{ 
+                                padding: '6px 12px', fontSize: '0.7rem', 
+                                background: 'rgba(255,255,255,0.08)', color: 'white', 
+                                border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
                             onClick={() => setSelected(new Set(selected.size === filteredFriends.length ? [] : filteredFriends.map(f => f.id)))}
                         >
-                            {selected.size === filteredFriends.length ? "Deselect All" : "Select All Visible"}
+                            {selected.size === filteredFriends.length ? "DESELECT ALL" : "SELECT ALL"}
                         </button>
                         <button 
-                            className="music-badge" 
-                            style={{ cursor: 'pointer', background: 'rgba(255, 78, 80, 0.1)', color: '#ff4e50', border: '1px solid rgba(255, 78, 80, 0.2)' }}
+                            className="secondary-btn" 
+                            style={{ 
+                                padding: '6px 12px', fontSize: '0.7rem', 
+                                background: 'rgba(200, 155, 60, 0.1)', color: 'var(--hextech-gold)', 
+                                border: '1px solid var(--hextech-gold)', borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
                             onClick={selectOffline}
                         >
-                            Select All Inactive/Mobile
+                            SELECT INACTIVE (OFFLINE/MOBILE)
                         </button>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                             Selected: <strong style={{ color: 'var(--hextech-gold)' }}>{selected.size}</strong>
