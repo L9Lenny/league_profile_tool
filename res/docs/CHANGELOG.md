@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.7.0] - 2026-05-10
+
+### Added
+- **🧹 Smart Friend Manager**: Integrated a new tab for manual bulk friend deletion, featuring real-time Riot ID display (Name#Tag) and a detailed progress tracker.
+- **🏠 Profile Dashboard**: Redesigned the Home page with a live header displaying current summoner icon, level, and Riot ID.
+- **✨ UX Polish**: Refactored the Home page to a cleaner, category-based navigation while maintaining the minimalist aesthetic.
+- **🛡️ Security Whitelist**: Updated the backend LCU request whitelist to support dynamic IDs (UUIDs) for deletion and status endpoints.
+
+### Fixed
+- **🔍 Riot ID Support**: Unified friend name mapping across Lobby and Friend Manager to prioritize Game Name and Tag over deprecated summoner names.
+
 ## [1.6.5] - 2026-05-09
 
 ### Changed
