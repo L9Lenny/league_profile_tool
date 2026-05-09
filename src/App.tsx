@@ -26,6 +26,7 @@ import { useLogs } from "./hooks/useLogs";
 import { useLcu } from "./hooks/useLcu";
 import { useIcons } from "./hooks/useIcons";
 import { useMusicSync } from "./hooks/useMusicSync";
+import { useAnalytics } from "./hooks/useAnalytics";
 
 // Components
 import HomeTab from "./components/tabs/HomeTab";
@@ -53,6 +54,8 @@ function App() {
   const { lcu, lcuRequest } = useLcu(addLog);
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
+  useAnalytics();
+
 
   const closingRef = useRef(false);
 

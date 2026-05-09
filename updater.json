@@ -1,19 +1,19 @@
 {
-    "version": "1.6.4",
-    "notes": "## [1.6.4] - 2026-04-27  ### Fixed - **CI/CD**: Resolved Tauri plugin version mismatch between Rust and NPM dependencies.  ",
-    "pub_date": "2026-04-27T17:58:18Z",
+    "version": "1.6.5",
+    "notes": "## [1.6.5] - 2026-05-09  ### Changed - **Dependencies**: Merged several security and maintenance updates for both frontend and backend.  ",
+    "pub_date": "2026-05-09T23:52:00Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.4/League.Profile.Tool_1.6.4_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.5/League.Profile.Tool_1.6.5_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.4/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.5/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.4/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.5/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
