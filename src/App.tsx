@@ -40,6 +40,7 @@ import TokensTab from "./components/tabs/TokensTab";
 import BackgroundTab from "./components/tabs/BackgroundTab";
 import SettingsTab from "./components/tabs/SettingsTab";
 import LobbyTab from "./components/tabs/LobbyTab";
+import PresenceTab from "./components/tabs/PresenceTab";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -183,6 +184,7 @@ function App() {
             {!isCollapsed && <div className="nav-category-title">Customization</div>}
             <NavItem icon={<ShieldCheck size={18} />} label="Profile Bio" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} collapsed={isCollapsed} />
             <NavItem icon={<Image size={18} />} label="Background" active={activeTab === 'background'} onClick={() => setActiveTab('background')} collapsed={isCollapsed} />
+            <NavItem icon={<MessageSquare size={18} />} label="Presence" active={activeTab === 'presence'} onClick={() => setActiveTab('presence')} collapsed={isCollapsed} />
             <NavItem icon={<UserCircle size={18} />} label="Icons" active={activeTab === 'icons'} onClick={() => setActiveTab('icons')} collapsed={isCollapsed} />
             <NavItem icon={<Award size={18} />} label="Tokens" active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')} collapsed={isCollapsed} />
           </div>
@@ -212,6 +214,7 @@ function App() {
         <main className="content-area">
           {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} />}
           {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'presence' && <PresenceTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
           {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
