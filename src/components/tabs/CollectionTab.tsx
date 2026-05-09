@@ -41,6 +41,7 @@ const RARITY_MAP: Record<string, { label: string, color: string, price: number }
 const CollectionTab: React.FC<CollectionTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
     const [skins, setSkins] = useState<SkinItem[]>([]);
     const [search, setSearch] = useState("");
+    const [filterRarity, setFilterRarity] = useState<string>("all");
     const [fetching, setFetching] = useState(false);
     const [stats, setStats] = useState({ total: 0, rpValue: 0, epic: 0, legendary: 0, ultimate: 0, mythic: 0 });
 
@@ -118,8 +119,12 @@ const CollectionTab: React.FC<CollectionTabProps> = ({ lcu, loading, setLoading,
     }, [lcu]);
 
     const filteredSkins = useMemo(() => {
-        return skins.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
-    }, [skins, search]);
+        return skins.filter(s => {
+            const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
+            const matchesRarity = filterRarity === "all" || s.rarity === filterRarity;
+            return matchesSearch && matchesRarity;
+        });
+    }, [skins, search, filterRarity]);
 
     return (
         <div className="tab-content fadeIn" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px', alignItems: 'start' }}>
@@ -149,6 +154,25 @@ const CollectionTab: React.FC<CollectionTabProps> = ({ lcu, loading, setLoading,
                             <RotateCw size={18} />
                         </button>
                     </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', overflowX: 'auto', padding: '0 5px 10px 5px' }}>
+                    {['all', 'kEpic', 'kLegendary', 'kMythic', 'kUltimate'].map(r => (
+                        <button
+                            key={r}
+                            onClick={() => setFilterRarity(r)}
+                            style={{ 
+                                padding: '6px 14px', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 'bold',
+                                border: '1px solid', 
+                                borderColor: filterRarity === r ? (RARITY_MAP[r]?.color || 'var(--hextech-gold)') : 'rgba(255,255,255,0.1)',
+                                background: filterRarity === r ? (RARITY_MAP[r]?.color + '22' || 'rgba(200,155,60,0.1)') : 'rgba(0,0,0,0.2)',
+                                color: filterRarity === r ? 'white' : 'var(--text-secondary)',
+                                cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s'
+                            }}
+                        >
+                            {r === 'all' ? 'ALL SKINS' : RARITY_MAP[r].label}
+                        </button>
+                    ))}
                 </div>
 
                 <div style={{ 

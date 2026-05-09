@@ -27,6 +27,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [search, setSearch] = useState("");
     const [fetching, setFetching] = useState(false);
+    const [progress, setProgress] = useState({ current: 0, total: 0 });
 
     const fetchFriends = async () => {
         if (!lcu) return;
@@ -84,12 +85,13 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
         setLoading(true);
         let successCount = 0;
         let failCount = 0;
+        setProgress({ current: 0, total: selected.size });
 
         for (const id of selected) {
             try {
-                // Endpoint example: /lol-chat/v1/friends/00112233-4455-6677-8899-aabbccddeeff
                 await lcuRequest("DELETE", `/lol-chat/v1/friends/${id}`);
                 successCount++;
+                setProgress(prev => ({ ...prev, current: prev.current + 1 }));
             } catch (err) {
                 failCount++;
                 addLog(`Failed to delete friend ${id}: ${err}`);
@@ -102,6 +104,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
         setSelected(new Set());
         fetchFriends();
         setLoading(false);
+        setProgress({ current: 0, total: 0 });
     };
 
     return (
@@ -181,6 +184,25 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLo
                         <Trash2 size={16} /> DELETE SELECTED
                     </button>
                 </div>
+
+                {/* Progress Bar for Deletion */}
+                {loading && progress.total > 0 && (
+                    <div style={{ marginBottom: '15px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--hextech-gold)', marginBottom: '5px' }}>
+                            <span>DELETING FRIENDS...</span>
+                            <span>{progress.current} / {progress.total}</span>
+                        </div>
+                        <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ 
+                                width: `${(progress.current / progress.total) * 100}%`, 
+                                height: '100%', 
+                                background: 'var(--hextech-gold)',
+                                transition: 'width 0.3s ease-out',
+                                boxShadow: '0 0 10px var(--hextech-gold)'
+                            }} />
+                        </div>
+                    </div>
+                )}
 
                 {/* Friends List */}
                 <div style={{ 

@@ -215,7 +215,7 @@ function App() {
 
       <div className="main-container">
         <main className="content-area">
-          {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} />}
+          {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} />}
           {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'collection' && <CollectionTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'friends' && <FriendManagerTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
