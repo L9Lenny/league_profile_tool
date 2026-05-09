@@ -1,19 +1,19 @@
 {
-    "version": "1.6.5",
-    "notes": "## [1.6.5] - 2026-05-09  ### Changed - **Dependencies**: Merged several security and maintenance updates for both frontend and backend.  ",
-    "pub_date": "2026-05-09T23:52:00Z",
+    "version": "1.7.0",
+    "notes": "## [1.7.0] - 2026-05-10  ### Added - **🧹 Smart Friend Manager**: Integrated a new tab for manual bulk friend deletion, featuring real-time Riot ID display (Name#Tag) and a detailed progress tracker. - **🏠 Profile Dashboard**: Redesigned the Home page with a live header displaying current summoner icon, level, and Riot ID. - **✨ UX Polish**: Refactored the Home page to a cleaner, category-based navigation while maintaining the minimalist aesthetic. - **🛡️ Security Whitelist**: Updated the backend LCU request whitelist to support dynamic IDs (UUIDs) for deletion and status endpoints.  ### Fixed - **🔍 Riot ID Support**: Unified friend name mapping across Lobby and Friend Manager to prioritize Game Name and Tag over deprecated summoner names.  ",
+    "pub_date": "2026-05-09T23:29:06Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.5/League.Profile.Tool_1.6.5_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.0/League.Profile.Tool_1.7.0_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.5/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.0/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.6.5/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.0/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
