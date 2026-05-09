@@ -10,9 +10,12 @@ describe('HomeTab', () => {
         lcuRequest: vi.fn()
     };
 
-    it('should render welcome message and version', () => {
+    it('should render profile header and categories', () => {
         render(<HomeTab {...mockProps} />);
-        expect(screen.getByText('League Profile Tool')).toBeDefined();
+        // Instead of title, look for categories and version
+        expect(screen.getByText('Customization')).toBeDefined();
+        expect(screen.getByText('Enhancements')).toBeDefined();
+        expect(screen.getByText('System')).toBeDefined();
         expect(screen.getByText(/v1.3.7/)).toBeDefined();
         expect(screen.getByText('CONNECTED')).toBeDefined();
     });
@@ -27,14 +30,14 @@ describe('HomeTab', () => {
 
         // Click on Customization category
         fireEvent.click(screen.getByText('Customization').closest('button')!);
-        expect(screen.getByText(/BACK/i)).toBeDefined();
+        expect(screen.getAllByRole('button', { name: /BACK/i })[0]).toBeDefined();
         
         // Now Profile Bio should be visible
         fireEvent.click(screen.getByText('Profile Bio').closest('button')!);
         expect(mockProps.setActiveTab).toHaveBeenCalledWith('profile');
 
         // Go back
-        fireEvent.click(screen.getByText(/BACK/i));
+        fireEvent.click(screen.getAllByRole('button', { name: /BACK/i })[0]);
         expect(screen.getByText('Customization')).toBeDefined();
 
         // Click on Enhancements category

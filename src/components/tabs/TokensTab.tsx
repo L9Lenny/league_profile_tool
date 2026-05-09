@@ -8,7 +8,7 @@ interface TokensTabProps {
     setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
+    lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
 }
 
 interface TokenDef {
