@@ -50,27 +50,54 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
         setFetching(true);
         try {
             addLog("Syncing challenges from LCU...");
-            const challenges: any = await lcuRequest("GET", "/lol-challenges/v1/challenges/local-player");
+            const challengesRes: any = await lcuRequest("GET", "/lol-challenges/v1/challenges/local-player");
             
+            if (!challengesRes) {
+                addLog("Empty response from challenges API.");
+                setFetching(false);
+                return;
+            }
+
             // Fetch definitions from Community Dragon for accurate English names
             let defs = challengeDefs;
             if (Object.keys(defs).length === 0) {
-                const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
-                if (cdRes.ok) {
-                    const cdData = await cdRes.json();
-                    const record: Record<number, { name: string, description: string }> = {};
-                    cdData.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
-                    defs = record;
-                    setChallengeDefs(record);
+                try {
+                    const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
+                    if (cdRes.ok) {
+                        const cdData = await cdRes.json();
+                        const record: Record<number, { name: string, description: string }> = {};
+                        cdData.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
+                        defs = record;
+                        setChallengeDefs(record);
+                    }
+                } catch (e) {
+                    addLog(`CD definitions fetch failed (using client names): ${e}`);
                 }
             }
 
             const tokenList: TokenDef[] = [];
-            const entries = Array.isArray(challenges) ? challenges : Object.values(challenges || {});
+            
+            // Robust parsing: handles both Array and Object/Map responses
+            let entries: any[] = [];
+            if (Array.isArray(challengesRes)) {
+                entries = challengesRes;
+            } else if (typeof challengesRes === 'object') {
+                // If it's a map, we might need the keys as IDs if values don't have them
+                entries = Object.entries(challengesRes).map(([key, val]: [string, any]) => {
+                    if (val && typeof val === 'object') {
+                        return { ...val, _idFromKey: key };
+                    }
+                    return val;
+                });
+            }
 
             entries.forEach((ch: any) => {
-                const id = ch.id || ch.challengeId;
-                const level = ch.currentLevel;
+                if (!ch || typeof ch !== 'object') return;
+
+                const rawId = ch.id || ch.challengeId || ch._idFromKey;
+                const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId));
+                const level = ch.currentLevel || ch.level;
+                
                 const cdDef = defs[id];
                 const name = cdDef?.name || ch.name;
 
@@ -85,10 +112,11 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
             });
 
             setTokens(tokenList.sort((a, b) => a.name.localeCompare(b.name)));
-            addLog(`Loaded ${tokenList.length} unlocked tokens.`);
+            addLog(`Successfully parsed ${tokenList.length} tokens.`);
             fetchCurrentSelection();
         } catch (err) {
             addLog(`Error syncing tokens: ${err}`);
+            showToast("Failed to sync tokens", "error");
         } finally {
             setFetching(false);
         }
