@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Zap, Play, Coffee, ghost, Search, Timer } from 'lucide-react';
+import { Zap, Play, Coffee, Ghost, Timer, Smartphone, UserCheck, ShieldAlert, Clock } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
 interface PresenceTabProps {
@@ -12,18 +12,17 @@ interface PresenceTabProps {
 }
 
 const GAME_STATUSES = [
-    { id: 'outOfGame', label: 'Home (Normal)', color: '#00ff88' },
-    { id: 'inQueue', label: 'In Queue (Blue)', color: '#00ccff' },
-    { id: 'championSelect', label: 'Champ Select (Yellow)', color: '#ffcc00' },
-    { id: 'inGame', label: 'In Match (Yellow)', color: '#ffff00' },
-    { id: 'hostingCustomGame', label: 'Hosting Custom', color: '#aa55ff' },
+    { id: 'outOfGame', label: 'Home', color: '#00ff88' },
+    { id: 'inQueue', label: 'In Queue', color: '#00ccff' },
+    { id: 'championSelect', label: 'Champ Select', color: '#ffcc00' },
+    { id: 'inGame', label: 'In Match', color: '#ffff00' },
 ];
 
 const PresenceTab: React.FC<PresenceTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
     const [status, setStatus] = useState("");
     const [availability, setAvailability] = useState("chat");
     const [gameStatus, setGameStatus] = useState("outOfGame");
-    const [queueId, setQueueId] = useState("420"); // Solo/Duo by default
+    const [queueId, setQueueId] = useState("420");
 
     useEffect(() => {
         if (lcu) {
@@ -33,7 +32,6 @@ const PresenceTab: React.FC<PresenceTabProps> = ({ lcu, loading, setLoading, sho
                     if (res) {
                         setStatus(res.statusMessage || "");
                         setAvailability(res.availability || "chat");
-                        if (res.lol?.gameStatus) setGameStatus(res.lol.gameStatus);
                     }
                 } catch (err) {
                     addLog(`Presence Sync Error: ${err}`);
@@ -51,45 +49,55 @@ const PresenceTab: React.FC<PresenceTabProps> = ({ lcu, loading, setLoading, sho
         const finalStatus = overrides?.status !== undefined ? overrides.status : status;
         const finalGameStatus = overrides?.gameStatus || gameStatus;
 
-        // Build the "lol" rich presence object
-        const lolObject: any = {
-            gameStatus: finalGameStatus,
+        // The "lol" object values MUST be strings for the chat server to process them as Rich Presence
+        const lol: any = {
+            gameStatus: String(finalGameStatus),
+            gameQueueId: String(queueId),
+            gameMode: "CLASSIC",
+            isPvp: "true",
+            isGameFull: "false",
+            mapId: "11",
+            queueId: String(queueId),
+            timeStamp: Date.now().toString()
         };
 
-        if (finalGameStatus === 'inQueue' || finalGameStatus === 'championSelect' || finalGameStatus === 'inGame') {
-            lolObject.gameQueueId = queueId;
-            lolObject.queueId = queueId;
-            lolObject.gameMode = "CLASSIC";
-            lolObject.isPvp = true;
-            lolObject.timeStamp = Date.now().toString();
-        }
+        const payload = {
+            availability: finalAvailability,
+            statusMessage: finalStatus,
+            product: "league_of_legends",
+            patchline: "live",
+            lol: lol
+        };
 
         try {
-            await lcuRequest("PUT", "/lol-chat/v1/me", {
-                availability: finalAvailability,
-                statusMessage: finalStatus,
-                lol: lolObject
-            });
+            await lcuRequest("PUT", "/lol-chat/v1/me", payload);
             
             setAvailability(finalAvailability);
             setStatus(finalStatus);
             setGameStatus(finalGameStatus);
             
-            showToast("Rich Presence applied!", "success");
-            addLog(`Presence updated: ${finalGameStatus} | ${finalAvailability} | "${finalStatus}"`);
+            showToast("Presence Synced!", "success");
+            addLog(`Presence synced: ${finalGameStatus} (${queueId})`);
         } catch (err) {
-            showToast("Failed to update presence", "error");
-            addLog(`Presence update failed: ${err}`);
+            showToast("Failed to sync presence", "error");
+            addLog(`Presence error: ${err}`);
         } finally {
             setLoading(false);
         }
     };
 
-    const templates = [
-        { name: "Fake Queue", gs: "inQueue", msg: "In Queue...", avail: "chat" },
-        { name: "Fake Match", gs: "inGame", msg: "Ranked (Solo/Duo)", avail: "dnd" },
-        { name: "Ghosting", gs: "outOfGame", msg: "", avail: "offline" },
-        { name: "AFK", gs: "outOfGame", msg: "AFK - Coffee break", avail: "away" },
+    const quickStates = [
+        { label: 'Online', icon: <UserCheck size={16} />, color: '#00ff88', val: 'chat' },
+        { label: 'Away', icon: <Clock size={16} />, color: '#ffb347', val: 'away' },
+        { label: 'DND', icon: <ShieldAlert size={16} />, color: '#ff4e50', val: 'dnd' },
+        { label: 'Mobile', icon: <Smartphone size={16} />, color: '#888', val: 'mobile' },
+        { label: 'Ghost', icon: <Ghost size={16} />, color: '#555', val: 'offline' },
+    ];
+
+    const scenarios = [
+        { name: "Fake SoloQ", gs: "inQueue", msg: "Searching for Match...", qid: "420", av: "chat" },
+        { name: "Fake ARAM", gs: "inGame", msg: "ARAM - 12:05", qid: "450", av: "dnd" },
+        { name: "Fake Custom", gs: "hostingCustomGame", msg: "In Lobby", qid: "0", av: "chat" },
     ];
 
     return (
@@ -97,68 +105,80 @@ const PresenceTab: React.FC<PresenceTabProps> = ({ lcu, loading, setLoading, sho
             <div className="card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
                     <Timer size={24} color="var(--hextech-gold)" />
-                    <h3 className="card-title" style={{ margin: 0 }}>Fake Presence Manager</h3>
+                    <h3 className="card-title" style={{ margin: 0 }}>Rich Presence Editor</h3>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                {/* Status & Queue */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '15px', marginBottom: '20px' }}>
                     <div className="input-group">
-                        <label>Rich Text (Status)</label>
-                        <input 
-                            type="text" 
-                            placeholder="e.g. In Match (Ranked)" 
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                            disabled={!lcu || loading}
-                        />
+                        <label>Status Message</label>
+                        <input type="text" value={status} onChange={(e) => setStatus(e.target.value)} placeholder="e.g. In Match" />
                     </div>
                     <div className="input-group">
-                        <label>Queue ID (420=SoloDuo, 440=Flex)</label>
-                        <input 
-                            type="text" 
-                            placeholder="420" 
-                            value={queueId}
-                            onChange={(e) => setQueueId(e.target.value)}
-                            disabled={!lcu || loading}
-                        />
+                        <label>Queue ID</label>
+                        <input type="text" value={queueId} onChange={(e) => setQueueId(e.target.value)} placeholder="420" />
                     </div>
                 </div>
 
-                <div style={{ marginBottom: '25px' }}>
-                    <label style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px', display: 'block' }}>Simulated Game Status</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
-                        {GAME_STATUSES.map(gs => (
-                            <button
-                                key={gs.id}
-                                onClick={() => setGameStatus(gs.id)}
+                {/* Availability Row */}
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Availability</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {quickStates.map(s => (
+                            <button 
+                                key={s.val}
+                                onClick={() => setAvailability(s.val)}
                                 style={{ 
-                                    padding: '12px', 
-                                    background: gameStatus === gs.id ? 'rgba(200, 155, 60, 0.15)' : 'rgba(255, 255, 255, 0.02)',
-                                    border: '1px solid',
-                                    borderColor: gameStatus === gs.id ? 'var(--hextech-gold)' : 'rgba(255,255,255,0.1)',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    textAlign: 'left',
-                                    transition: 'all 0.2s'
+                                    flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid',
+                                    borderColor: availability === s.val ? 'var(--hextech-gold)' : 'rgba(255,255,255,0.05)',
+                                    background: availability === s.val ? 'rgba(200,155,60,0.1)' : 'rgba(0,0,0,0.2)',
+                                    cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px'
                                 }}
                             >
-                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: gs.color, marginBottom: '6px', boxShadow: `0 0 5px ${gs.color}` }}></div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: gameStatus === gs.id ? 'white' : 'var(--text-secondary)' }}>{gs.label}</span>
+                                <div style={{ color: s.color }}>{s.icon}</div>
+                                <span style={{ fontSize: '0.6rem', color: availability === s.val ? 'white' : 'var(--text-secondary)' }}>{s.label}</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
+                {/* Game Status Row */}
                 <div style={{ marginBottom: '25px' }}>
-                    <label style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px', display: 'block' }}>One-Click Scenarios</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                        {templates.map(tmp => (
-                            <button 
-                                key={tmp.name}
-                                className="music-badge" 
-                                style={{ padding: '8px 15px', cursor: 'pointer' }}
-                                onClick={() => applyPresence({ gameStatus: tmp.gs, status: tmp.msg, availability: tmp.avail })}
+                    <label style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Simulated Activity</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                        {GAME_STATUSES.map(gs => (
+                            <button
+                                key={gs.id}
+                                onClick={() => setGameStatus(gs.id)}
+                                style={{ 
+                                    padding: '12px 5px', borderRadius: '8px', border: '1px solid',
+                                    borderColor: gameStatus === gs.id ? 'var(--hextech-gold)' : 'rgba(255,255,255,0.05)',
+                                    background: gameStatus === gs.id ? 'rgba(200,155,60,0.1)' : 'rgba(0,0,0,0.2)',
+                                    cursor: 'pointer', textAlign: 'center'
+                                }}
                             >
-                                {tmp.name}
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: gs.color, margin: '0 auto 5px', boxShadow: `0 0 5px ${gs.color}` }}></div>
+                                <span style={{ fontSize: '0.65rem', color: gameStatus === gs.id ? 'white' : 'var(--text-secondary)' }}>{gs.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Scenarios */}
+                <div style={{ marginBottom: '25px' }}>
+                    <label style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Quick Scenarios</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {scenarios.map(sc => (
+                            <button 
+                                key={sc.name}
+                                className="music-badge" 
+                                style={{ padding: '8px 12px', cursor: 'pointer' }}
+                                onClick={() => {
+                                    setQueueId(sc.qid);
+                                    applyPresence({ gameStatus: sc.gs, status: sc.msg, availability: sc.av });
+                                }}
+                            >
+                                {sc.name}
                             </button>
                         ))}
                     </div>
@@ -168,19 +188,10 @@ const PresenceTab: React.FC<PresenceTabProps> = ({ lcu, loading, setLoading, sho
                     className="primary-btn" 
                     onClick={() => applyPresence()} 
                     disabled={!lcu || loading}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '15px' }}
+                    style={{ width: '100%', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                 >
-                    <Zap size={20} /> SYNC FAKE PRESENCE TO CLIENT
+                    <Zap size={20} /> PUSH PRESENCE TO FRIENDS
                 </button>
-            </div>
-
-            <div className="card" style={{ marginTop: '15px', background: 'rgba(200, 155, 60, 0.05)', border: '1px solid rgba(200, 155, 60, 0.2)' }}>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <Play size={20} color="var(--hextech-gold)" />
-                    <p style={{ fontSize: '0.8rem', margin: 0, color: 'var(--text-secondary)' }}>
-                        <strong>Tip:</strong> Setting status to <code>inQueue</code> with Queue ID <code>420</code> will show you as searching for a Ranked Solo/Duo match.
-                    </p>
-                </div>
             </div>
         </div>
     );
