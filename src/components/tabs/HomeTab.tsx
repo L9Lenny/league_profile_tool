@@ -12,7 +12,8 @@ import {
     Terminal, 
     Layers,
     Sparkles,
-    Cpu
+    Cpu,
+    Users
 } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
@@ -62,6 +63,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab }) =
             options: [
                 { id: 'music', title: 'Music Sync', desc: 'Auto-update bio with your current track.', icon: <Disc3 size={24} /> },
                 { id: 'rank', title: 'Rank Overrides', desc: 'Modify visible Solo/Duo rankings.', icon: <Trophy size={24} /> },
+                { id: 'lobby', title: 'Lobby Manager', desc: 'Mass invite friends and manage your lobby.', icon: <Users size={24} /> },
             ]
         },
         {
