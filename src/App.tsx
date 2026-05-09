@@ -16,7 +16,8 @@ import {
     Trophy,
     UserCircle,
     Menu,
-    ChevronLeft
+    ChevronLeft,
+    Users
 } from 'lucide-react';
 import "./App.css";
 

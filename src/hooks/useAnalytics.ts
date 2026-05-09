@@ -17,25 +17,33 @@ export function useAnalytics() {
 
     const sendHeartbeat = async () => {
       try {
+        // Use a 5 second timeout for the request itself
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
         await fetch(`${ANALYTICS_URL}/heartbeat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ userId }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
       } catch (err) {
-        // Silently ignore errors to avoid affecting user experience
-        console.warn("Analytics heartbeat failed:", err);
+        // Silently ignore
       }
     };
 
-    // Send initial heartbeat on mount
-    sendHeartbeat();
+    // Delay the initial heartbeat to prioritize app startup
+    const initialDelay = setTimeout(sendHeartbeat, 2000);
 
     // Send heartbeat every 2 minutes (120,000 ms)
     const interval = setInterval(sendHeartbeat, 120 * 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
   }, []);
 }
