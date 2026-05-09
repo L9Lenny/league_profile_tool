@@ -91,8 +91,6 @@ fn is_allowed_lcu_request(method: &str, endpoint: &str) -> bool {
             | ("POST", "/lol-lobby/v2/lobby/invitations")
             | ("GET", "/lol-lobby/v2/lobby")
             | ("GET", "/lol-chat/v1/friends")
-            | ("GET", "/lol-inventory/v1/inventory")
-            | ("GET", "/lol-catalog/v1/items/CHAMPION_SKIN")
     );
 
     if exact_matches {

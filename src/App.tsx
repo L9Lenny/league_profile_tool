@@ -41,7 +41,6 @@ import TokensTab from "./components/tabs/TokensTab";
 import BackgroundTab from "./components/tabs/BackgroundTab";
 import SettingsTab from "./components/tabs/SettingsTab";
 import LobbyTab from "./components/tabs/LobbyTab";
-import CollectionTab from "./components/tabs/CollectionTab";
 import FriendManagerTab from "./components/tabs/FriendManagerTab";
 
 function App() {
@@ -186,7 +185,6 @@ function App() {
             {!isCollapsed && <div className="nav-category-title">Customization</div>}
             <NavItem icon={<ShieldCheck size={18} />} label="Profile Bio" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} collapsed={isCollapsed} />
             <NavItem icon={<Image size={18} />} label="Background" active={activeTab === 'background'} onClick={() => setActiveTab('background')} collapsed={isCollapsed} />
-            <NavItem icon={<Trophy size={18} />} label="Collection" active={activeTab === 'collection'} onClick={() => setActiveTab('collection')} collapsed={isCollapsed} />
             <NavItem icon={<UserCircle size={18} />} label="Icons" active={activeTab === 'icons'} onClick={() => setActiveTab('icons')} collapsed={isCollapsed} />
             <NavItem icon={<Users size={18} />} label="Friends" active={activeTab === 'friends'} onClick={() => setActiveTab('friends')} collapsed={isCollapsed} />
             <NavItem icon={<Award size={18} />} label="Tokens" active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')} collapsed={isCollapsed} />
@@ -217,7 +215,6 @@ function App() {
         <main className="content-area">
           {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} />}
           {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'collection' && <CollectionTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'friends' && <FriendManagerTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
