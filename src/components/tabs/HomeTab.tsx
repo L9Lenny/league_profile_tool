@@ -114,7 +114,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
     return (
         <div className="tab-content fadeIn" style={{ padding: '0 20px 40px 20px' }}>
             
-            {/* Profile Banner */}
+            {/* Profile Banner - Now the only header */}
             <div className="card profile-header-card" style={{ 
                 marginTop: '10px',
                 marginBottom: '20px', 
@@ -160,22 +160,21 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
                 </div>
             </div>
 
-            <div className="home-hero" style={{ textAlign: 'left', marginBottom: '25px' }}>
+            {/* View Title / Back Button - Minimalist */}
+            <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {view === 'category-detail' && (
-                    <button className="ghost-btn home-back-btn" onClick={() => setView('categories')} style={{ marginBottom: '10px', fontSize: '0.8rem' }}>
-                        <ArrowLeft size={14} /> Back to Menu
+                    <button className="ghost-btn" onClick={() => setView('categories')} style={{ padding: '5px 10px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <ArrowLeft size={14} /> BACK
                     </button>
                 )}
-                <h1 className="hero-title" style={{ fontSize: '1.8rem' }}>
-                    {view === 'categories' ? 'League Profile Tool' : selectedCategory?.title}
-                </h1>
-                <p className="hero-subtitle" style={{ fontSize: '0.85rem' }}>
-                    {view === 'categories' 
-                        ? 'Select a category to customize your profile or manage your lobby.' 
-                        : selectedCategory?.desc}
-                </p>
+                {view === 'category-detail' && (
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--hextech-gold)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        {selectedCategory?.title}
+                    </span>
+                )}
             </div>
 
+            {/* Quick Start Grid */}
             <div className="quick-start-grid">
                 {view === 'categories' ? (
                     categories.map(cat => (
