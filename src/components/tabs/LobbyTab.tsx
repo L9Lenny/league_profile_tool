@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Play, RefreshCw, CheckCircle2, UserCheck } from 'lucide-react';
+import { Users, Play, RefreshCw, UserCheck } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
 interface LobbyTabProps {
@@ -19,7 +19,7 @@ interface Friend {
 
 const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
     const [friends, setFriends] = useState<Friend[]>([]);
-    const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [isRefreshingFriends, setIsRefreshingFriends] = useState(false);
 
     const refreshFriends = async () => {
@@ -33,7 +33,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                     .filter(f => f.availability === "chat" || f.availability === "dnd")
                     .map(f => ({
                         summonerId: f.summonerId,
-                        summonerName: f.name || f.gameName || "Unknown",
+                        summonerName: f.name || f.gameName || f.summonerName || "Unknown",
                         availability: f.availability
                     }));
                 setFriends(available);
@@ -49,55 +49,61 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
         if (lcu) refreshFriends();
     }, [lcu]);
 
-    const sendInvites = async (namesToInvite: string[]) => {
-        if (!lcu || namesToInvite.length === 0) return;
+    const sendInvites = async (idsToInvite: number[]) => {
+        if (!lcu || idsToInvite.length === 0) return;
         
         setLoading(true);
-        addLog(`Attempting to invite ${namesToInvite.length} players...`);
+        addLog(`Attempting to invite ${idsToInvite.length} players by ID...`);
 
         try {
             // Check if we are in a lobby
             try {
-                await lcuRequest("GET", "/lol-lobby/v2/lobby");
+                const currentLobby: any = await lcuRequest("GET", "/lol-lobby/v2/lobby");
+                addLog(`Current lobby found: ${currentLobby?.gameConfig?.gameMode || "Custom/Other"}`);
             } catch (err) {
-                addLog("Not in a lobby. Creating a Normal 5v5 lobby first...");
+                addLog("No active lobby. Creating a new Normal 5v5 lobby...");
                 await lcuRequest("POST", "/lol-lobby/v2/lobby", { queueId: 430 }); 
             }
 
-            // Send invitations
-            const invitations = namesToInvite.map(name => ({ toSummonerName: name }));
+            // Send invitations using summonerId (more reliable)
+            const invitations = idsToInvite.map(id => ({ toSummonerId: id }));
             await lcuRequest("POST", "/lol-lobby/v2/lobby/invitations", invitations);
             
-            showToast(`Invited ${namesToInvite.length} players!`, "success");
-            addLog(`Sent invitations to: ${namesToInvite.join(", ")}`);
-            setSelectedFriends([]);
-        } catch (err) {
+            showToast(`Invited ${idsToInvite.length} players!`, "success");
+            addLog(`Successfully sent ${idsToInvite.length} invitations.`);
+            setSelectedIds([]);
+        } catch (err: any) {
+            const errorMsg = err?.message || String(err);
             showToast("Failed to send invitations", "error");
-            addLog(`Invite error: ${err}`);
+            addLog(`Invite error: ${errorMsg}`);
+            
+            if (errorMsg.includes("403") || errorMsg.includes("401")) {
+                addLog("Hint: Make sure you are the lobby leader.");
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const handleInviteSelected = () => sendInvites(selectedFriends);
+    const handleInviteSelected = () => sendInvites(selectedIds);
     
     const handleInviteAllAvailable = () => {
-        const allNames = friends.map(f => f.summonerName);
-        if (allNames.length === 0) {
+        const allIds = friends.map(f => f.summonerId);
+        if (allIds.length === 0) {
             showToast("No available friends to invite", "error");
             return;
         }
-        sendInvites(allNames);
+        sendInvites(allIds);
     };
 
-    const toggleFriend = (name: string) => {
-        setSelectedFriends(prev => 
-            prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    const toggleFriend = (id: number) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         );
     };
 
     const selectAll = () => {
-        setSelectedFriends(friends.map(f => f.summonerName));
+        setSelectedIds(friends.map(f => f.summonerId));
     };
 
     const statusColor = (availability: string) => {
@@ -155,7 +161,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                             {friends.map(friend => (
                                 <div 
                                     key={friend.summonerId}
-                                    onClick={() => toggleFriend(friend.summonerName)}
+                                    onClick={() => toggleFriend(friend.summonerId)}
                                     style={{ 
                                         padding: '10px 14px',
                                         borderRadius: '8px',
@@ -163,9 +169,9 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                                         alignItems: 'center',
                                         gap: '12px',
                                         cursor: 'pointer',
-                                        background: selectedFriends.includes(friend.summonerName) ? 'rgba(200, 155, 60, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                                        background: selectedIds.includes(friend.summonerId) ? 'rgba(200, 155, 60, 0.12)' : 'rgba(255, 255, 255, 0.02)',
                                         border: '1px solid',
-                                        borderColor: selectedFriends.includes(friend.summonerName) ? 'var(--hextech-gold)' : 'transparent',
+                                        borderColor: selectedIds.includes(friend.summonerId) ? 'var(--hextech-gold)' : 'transparent',
                                         transition: 'all 0.2s',
                                         position: 'relative'
                                     }}
@@ -180,7 +186,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                                     <span style={{ fontSize: '0.85rem', flex: 1, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         {friend.summonerName}
                                     </span>
-                                    {selectedFriends.includes(friend.summonerName) && <UserCheck size={16} color="var(--hextech-gold)" />}
+                                    {selectedIds.includes(friend.summonerId) && <UserCheck size={16} color="var(--hextech-gold)" />}
                                 </div>
                             ))}
                         </div>
@@ -191,10 +197,10 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                     <button 
                         className="primary-btn" 
                         onClick={handleInviteSelected} 
-                        disabled={!lcu || loading || selectedFriends.length === 0}
+                        disabled={!lcu || loading || selectedIds.length === 0}
                         style={{ background: 'transparent', border: '1px solid var(--hextech-gold)', color: 'var(--hextech-gold)' }}
                     >
-                        INVITE SELECTED ({selectedFriends.length})
+                        INVITE SELECTED ({selectedIds.length})
                     </button>
                     <button 
                         className="primary-btn" 
