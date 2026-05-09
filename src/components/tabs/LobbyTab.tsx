@@ -33,7 +33,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast
                     .filter(f => f.availability === "chat" || f.availability === "dnd")
                     .map(f => ({
                         summonerId: f.summonerId,
-                        summonerName: f.name || f.gameName || f.summonerName || "Unknown",
+                        summonerName: f.gameName ? `${f.gameName}#${f.gameTag}` : (f.name || "Unknown"),
                         availability: f.availability
                     }));
                 setFriends(available);

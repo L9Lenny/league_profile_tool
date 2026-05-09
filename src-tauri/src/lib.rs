@@ -75,12 +75,12 @@ async fn get_lcu_connection() -> Result<lcu::LcuInfo, String> {
 }
 
 fn is_allowed_lcu_request(method: &str, endpoint: &str) -> bool {
-    matches!(
+    // Exact matches for simple endpoints
+    let exact_matches = matches!(
         (method, endpoint),
         ("PUT", "/lol-chat/v1/me")
             | ("PATCH", "/lol-chat/v1/me")
             | ("GET", "/lol-chat/v1/me")
-            | ("PUT", "/lol-summoner/v1/current-summoner/icon")
             | ("GET", "/lol-challenges/v1/summary-player-data/local-player")
             | ("GET", "/lol-challenges/v1/challenges/local-player")
             | ("POST", "/lol-challenges/v1/update-player-preferences")
@@ -90,7 +90,23 @@ fn is_allowed_lcu_request(method: &str, endpoint: &str) -> bool {
             | ("POST", "/lol-lobby/v2/lobby/invitations")
             | ("GET", "/lol-lobby/v2/lobby")
             | ("GET", "/lol-chat/v1/friends")
-    )
+            | ("GET", "/lol-inventory/v1/inventory")
+            | ("GET", "/lol-catalog/v1/items/CHAMPION_SKIN")
+    );
+
+    if exact_matches {
+        return true;
+    }
+
+    // Prefix matches for endpoints with IDs or dynamic paths
+    if method == "DELETE" && endpoint.starts_with("/lol-chat/v1/friends/") {
+        return true;
+    }
+    if method == "PUT" && endpoint.starts_with("/lol-summoner/v1/current-summoner/icon") {
+        return true;
+    }
+
+    false
 }
 
 use std::sync::OnceLock;
