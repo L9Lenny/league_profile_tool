@@ -52,13 +52,15 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 ## ✨ Main Features
 
 - **🗂️ Categorized Navigation**: Premium vertical sidebar with grouped categories (Customization, Enhancements, System).
-- **🏠 Smart Home Dashboard**: Redesigned home page with hierarchical navigation and improved drill-down UX.
+- **🧹 Smart Friend Manager**: Bulk delete friends with ease, featuring real-time Riot ID display (Name#Tag) and a detailed progress tracker.
+- **🏠 Live Profile Dashboard**: Redesigned home page with a live header displaying your current summoner icon, level, and Riot ID.
 - **🖼️ Profile Background**: Dedicated tab to set any champion skin as your profile background with lazy loading.
-- **🆕 Profile Tokens**: Customize your 3 challenge medals with a visual image picker.
-- **🎵 Music Integration**: Synchronize your profile bio with your **Last.fm** scrobbles.
-- **🏆 Rank Mirror**: Customize your visible **Solo/Duo rank** with live draft previews.
-- **🖼️ Icon Swapper**: Browse and apply **6,000+ profile icons** from the Data Dragon library.
+- **🆕 Profile Tokens**: Customize your 3 challenge medals with a visual image picker powered by HD Community Dragon assets.
+- **🎵 Music Integration**: Synchronize your profile bio with your **Last.fm** scrobbles automatically.
+- **🏆 Rank Mirror**: Customize your visible **Solo/Duo rank** with live draft previews and holographic grids.
+- **🖼️ Icon Swapper**: Browse and apply **6,000+ profile icons** with descriptive names (e.g., "Blue Minion Bruiser").
 - **📝 Presence Control**: Edit **bio/chat status** and set LCU presence (**Online, Away, Mobile, Offline**).
+- **⚡ Performance Optimized**: Version-aware local cache for metadata and JPG previews for instant loading.
 - **🔄 Auto-Updater**: Built-in update detection with secure ED25519 signatures.
 - **↔️ Collapsible Sidebar**: Support for icon-only mode with smooth transitions.
 
