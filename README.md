@@ -33,6 +33,8 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 
 ![League Profile Tool Demo](res/img/demo.png)
 
+[![Watch the video](https://img.youtube.com/vi/zd6FKj8uvA4/maxresdefault.jpg)](https://www.youtube.com/watch?v=zd6FKj8uvA4)
+
 > **Tip:** Fast links: [Download](https://github.com/L9Lenny/league_profile_tool/releases) • [Security Report](res/docs/SECURITY_REPORT.md) • [Changelog](res/docs/CHANGELOG.md)
 
 | 🚀 Start Here | 🔗 Link |
