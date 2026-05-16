@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.7.1] - 2026-05-16
+
+### Fixed
+- **🍎 macOS Support**: Fixed a critical bug where the app would get stuck on "Connecting..." on macOS by correctly supporting macOS process names (`LeagueClientUx`) and expanding LCU `lockfile` detection to include common macOS installation paths.
+
 ## [1.7.0] - 2026-05-10
 
 ### Added

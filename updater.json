@@ -1,19 +1,19 @@
 {
-    "version": "1.7.0",
-    "notes": "## [1.7.0] - 2026-05-10  ### Added - **🧹 Smart Friend Manager**: Integrated a new tab for manual bulk friend deletion, featuring real-time Riot ID display (Name#Tag) and a detailed progress tracker. - **🏠 Profile Dashboard**: Redesigned the Home page with a live header displaying current summoner icon, level, and Riot ID. - **✨ UX Polish**: Refactored the Home page to a cleaner, category-based navigation while maintaining the minimalist aesthetic. - **🛡️ Security Whitelist**: Updated the backend LCU request whitelist to support dynamic IDs (UUIDs) for deletion and status endpoints.  ### Fixed - **🔍 Riot ID Support**: Unified friend name mapping across Lobby and Friend Manager to prioritize Game Name and Tag over deprecated summoner names.  ",
-    "pub_date": "2026-05-09T23:33:38Z",
+    "version": "1.7.1",
+    "notes": "## [1.7.1] - 2026-05-16\n\n### Fixed\n- **🍎 macOS Support**: Fixed a critical bug where the app would get stuck on \"Connecting...\" on macOS by correctly supporting macOS process names (`LeagueClientUx`) and expanding LCU `lockfile` detection to include common macOS installation paths.",
+    "pub_date": "2026-05-16T16:20:00Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.0/League.Profile.Tool_1.7.0_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.1/League.Profile.Tool_1.7.1_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.0/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.1/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.0/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.1/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
