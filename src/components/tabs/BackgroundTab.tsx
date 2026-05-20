@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
+import { SAVED_BACKGROUND_KEY } from '../../hooks/useAutoRestore';
 import { Search, Image, Loader2, Hash } from 'lucide-react';
 
 interface BackgroundTabProps {
@@ -136,6 +137,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading,
                 key: 'backgroundSkinId',
                 value: skinId,
             });
+            localStorage.setItem(SAVED_BACKGROUND_KEY, skinId.toString());
             showToast(`Background set to ${skinName}!`, 'success');
             addLog(`Profile background updated: ${skinName} (ID: ${skinId})`);
             setCurrentBgId(skinId);

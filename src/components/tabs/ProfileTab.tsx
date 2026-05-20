@@ -11,7 +11,7 @@ interface ProfileTabProps {
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<any>;
 }
 
-const SAVED_BIO_KEY = "profile_saved_bio_v1";
+import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
 
 const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
@@ -61,9 +61,6 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         const connectionId = `${currentLcu.port}-${currentLcu.token}`;
         if (!lcu || syncInProgressRef.current !== connectionId) return;
 
-        const MAX_ATTEMPTS = 6;
-        const RETRY_DELAY_MS = 2000;
-
         try {
             const chatRes: any = await lcuRequest("GET", "/lol-chat/v1/me");
             if (syncInProgressRef.current !== connectionId) return;
@@ -71,23 +68,13 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
             if (chatRes?.availability) setAvailability(chatRes.availability);
 
             const lcuBio: string = chatRes?.statusMessage || "";
-            const savedBio = localStorage.getItem(SAVED_BIO_KEY) ?? "";
-
             if (lcuBio && lcuBio.trim() !== "") {
                 setBio(lcuBio);
                 localStorage.setItem(SAVED_BIO_KEY, lcuBio);
-            } else if (savedBio && savedBio.trim() !== "") {
-                await handleBioRestoration(currentLcu, savedBio, attempt);
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : String(err);
-            if (attempt < MAX_ATTEMPTS && lcu && syncInProgressRef.current === connectionId) {
-                const delay = RETRY_DELAY_MS * (attempt + 1);
-                addLog(`LCU API error: ${errorMessage}. Retrying in ${delay / 1000}s (attempt ${attempt + 1}/${MAX_ATTEMPTS})...`);
-                setTimeout(() => refreshProfileData(currentLcu, attempt + 1), delay);
-            } else if (attempt >= MAX_ATTEMPTS) {
-                addLog(`Profile sync failed after ${MAX_ATTEMPTS} attempts: ${errorMessage}`);
-            }
+            addLog(`Profile sync failed: ${errorMessage}`);
         }
     };
 
@@ -125,6 +112,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
         setLoading(true);
         try {
             await lcuRequest("PUT", "/lol-chat/v1/me", { availability: target });
+            localStorage.setItem(SAVED_AVAILABILITY_KEY, target);
             showToast(`Status set to ${statusLabel(target)}`, "success");
             addLog(`Status updated: ${statusLabel(target)}.`);
         } catch (err) {

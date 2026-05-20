@@ -17,7 +17,8 @@ import {
     UserCircle,
     Menu,
     ChevronLeft,
-    Users
+    Users,
+    FolderOpen
 } from 'lucide-react';
 import "./App.css";
 
@@ -28,6 +29,7 @@ import { useLcu } from "./hooks/useLcu";
 import { useIcons } from "./hooks/useIcons";
 import { useMusicSync } from "./hooks/useMusicSync";
 import { useAnalytics } from "./hooks/useAnalytics";
+import { useAutoRestore } from "./hooks/useAutoRestore";
 
 // Components
 import HomeTab from "./components/tabs/HomeTab";
@@ -41,6 +43,7 @@ import BackgroundTab from "./components/tabs/BackgroundTab";
 import SettingsTab from "./components/tabs/SettingsTab";
 import LobbyTab from "./components/tabs/LobbyTab";
 import FriendManagerTab from "./components/tabs/FriendManagerTab";
+import PresetsTab from "./components/tabs/PresetsTab";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -58,6 +61,7 @@ function App() {
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
   useAnalytics();
+  useAutoRestore(lcu, addLog, lcuRequest);
 
 
   const closingRef = useRef(false);
@@ -187,6 +191,7 @@ function App() {
             <NavItem icon={<UserCircle size={18} />} label="Icons" active={activeTab === 'icons'} onClick={() => setActiveTab('icons')} collapsed={isCollapsed} />
             <NavItem icon={<Users size={18} />} label="Friends" active={activeTab === 'friends'} onClick={() => setActiveTab('friends')} collapsed={isCollapsed} />
             <NavItem icon={<Award size={18} />} label="Tokens" active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')} collapsed={isCollapsed} />
+            <NavItem icon={<FolderOpen size={18} />} label="Presets" active={activeTab === 'presets'} onClick={() => setActiveTab('presets')} collapsed={isCollapsed} />
           </div>
 
           <div className="nav-category">
@@ -218,6 +223,7 @@ function App() {
           {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
           {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} />}
           {activeTab === 'rank' && <RankTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} />}
           {activeTab === 'lobby' && <LobbyTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'icons' && <IconTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} {...icons} />}

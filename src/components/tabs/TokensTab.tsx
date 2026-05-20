@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
+import { SAVED_TOKENS_KEY } from '../../hooks/useAutoRestore';
 import { Search, Award, Info, RotateCw, Trash2, Layers, CheckCircle2 } from 'lucide-react';
 
 interface TokensTabProps {
@@ -140,6 +141,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToa
         try {
             const challengeIds = slots.filter(id => id !== -1);
             await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { challengeIds });
+            localStorage.setItem(SAVED_TOKENS_KEY, JSON.stringify(challengeIds));
             showToast("Tokens updated successfully!", "success");
             addLog(`Equipped tokens: [${challengeIds.join(", ")}]`);
         } catch (err) {

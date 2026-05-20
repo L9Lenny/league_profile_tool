@@ -17,6 +17,8 @@ interface IconTabProps {
     gridRef: React.RefObject<HTMLDivElement | null>;
 }
 
+import { SAVED_ICON_KEY } from '../../hooks/useAutoRestore';
+
 const IconTab: React.FC<IconTabProps> = ({
     lcu, loading, setLoading, showToast, addLog,
     visibleIcons, iconSearchTerm, setIconSearchTerm,
@@ -43,6 +45,8 @@ const IconTab: React.FC<IconTabProps> = ({
                 port: lcu.port,
                 token: lcu.token
             });
+
+            localStorage.setItem(SAVED_ICON_KEY, selectedIcon.toString());
 
             addLog(`Icon ID ${selectedIcon} applied (Force sync).`);
             showToast("Icon Applied!", "success");

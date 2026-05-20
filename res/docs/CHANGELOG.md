@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.8.0] - 2026-05-20
 
+### Added
+- **💾 Profile Presets**: Introduced a brand new "Presets" tab. Users can now save their entire customized profile (Icon, Background, Bio, Tokens, and Status) as a named preset.
+- **🖼️ Visual Preset Cards**: The Presets tab features beautiful, dynamic cards that display a live preview of the profile, loading the exact champion splash art and icon directly from Community Dragon.
+- **🛡️ Active Auto-Restore Enforcement**: The auto-restore system has been completely rewritten. It now continuously monitors the League client in the background. If Riot's servers reset your unowned icon or tokens, the app will instantly re-apply them within 10 seconds, ensuring your customizations remain permanently active as long as the tool is running.
+
+### Fixed
+- **🚀 Initialization Race Conditions**: Fixed a critical bug where the app attempted to restore customizations before the League Client was fully initialized, leading to silent failures. The app now properly waits for all client subsystems to be ready.
+- **🔄 Error Cascade Prevention**: Resolved an issue where attempting to apply an unowned icon would throw an error and halt the entire auto-restore sequence for the background and tokens. Errors are now handled individually.
 
 ## [1.7.1] - 2026-05-16
 
