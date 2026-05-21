@@ -1,19 +1,19 @@
 {
-    "version": "1.7.1",
-    "notes": "## [1.7.1] - 2026-05-16  ### Fixed - **🍎 macOS Support**: Fixed a critical bug where the app would get stuck on \"Connecting...\" on macOS by correctly supporting macOS process names (`LeagueClientUx`) and expanding LCU `lockfile` detection to include common macOS installation paths.  ",
-    "pub_date": "2026-05-16T15:04:30Z",
+    "version": "1.8.0",
+    "notes": "## [1.8.0] - 2026-05-20  ### Added - **💾 Profile Presets**: Introduced a brand new \"Presets\" tab. Users can now save their entire customized profile (Icon, Background, Bio, Tokens, and Status) as a named preset. - **🖼️ Visual Preset Cards**: The Presets tab features beautiful, dynamic cards that display a live preview of the profile, loading the exact champion splash art and icon directly from Community Dragon. - **🛡️ Active Auto-Restore Enforcement**: The auto-restore system has been completely rewritten. It now continuously monitors the League client in the background. If Riot's servers reset your unowned icon or tokens, the app will instantly re-apply them within 10 seconds, ensuring your customizations remain permanently active as long as the tool is running.  ### Fixed - **🚀 Initialization Race Conditions**: Fixed a critical bug where the app attempted to restore customizations before the League Client was fully initialized, leading to silent failures. The app now properly waits for all client subsystems to be ready. - **🔄 Error Cascade Prevention**: Resolved an issue where attempting to apply an unowned icon would throw an error and halt the entire auto-restore sequence for the background and tokens. Errors are now handled individually.  ",
+    "pub_date": "2026-05-21T07:51:52Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.1/League.Profile.Tool_1.7.1_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.8.0/League.Profile.Tool_1.8.0_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.1/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.8.0/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.7.1/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.8.0/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
