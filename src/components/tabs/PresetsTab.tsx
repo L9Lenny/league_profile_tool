@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
-import { Save, FolderOpen, Trash2, Edit2, CheckCircle2 } from 'lucide-react';
+import { Save, FolderOpen, Trash2, CheckCircle2 } from 'lucide-react';
 import {
     SAVED_AVAILABILITY_KEY,
     SAVED_BIO_KEY,
@@ -27,7 +27,7 @@ interface ProfilePreset {
 
 const PRESETS_STORAGE_KEY = "profile_presets_list_v1";
 
-const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog }) => {
+const PresetsTab: React.FC<PresetsTabProps> = ({ lcu: _lcu, showToast, addLog }) => {
     const [presets, setPresets] = useState<ProfilePreset[]>([]);
     const [newPresetName, setNewPresetName] = useState("");
 

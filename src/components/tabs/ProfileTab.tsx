@@ -29,35 +29,8 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
 
     const syncInProgressRef = React.useRef<string | null>(null);
 
-    const verifyRestoration = async (connectionId: string, savedBio: string) => {
-        if (syncInProgressRef.current !== connectionId) return;
-        try {
-            const verify: any = await lcuRequest("GET", "/lol-chat/v1/me");
-            if (verify?.statusMessage === savedBio) {
-                addLog(`Bio restoration verified successfully.`);
-            } else {
-                addLog(`Bio restoration could not be verified, client might be lagging.`);
-            }
-        } catch (err) {
-            addLog(`Bio verification error: ${err}`);
-        }
-    };
 
-    const handleBioRestoration = async (currentLcu: LcuInfo, savedBio: string, attempt: number) => {
-        const connectionId = `${currentLcu.port}-${currentLcu.token}`;
-        addLog(`Bio is empty in client. Restoring saved bio (Attempt ${attempt + 1})...`);
-        try {
-            await invoke("update_bio", { port: currentLcu.port, token: currentLcu.token, newBio: savedBio });
-            setBio(savedBio);
-            addLog(`Bio restore command sent.`);
-            setTimeout(() => verifyRestoration(connectionId, savedBio), 1500);
-        } catch (restoreErr) {
-            addLog(`Bio restore failed: ${restoreErr}`);
-            setBio(savedBio);
-        }
-    };
-
-    const refreshProfileData = async (currentLcu: LcuInfo, attempt = 0) => {
+    const refreshProfileData = async (currentLcu: LcuInfo) => {
         const connectionId = `${currentLcu.port}-${currentLcu.token}`;
         if (!lcu || syncInProgressRef.current !== connectionId) return;
 
