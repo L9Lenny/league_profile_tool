@@ -18,7 +18,6 @@ describe('BackgroundTab', () => {
     const createProps = () => ({
         lcu: { port: '1234', token: 'secret' },
         loading: false,
-        setLoading: vi.fn(),
         showToast: vi.fn(),
         addLog: vi.fn(),
         lcuRequest: vi.fn().mockResolvedValue({ backgroundSkinId: 0 })

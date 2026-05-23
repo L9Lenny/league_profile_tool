@@ -6,7 +6,6 @@ describe('TokensTab', () => {
     const createProps = () => ({
         lcu: { port: '1234', token: 'secret' },
         loading: false,
-        setLoading: vi.fn(),
         showToast: vi.fn(),
         addLog: vi.fn(),
         lcuRequest: vi.fn().mockImplementation((_m, endpoint) => {
@@ -81,7 +80,6 @@ describe('TokensTab', () => {
             fireEvent.click(applyBtn);
         });
 
-        expect(props.setLoading).toHaveBeenCalledWith(true);
         expect(props.lcuRequest).toHaveBeenCalledWith("POST", expect.stringContaining("update-player-preferences"), expect.any(Object));
     });
 

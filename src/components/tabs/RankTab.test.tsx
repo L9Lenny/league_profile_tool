@@ -11,7 +11,6 @@ describe('RankTab', () => {
     const mockProps = {
         lcu: { port: '1234', token: 'secret' },
         loading: false,
-        setLoading: vi.fn(),
         showToast: vi.fn(),
         addLog: vi.fn(),
     };
@@ -44,8 +43,6 @@ describe('RankTab', () => {
         render(<RankTab {...mockProps} />);
         const applyBtn = screen.getByText('APPLY');
         fireEvent.click(applyBtn);
-
-        expect(mockProps.setLoading).toHaveBeenCalledWith(true);
     });
 
     it('should handle apply errors gracefully', async () => {

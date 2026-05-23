@@ -11,7 +11,6 @@ describe('IconTab', () => {
     const mockProps = {
         lcu: { port: '1234', token: 'secret' },
         loading: false,
-        setLoading: vi.fn(),
         showToast: vi.fn(),
         addLog: vi.fn(),
         allIcons: [
@@ -52,8 +51,6 @@ describe('IconTab', () => {
         await act(async () => {
             fireEvent.click(applyBtn);
         });
-
-        expect(mockProps.setLoading).toHaveBeenCalledWith(true);
     });
 
     it('should show empty state when no icons match', () => {

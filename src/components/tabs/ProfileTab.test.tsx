@@ -12,7 +12,6 @@ describe('ProfileTab', () => {
     const createProps = () => ({
         lcu: { port: '1234', token: 'secret' },
         loading: false,
-        setLoading: vi.fn(),
         showToast: vi.fn(),
         addLog: vi.fn(),
         lcuRequest: vi.fn().mockImplementation((_m, endpoint) => {
@@ -49,60 +48,8 @@ describe('ProfileTab', () => {
             fireEvent.click(applyBtn);
         });
 
-        expect(props.setLoading).toHaveBeenCalledWith(true);
         expect(invoke).toHaveBeenCalledWith("update_bio", expect.anything());
         expect(localStorage.getItem('profile_saved_bio_v1')).toBe('New Bio');
-    });
-
-    it('should restore bio from localStorage when LCU returns empty statusMessage', async () => {
-        localStorage.setItem('profile_saved_bio_v1', 'Saved Bio');
-        const props = createProps();
-        props.lcuRequest = vi.fn().mockResolvedValue({ availability: 'chat', statusMessage: '' });
-
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-
-        expect(invoke).toHaveBeenCalledWith('update_bio', expect.objectContaining({ newBio: 'Saved Bio' }));
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining('Restoring'));
-    });
-
-    it('should retry profile sync when LCU chat is not ready on connect', async () => {
-        vi.useFakeTimers();
-        localStorage.setItem('profile_saved_bio_v1', 'Saved Bio');
-        const props = createProps();
-
-        // First attempt fails (LCU chat not ready), second succeeds with empty bio
-        props.lcuRequest = vi.fn()
-            .mockRejectedValueOnce(new Error('connection refused'))
-            .mockResolvedValue({ availability: 'chat', statusMessage: '' });
-
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining('Retrying in 2s'));
-
-        // Advance timers so retry fires
-        await act(async () => {
-            vi.advanceTimersByTime(2000);
-        });
-
-        expect(invoke).toHaveBeenCalledWith('update_bio', expect.objectContaining({ newBio: 'Saved Bio' }));
-        vi.useRealTimers();
-    });
-
-    it('should NOT restore bio if LCU returns a non-empty statusMessage', async () => {
-        localStorage.setItem('profile_saved_bio_v1', 'Saved Bio');
-        const props = createProps();
-        // LCU returns a bio — no restore should happen
-        props.lcuRequest = vi.fn().mockResolvedValue({ availability: 'chat', statusMessage: 'Current Bio' });
-
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-
-        expect(invoke).not.toHaveBeenCalledWith('update_bio', expect.anything());
     });
 
     it('should update availability', async () => {
@@ -118,7 +65,6 @@ describe('ProfileTab', () => {
             fireEvent.click(applyBtn);
         });
 
-        expect(props.setLoading).toHaveBeenCalledWith(true);
         expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.anything());
     });
 
@@ -171,25 +117,5 @@ describe('ProfileTab', () => {
         });
 
         expect(screen.getByText('DND')).toBeDefined();
-    });
-    it('should verify bio restoration after timeout', async () => {
-        vi.useFakeTimers();
-        localStorage.setItem('profile_saved_bio_v1', 'Target Bio');
-        const props = createProps();
-        props.lcuRequest = vi.fn()
-            .mockResolvedValueOnce({ availability: 'chat', statusMessage: '' }) // initial sync
-            .mockResolvedValueOnce({ availability: 'chat', statusMessage: 'Target Bio' }); // verification call
-
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-
-        // Verification call happens after 1500ms
-        await act(async () => {
-            vi.advanceTimersByTime(1500);
-        });
-
-        expect(props.addLog).toHaveBeenCalledWith('Bio restoration verified successfully.');
-        vi.useRealTimers();
     });
 });

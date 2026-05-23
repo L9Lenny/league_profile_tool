@@ -29,7 +29,7 @@ interface ProfilePreset {
 /** Legacy key used before disk persistence — kept for migration */
 const PRESETS_LS_KEY = "profile_presets_list_v1";
 
-const PresetsTab: React.FC<PresetsTabProps> = ({ lcu: _lcu, showToast, addLog }) => {
+const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog }) => {
     const [presets, setPresets] = useState<ProfilePreset[]>([]);
     const [newPresetName, setNewPresetName] = useState("");
     const [saving, setSaving] = useState(false);
