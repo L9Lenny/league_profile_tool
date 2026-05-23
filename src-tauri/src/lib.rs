@@ -30,6 +30,7 @@ impl Default for Settings {
 struct AppSettings {
     minimize_to_tray: Mutex<bool>,
     config_path: PathBuf,
+    presets_path: PathBuf,
 }
 
 impl AppSettings {
@@ -67,6 +68,23 @@ fn set_minimize_to_tray(state: tauri::State<AppSettings>, enabled: bool) {
 #[tauri::command]
 fn get_minimize_to_tray(state: tauri::State<AppSettings>) -> bool {
     *state.minimize_to_tray.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+#[tauri::command]
+fn save_presets(state: tauri::State<AppSettings>, data: String) -> Result<(), String> {
+    if let Some(parent) = state.presets_path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+    fs::write(&state.presets_path, data).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn load_presets(state: tauri::State<AppSettings>) -> Result<String, String> {
+    if state.presets_path.exists() {
+        fs::read_to_string(&state.presets_path).map_err(|e| e.to_string())
+    } else {
+        Ok("[]".to_string())
+    }
 }
 
 #[tauri::command]
@@ -167,6 +185,7 @@ async fn lcu_request(
     }
 
     let res = request.send().await.map_err(|e| {
+        #[cfg(debug_assertions)]
         eprintln!("[LCU] Request Error: {:?} (Source: {:?})", e, std::error::Error::source(&e));
         e.to_string()
     })?;
@@ -233,11 +252,13 @@ pub fn run() {
             // Get config directory
             let config_dir = app.path().app_config_dir().unwrap_or_else(|_| PathBuf::from("."));
             let config_path = config_dir.join("settings.json");
+            let presets_path = config_dir.join("presets.json");
             
             // Create AppSettings and load from file
             let app_settings = AppSettings {
                 minimize_to_tray: Mutex::new(true),
                 config_path: config_path.clone(),
+                presets_path,
             };
             
             // Load saved settings
@@ -286,7 +307,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray, lcu_request, save_logs_to_path, force_quit])
+        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray, lcu_request, save_logs_to_path, force_quit, load_presets, save_presets])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_, _| {});

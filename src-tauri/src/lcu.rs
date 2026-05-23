@@ -1,7 +1,9 @@
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
 use std::fs;
+use std::path::PathBuf;
 use base64::{Engine as _, engine::general_purpose};
 use serde::{Deserialize, Serialize};
+use std::sync::{Mutex, OnceLock};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LcuInfo {
@@ -9,64 +11,67 @@ pub struct LcuInfo {
     pub token: String,
 }
 
+/// Reuse a single System instance across calls — avoids allocating a new one every 2 seconds.
+static SYS: OnceLock<Mutex<System>> = OnceLock::new();
+
+fn get_system() -> &'static Mutex<System> {
+    SYS.get_or_init(|| Mutex::new(System::new()))
+}
+
 pub fn find_lcu_info() -> Option<LcuInfo> {
-    let mut sys = System::new();
-    sys.refresh_processes_specifics(
-        ProcessesToUpdate::All,
-        true,
-        ProcessRefreshKind::default().with_exe(sysinfo::UpdateKind::Always)
-    );
+    // Hold the lock only while refreshing sysinfo — release before any file I/O.
+    let exe_path: Option<PathBuf> = {
+        let mut sys = get_system().lock().unwrap_or_else(|e| e.into_inner());
+        sys.refresh_processes_specifics(
+            ProcessesToUpdate::All,
+            true,
+            ProcessRefreshKind::default().with_exe(sysinfo::UpdateKind::Always),
+        );
+        sys.processes().values().find(|p| {
+            let name = p.name().to_string_lossy().to_lowercase();
+            matches!(name.as_str(), "leagueclientux.exe" | "leagueclient.exe" | "leagueclientux" | "leagueclient")
+        }).and_then(|p| p.exe().map(|e| e.to_path_buf()))
+    }; // MutexGuard dropped here
 
-    let process = sys.processes().values().find(|p| {
-        let name = p.name().to_string_lossy().to_lowercase();
-        name == "leagueclientux.exe" || 
-        name == "leagueclient.exe" || 
-        name == "leagueclientux" || 
-        name == "leagueclient"
-    })?;
-
-    if let Some(exe_path) = process.exe() {
-        if let Some(install_dir) = exe_path.parent() {
-            let lockfile_path = install_dir.join("lockfile");
-            if let Ok(contents) = fs::read_to_string(&lockfile_path) {
-                let parts: Vec<&str> = contents.split(':').collect();
-                if parts.len() >= 5 {
-                    return Some(LcuInfo {
-                        port: parts[2].to_string(),
-                        token: parts[3].to_string(),
-                    });
-                }
+    if let Some(exe) = exe_path {
+        if let Some(install_dir) = exe.parent() {
+            if let Some(info) = read_lockfile(&install_dir.join("lockfile")) {
+                return Some(info);
             }
         }
     }
-    
-    // Fallback: Check common install paths if process detection fails or doesn't provide a path
+
+    // Fallback: common install paths
     let mut fallbacks = vec![
-        "C:\\Riot Games\\League of Legends\\lockfile".to_string(),
-        "/Applications/League of Legends.app/Contents/LoL/lockfile".to_string(),
+        PathBuf::from("C:\\Riot Games\\League of Legends\\lockfile"),
+        PathBuf::from("/Applications/League of Legends.app/Contents/LoL/lockfile"),
     ];
-
-    // Add user-specific Mac path if HOME is set
     if let Ok(home) = std::env::var("HOME") {
-        fallbacks.push(format!("{}/Applications/League of Legends.app/Contents/LoL/lockfile", home));
+        fallbacks.push(PathBuf::from(format!(
+            "{}/Applications/League of Legends.app/Contents/LoL/lockfile",
+            home
+        )));
     }
-
-    for path in fallbacks {
-        let p = std::path::Path::new(&path);
-        if p.exists() {
-            if let Ok(contents) = fs::read_to_string(p) {
-                let parts: Vec<&str> = contents.split(':').collect();
-                if parts.len() >= 5 {
-                    return Some(LcuInfo {
-                        port: parts[2].to_string(),
-                        token: parts[3].to_string(),
-                    });
-                }
-            }
+    for path in &fallbacks {
+        if let Some(info) = read_lockfile(path) {
+            return Some(info);
         }
     }
 
     None
+}
+
+fn read_lockfile(path: &std::path::Path) -> Option<LcuInfo> {
+    let contents = fs::read_to_string(path).ok()?;
+    let parts: Vec<&str> = contents.split(':').collect();
+    if parts.len() >= 5 {
+        Some(LcuInfo {
+            port:  parts[2].to_string(),
+            token: parts[3].to_string(),
+        })
+    } else {
+        None
+    }
 }
 
 pub fn get_auth_header(token: &str) -> String {

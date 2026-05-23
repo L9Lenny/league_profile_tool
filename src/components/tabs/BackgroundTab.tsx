@@ -5,8 +5,6 @@ import { Search, Image, Loader2, Hash } from 'lucide-react';
 
 interface BackgroundTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
@@ -32,7 +30,8 @@ function cdnUrl(path: string): string {
     return CDRAGON_BASE + path.replace('/lol-game-data/assets', '').toLowerCase();
 }
 
-const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
+const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
+    const [loading, setLoading] = useState(false);
     const [champions, setChampions] = useState<ChampionSummary[]>([]);
     const [champSearch, setChampSearch] = useState('');
     const [selectedChampion, setSelectedChampion] = useState<ChampionSummary | null>(null);

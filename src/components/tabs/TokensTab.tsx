@@ -5,8 +5,6 @@ import { Search, Award, Info, RotateCw, Trash2, Layers, CheckCircle2 } from 'luc
 
 interface TokensTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
@@ -21,7 +19,8 @@ interface TokenDef {
 
 const TIERS = ["ALL", "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 
-const TokensTab: React.FC<TokensTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
+const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
+    const [loading, setLoading] = useState(false);
     const [tokens, setTokens] = useState<TokenDef[]>([]);
     const [selectedSlot, setSelectedSlot] = useState<number>(1);
     const [slots, setSlots] = useState<[number, number, number]>([-1, -1, -1]);

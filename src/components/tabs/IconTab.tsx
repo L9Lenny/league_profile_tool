@@ -6,8 +6,6 @@ import { Icon } from '../../hooks/useIcons';
 
 interface IconTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     visibleIcons: Icon[];
@@ -20,11 +18,12 @@ interface IconTabProps {
 import { SAVED_ICON_KEY } from '../../hooks/useAutoRestore';
 
 const IconTab: React.FC<IconTabProps> = ({
-    lcu, loading, setLoading, showToast, addLog,
+    lcu, showToast, addLog,
     visibleIcons, iconSearchTerm, setIconSearchTerm,
     handleScroll, gridRef
 }) => {
     const [selectedIcon, setSelectedIcon] = useState<number | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const applyIcon = async () => {
         if (!lcu || selectedIcon === null) return;

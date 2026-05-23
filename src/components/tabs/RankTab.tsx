@@ -4,13 +4,12 @@ import { LcuInfo } from '../../hooks/useLcu';
 
 interface RankTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
 }
 
-const RankTab: React.FC<RankTabProps> = ({ lcu, loading, setLoading, showToast, addLog }) => {
+const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog }) => {
+    const [loading, setLoading] = useState(false);
     const [soloTier, setSoloTier] = useState("CHALLENGER");
     const [soloDiv, setSoloDiv] = useState("I");
 

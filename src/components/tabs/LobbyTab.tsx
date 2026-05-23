@@ -4,8 +4,6 @@ import { LcuInfo } from '../../hooks/useLcu';
 
 interface LobbyTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
@@ -17,7 +15,8 @@ interface Friend {
     availability: string;
 }
 
-const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
+const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
+    const [loading, setLoading] = useState(false);
     const [friends, setFriends] = useState<Friend[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [isRefreshingFriends, setIsRefreshingFriends] = useState(false);

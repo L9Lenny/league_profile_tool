@@ -4,8 +4,6 @@ import { LcuInfo } from '../../hooks/useLcu';
 
 interface FriendManagerTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<any>;
@@ -21,7 +19,8 @@ interface Friend {
     groupName: string;
 }
 
-const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
+const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
+    const [loading, setLoading] = useState(false);
     const [friends, setFriends] = useState<Friend[]>([]);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [search, setSearch] = useState("");

@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.9.0] - 2026-05-23
+
+### Added
+- **💾 Presets Disk Persistence**: Profile presets are now securely saved to disk, surviving app reinstalls and updates.
+- **🛡️ Secure Backend Commands**: Implemented `load_presets` and `save_presets` commands in the Tauri Rust backend to securely manage presets file storage.
+
+### Changed
+- **🚀 Performance (React)**: Restructured loading state so that each tab manages its own fetching process locally, preventing the entire app from locking up during a request.
+- **⚡ Performance (Rust)**: System process detection logic was rewritten using a singleton `OnceLock`, drastically reducing CPU overhead.
+- **🧹 CSS Codebase**: Refactored CSS by removing all duplicate declarations across stylesheets and purged unused dead styles.
+
+### Fixed
+- **🧩 Hook Optimization**: Stabilized dependencies in `useLcu` and `useMusicSync` using proper `useCallback` implementations.
+
 ## [1.8.0] - 2026-05-20
 
 ### Added

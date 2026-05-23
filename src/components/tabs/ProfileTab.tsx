@@ -1,65 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
+import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<any>;
+    lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
 }
 
-import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
-
-const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showToast, addLog, lcuRequest }) => {
+const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
+    const [loading, setLoading] = useState(false);
 
     const statusLabel = (value: string) => {
         switch (value) {
-            case "chat": return "ONLINE";
-            case "away": return "AWAY";
-            case "mobile": return "MOBILE";
+            case "chat":    return "ONLINE";
+            case "away":    return "AWAY";
+            case "mobile":  return "MOBILE";
             case "offline": return "OFFLINE";
-            default: return value.toUpperCase();
+            default:        return value.toUpperCase();
         }
     };
 
-    const syncInProgressRef = React.useRef<string | null>(null);
-
-
-    const refreshProfileData = async (currentLcu: LcuInfo) => {
-        const connectionId = `${currentLcu.port}-${currentLcu.token}`;
-        if (!lcu || syncInProgressRef.current !== connectionId) return;
-
+    const refreshProfileData = useCallback(async () => {
+        if (!lcu) return;
         try {
-            const chatRes: any = await lcuRequest("GET", "/lol-chat/v1/me");
-            if (syncInProgressRef.current !== connectionId) return;
-
-            if (chatRes?.availability) setAvailability(chatRes.availability);
-
-            const lcuBio: string = chatRes?.statusMessage || "";
-            if (lcuBio && lcuBio.trim() !== "") {
+            const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as Record<string, unknown>;
+            if (chatRes?.availability) setAvailability(chatRes.availability as string);
+            const lcuBio = (chatRes?.statusMessage as string) || "";
+            if (lcuBio.trim()) {
                 setBio(lcuBio);
                 localStorage.setItem(SAVED_BIO_KEY, lcuBio);
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : String(err);
-            addLog(`Profile sync failed: ${errorMessage}`);
+            addLog(`Profile sync failed: ${err instanceof Error ? err.message : String(err)}`);
         }
-    };
+    }, [lcu, lcuRequest, addLog]);
 
     useEffect(() => {
-        if (lcu) {
-            const connectionId = `${lcu.port}-${lcu.token}`;
-            syncInProgressRef.current = connectionId;
-            refreshProfileData(lcu);
-        } else {
-            syncInProgressRef.current = null;
-        }
-    }, [lcu]);
+        refreshProfileData();
+    }, [refreshProfileData]);
 
     const handleUpdateBio = async () => {
         if (!lcu) return;
@@ -70,9 +53,8 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
             addLog(`Bio updated: "${bio}"`);
             showToast("Bio Updated!", "success");
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : String(err);
             showToast("Failed to update bio", "error");
-            addLog(`Bio update failed: ${msg}`);
+            addLog(`Bio update failed: ${err instanceof Error ? err.message : String(err)}`);
         } finally { setLoading(false); }
     };
 
@@ -127,9 +109,9 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, loading, setLoading, showT
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <select id="availability-select" className="availability-select" value={availability} onChange={(e) => setAvailability(e.target.value)} style={{ flex: 2 }}>
                                 {[
-                                    { value: "chat", label: "ONLINE" },
-                                    { value: "away", label: "AWAY" },
-                                    { value: "mobile", label: "MOBILE" },
+                                    { value: "chat",    label: "ONLINE" },
+                                    { value: "away",    label: "AWAY" },
+                                    { value: "mobile",  label: "MOBILE" },
                                     { value: "offline", label: "OFFLINE" }
                                 ].map(state => (
                                     <option key={state.value} value={state.value}>{state.label}</option>

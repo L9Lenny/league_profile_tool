@@ -251,33 +251,6 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.nav-actions {
-  display: flex;
-  align-items: center;
-}
-
-.update-btn {
-  background: transparent;
-  border: 1px solid var(--hextech-gold-dark);
-  color: var(--hextech-gold);
-  padding: 6px 16px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-radius: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-
-.update-btn:hover {
-  border-color: var(--hextech-gold);
-  background: rgba(200, 155, 60, 0.05);
-}
-
-.update-btn .spin,
 .spin {
   animation: spin 1s linear infinite;
 }
@@ -679,7 +652,7 @@ input:checked+.slider:before {
 }
 
 .fadeIn {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { Save, FolderOpen, Trash2, CheckCircle2 } from 'lucide-react';
 import {
@@ -25,128 +26,158 @@ interface ProfilePreset {
     tokens: string | null;
 }
 
-const PRESETS_STORAGE_KEY = "profile_presets_list_v1";
+/** Legacy key used before disk persistence — kept for migration */
+const PRESETS_LS_KEY = "profile_presets_list_v1";
 
 const PresetsTab: React.FC<PresetsTabProps> = ({ lcu: _lcu, showToast, addLog }) => {
     const [presets, setPresets] = useState<ProfilePreset[]>([]);
     const [newPresetName, setNewPresetName] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    /** Write presets to disk via Tauri; falls back to localStorage on error */
+    const persistPresets = useCallback(async (updated: ProfilePreset[]) => {
+        const json = JSON.stringify(updated);
+        try {
+            await invoke("save_presets", { data: json });
+        } catch (err) {
+            addLog(`Disk save failed, using localStorage fallback: ${err}`);
+            localStorage.setItem(PRESETS_LS_KEY, json);
+        }
+        setPresets(updated);
+    }, [addLog]);
 
     useEffect(() => {
-        const saved = localStorage.getItem(PRESETS_STORAGE_KEY);
-        if (saved) {
+        const load = async () => {
+            // 1. Try to load from disk (Tauri AppData)
             try {
-                setPresets(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse presets", e);
+                const raw = await invoke<string>("load_presets");
+                const parsed: ProfilePreset[] = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setPresets(parsed);
+                    return;
+                }
+            } catch (err) {
+                addLog(`Disk load failed, checking localStorage: ${err}`);
             }
-        }
-    }, []);
 
-    const savePresetsToStorage = (newPresets: ProfilePreset[]) => {
-        localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(newPresets));
-        setPresets(newPresets);
-    };
+            // 2. Migrate from localStorage for existing users
+            const lsData = localStorage.getItem(PRESETS_LS_KEY);
+            if (lsData) {
+                try {
+                    const parsed: ProfilePreset[] = JSON.parse(lsData);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        setPresets(parsed);
+                        // Migrate to disk silently
+                        await invoke("save_presets", { data: lsData }).catch(() => {});
+                        localStorage.removeItem(PRESETS_LS_KEY);
+                        addLog(`Migrated ${parsed.length} preset(s) from localStorage to disk.`);
+                    }
+                } catch { /* ignore parse errors */ }
+            }
+        };
+        load();
+    }, [addLog]);
 
-    const handleSaveCurrentAsPreset = () => {
+    const handleSaveCurrentAsPreset = async () => {
         if (!newPresetName.trim()) {
             showToast("Please enter a name for the preset", "error");
             return;
         }
-
+        setSaving(true);
         const newPreset: ProfilePreset = {
             id: Date.now().toString(),
             name: newPresetName.trim(),
-            bio: localStorage.getItem(SAVED_BIO_KEY),
+            bio:          localStorage.getItem(SAVED_BIO_KEY),
             availability: localStorage.getItem(SAVED_AVAILABILITY_KEY),
-            iconId: localStorage.getItem(SAVED_ICON_KEY),
+            iconId:       localStorage.getItem(SAVED_ICON_KEY),
             backgroundId: localStorage.getItem(SAVED_BACKGROUND_KEY),
-            tokens: localStorage.getItem(SAVED_TOKENS_KEY)
+            tokens:       localStorage.getItem(SAVED_TOKENS_KEY)
         };
-
-        const updatedPresets = [...presets, newPreset];
-        savePresetsToStorage(updatedPresets);
+        const updated = [...presets, newPreset];
+        await persistPresets(updated);
         setNewPresetName("");
         showToast(`Preset "${newPreset.name}" saved!`, "success");
-        addLog(`Saved current config as preset: ${newPreset.name}`);
+        addLog(`Saved preset: ${newPreset.name}`);
+        setSaving(false);
     };
 
     const handleLoadPreset = (preset: ProfilePreset) => {
-        // Apply to localStorage
-        if (preset.bio !== null) localStorage.setItem(SAVED_BIO_KEY, preset.bio);
-        else localStorage.removeItem(SAVED_BIO_KEY);
+        if (preset.bio !== null)          localStorage.setItem(SAVED_BIO_KEY, preset.bio);
+        else                              localStorage.removeItem(SAVED_BIO_KEY);
 
         if (preset.availability !== null) localStorage.setItem(SAVED_AVAILABILITY_KEY, preset.availability);
-        else localStorage.removeItem(SAVED_AVAILABILITY_KEY);
+        else                              localStorage.removeItem(SAVED_AVAILABILITY_KEY);
 
-        if (preset.iconId !== null) localStorage.setItem(SAVED_ICON_KEY, preset.iconId);
-        else localStorage.removeItem(SAVED_ICON_KEY);
+        if (preset.iconId !== null)       localStorage.setItem(SAVED_ICON_KEY, preset.iconId);
+        else                              localStorage.removeItem(SAVED_ICON_KEY);
 
         if (preset.backgroundId !== null) localStorage.setItem(SAVED_BACKGROUND_KEY, preset.backgroundId);
-        else localStorage.removeItem(SAVED_BACKGROUND_KEY);
+        else                              localStorage.removeItem(SAVED_BACKGROUND_KEY);
 
-        if (preset.tokens !== null) localStorage.setItem(SAVED_TOKENS_KEY, preset.tokens);
-        else localStorage.removeItem(SAVED_TOKENS_KEY);
+        if (preset.tokens !== null)       localStorage.setItem(SAVED_TOKENS_KEY, preset.tokens);
+        else                              localStorage.removeItem(SAVED_TOKENS_KEY);
 
-        showToast(`Preset "${preset.name}" loaded! It will apply automatically.`, "success");
-        addLog(`Loaded preset: ${preset.name}. Auto-restore will apply it shortly.`);
-        
-        // We could manually trigger an update here, but the active polling in useAutoRestore 
-        // will pick these changes up within 10 seconds anyway!
+        showToast(`Preset "${preset.name}" loaded! Navigate to each tab to apply.`, "success");
+        addLog(`Loaded preset: ${preset.name}.`);
     };
 
-    const handleDeletePreset = (id: string) => {
-        const updatedPresets = presets.filter(p => p.id !== id);
-        savePresetsToStorage(updatedPresets);
+    const handleDeletePreset = async (id: string) => {
+        const updated = presets.filter(p => p.id !== id);
+        await persistPresets(updated);
         showToast("Preset deleted.", "success");
     };
 
     return (
-        <div className="tab-content fade-in">
-            <div className="tab-header">
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <FolderOpen size={24} style={{ color: 'var(--hextech-gold)' }} />
+        <div className="tab-content fadeIn">
+            {/* Save current setup */}
+            <div className="card" style={{ marginBottom: '12px' }}>
+                <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <FolderOpen size={20} style={{ color: 'var(--hextech-gold)' }} />
                     Profile Presets
-                </h2>
-                <p style={{ opacity: 0.7, fontSize: '0.9rem', maxWidth: '600px' }}>
-                    Save your current customized profile (Bio, Icon, Background, Tokens, Status) as a preset. 
-                    You can load it later to instantly swap between different visual themes.
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+                    Save your current profile setup (Bio, Icon, Background, Tokens, Status).
+                    Presets are stored on disk and persist across reinstalls and future updates.
                 </p>
-            </div>
-
-            <div className="panel" style={{ marginBottom: '20px' }}>
-                <h3 style={{ marginBottom: '15px', color: 'var(--hextech-gold)' }}>Save Current Setup</h3>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <input
                         type="text"
-                        placeholder="e.g. 'Edgy Setup' or 'Tryhard Mode'"
+                        placeholder="e.g. 'Edgy Setup' or 'Ranked Mode'"
                         value={newPresetName}
                         onChange={(e) => setNewPresetName(e.target.value)}
-                        className="text-input"
-                        style={{ flex: 1 }}
                         onKeyDown={(e) => e.key === 'Enter' && handleSaveCurrentAsPreset()}
+                        style={{ flex: 1 }}
                     />
-                    <button className="btn btn-primary" onClick={handleSaveCurrentAsPreset} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <Save size={18} />
-                        Save Preset
+                    <button
+                        className="primary-btn"
+                        onClick={handleSaveCurrentAsPreset}
+                        disabled={saving || !newPresetName.trim()}
+                        style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '12px 20px' }}
+                    >
+                        <Save size={16} />
+                        {saving ? 'SAVING...' : 'SAVE PRESET'}
                     </button>
                 </div>
             </div>
 
-            <div className="panel">
-                <h3 style={{ marginBottom: '15px', color: 'var(--hextech-gold)' }}>Your Presets</h3>
-                
+            {/* Preset list */}
+            <div className="card">
+                <h3 className="card-title">Your Presets</h3>
+
                 {presets.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px', opacity: 0.5 }}>
                         <FolderOpen size={48} style={{ margin: '0 auto 15px auto', opacity: 0.5 }} />
-                        <p>No presets saved yet.</p>
-                        <p style={{ fontSize: '0.8rem' }}>Customize your profile in the other tabs, then save it here.</p>
+                        <p style={{ margin: '0 0 8px 0' }}>No presets saved yet.</p>
+                        <p style={{ fontSize: '0.8rem', margin: 0 }}>Customize your profile in the other tabs, then save it here.</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                         {presets.map(preset => {
-                            const iconUrl = preset.iconId ? `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${preset.iconId}.jpg` : null;
-                            
-                            let bgUrl = null;
+                            const iconUrl = preset.iconId
+                                ? `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${preset.iconId}.jpg`
+                                : null;
+
+                            let bgUrl: string | null = null;
                             if (preset.backgroundId) {
                                 const bgIdNum = parseInt(preset.backgroundId, 10);
                                 if (!isNaN(bgIdNum)) {
@@ -156,52 +187,45 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu: _lcu, showToast, addLog })
                             }
 
                             return (
-                                <div key={preset.id} style={{
-                                    position: 'relative',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between',
-                                    background: '#1a1a1c',
-                                    border: '1px solid rgba(200, 170, 110, 0.4)',
-                                    borderRadius: '8px',
-                                    overflow: 'hidden',
-                                    minHeight: '200px',
-                                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                                    transition: 'transform 0.2s',
-                                    cursor: 'default'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                <div
+                                    key={preset.id}
+                                    style={{
+                                        position: 'relative',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        background: '#1a1a1c',
+                                        border: '1px solid rgba(200, 170, 110, 0.4)',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        minHeight: '200px',
+                                        boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                                        transition: 'transform 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                 >
-                                    {/* Background Splash */}
                                     {bgUrl && (
                                         <div style={{
-                                            position: 'absolute',
-                                            top: 0, left: 0, right: 0, bottom: 0,
+                                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                                             backgroundImage: `url(${bgUrl})`,
                                             backgroundSize: 'cover',
                                             backgroundPosition: 'center 20%',
-                                            opacity: 0.5,
-                                            zIndex: 0
+                                            opacity: 0.5, zIndex: 0
                                         }} />
                                     )}
                                     <div style={{
-                                        position: 'absolute',
-                                        top: 0, left: 0, right: 0, bottom: 0,
+                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                                         background: 'linear-gradient(to bottom, rgba(10,10,12,0.1) 0%, rgba(10,10,12,0.95) 100%)',
                                         zIndex: 1
                                     }} />
 
-                                    {/* Content */}
                                     <div style={{ position: 'relative', zIndex: 2, padding: '20px', display: 'flex', flexDirection: 'column', height: '100%' }}>
                                         <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', marginBottom: '15px' }}>
                                             <div style={{
-                                                width: '60px', height: '60px',
-                                                borderRadius: '50%',
+                                                width: '60px', height: '60px', borderRadius: '50%',
                                                 border: '2px solid var(--hextech-gold)',
-                                                background: '#0a0a0c',
-                                                overflow: 'hidden',
-                                                flexShrink: 0
+                                                background: '#0a0a0c', overflow: 'hidden', flexShrink: 0
                                             }}>
                                                 {iconUrl ? (
                                                     <img src={iconUrl} alt="Icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.currentTarget.style.display = 'none'} />
@@ -210,17 +234,15 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu: _lcu, showToast, addLog })
                                                 )}
                                             </div>
                                             <div style={{ flex: 1, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
-                                                <h4 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', color: '#fff', letterSpacing: '1px' }}>{preset.name}</h4>
+                                                <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: '#fff', letterSpacing: '0.5px' }}>{preset.name}</h4>
                                                 {preset.availability && (
-                                                    <span style={{ 
-                                                        fontSize: '0.75rem', 
-                                                        textTransform: 'uppercase', 
-                                                        padding: '2px 6px', 
+                                                    <span style={{
+                                                        fontSize: '0.7rem', textTransform: 'uppercase', padding: '2px 6px',
                                                         borderRadius: '3px',
-                                                        background: preset.availability === 'chat' ? 'rgba(40, 167, 69, 0.2)' : 
-                                                                    preset.availability === 'away' ? 'rgba(220, 53, 69, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                                                        color: preset.availability === 'chat' ? '#28a745' : 
-                                                               preset.availability === 'away' ? '#dc3545' : '#aaa',
+                                                        background: preset.availability === 'chat' ? 'rgba(40, 167, 69, 0.2)' :
+                                                            preset.availability === 'away' ? 'rgba(220, 53, 69, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                                                        color: preset.availability === 'chat' ? '#28a745' :
+                                                            preset.availability === 'away' ? '#dc3545' : '#aaa',
                                                         border: '1px solid currentColor'
                                                     }}>
                                                         {preset.availability}
@@ -229,38 +251,34 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu: _lcu, showToast, addLog })
                                             </div>
                                         </div>
 
-                                        <div style={{ flex: 1 }}>
-                                            {preset.bio && (
-                                                <p style={{ margin: '0 0 15px 0', fontSize: '0.85rem', color: '#ddd', fontStyle: 'italic', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-                                                    "{preset.bio}"
-                                                </p>
-                                            )}
-                                        </div>
+                                        {preset.bio && (
+                                            <p style={{ margin: '0 0 15px 0', fontSize: '0.82rem', color: '#ddd', fontStyle: 'italic', textShadow: '0 1px 3px rgba(0,0,0,0.8)', flex: 1 }}>
+                                                "{preset.bio}"
+                                            </p>
+                                        )}
 
-                                        {/* Actions */}
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid rgba(200, 170, 110, 0.2)', paddingTop: '15px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px solid rgba(200, 170, 110, 0.2)', paddingTop: '12px' }}>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 {preset.tokens && (
-                                                    <div style={{ display: 'flex', gap: '5px' }} title="Equipped Tokens">
-                                                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--hextech-gold)' }} />
-                                                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--hextech-gold)' }} />
-                                                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--hextech-gold)' }} />
+                                                    <div style={{ display: 'flex', gap: '4px' }} title="Has equipped tokens">
+                                                        {[0,1,2].map(i => <div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--hextech-gold)' }} />)}
                                                     </div>
                                                 )}
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button 
-                                                    className="btn btn-primary" 
+                                                <button
+                                                    className="primary-btn"
                                                     onClick={() => handleLoadPreset(preset)}
-                                                    style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', gap: '5px', alignItems: 'center' }}
+                                                    style={{ padding: '6px 14px', fontSize: '0.75rem', display: 'flex', gap: '5px', alignItems: 'center' }}
+                                                    disabled={!lcu}
+                                                    title={!lcu ? 'Connect League client first' : 'Load preset'}
                                                 >
-                                                    <CheckCircle2 size={14} /> LOAD
+                                                    <CheckCircle2 size={13} /> LOAD
                                                 </button>
-                                                <button 
-                                                    className="btn" 
+                                                <button
                                                     onClick={() => handleDeletePreset(preset.id)}
-                                                    style={{ padding: '6px', background: 'rgba(220, 53, 69, 0.2)', color: '#ff6b6b', border: '1px solid rgba(220, 53, 69, 0.4)' }}
-                                                    title="Delete Preset"
+                                                    style={{ padding: '6px', background: 'rgba(220, 53, 69, 0.2)', color: '#ff6b6b', border: '1px solid rgba(220, 53, 69, 0.4)', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                                    title="Delete preset"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>

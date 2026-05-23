@@ -26,21 +26,7 @@ button.icon-item:focus {
   gap: 12px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
-}
 
 
 /* Scrollbar Styles */
@@ -230,13 +216,7 @@ input:not([type]):focus {
   opacity: 0.4;
 }
 
-.home-hero {
-  text-align: center;
-  padding: 40px 20px 20px;
-  background: transparent;
-  margin-bottom: 20px;
-  position: relative;
-}
+
 
 .home-back-btn {
   position: absolute;
@@ -501,15 +481,7 @@ input:not([type]):focus {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
 
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 /* ── Background Tab ── */
 .bg-champ-grid {

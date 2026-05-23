@@ -66,7 +66,6 @@ export function useIcons(addLog: (msg: string) => void) {
                 }));
 
                 setAllIcons(icons);
-                localStorage.setItem("ddragon_version", latest);
                 localStorage.setItem("icon_data_version", latest);
                 localStorage.setItem("profile_icons", JSON.stringify(icons));
                 addLog(`Icon database updated: ${icons.length} items loaded.`);

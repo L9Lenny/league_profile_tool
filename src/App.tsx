@@ -29,7 +29,7 @@ import { useLcu } from "./hooks/useLcu";
 import { useIcons } from "./hooks/useIcons";
 import { useMusicSync } from "./hooks/useMusicSync";
 import { useAnalytics } from "./hooks/useAnalytics";
-import { useAutoRestore } from "./hooks/useAutoRestore";
+
 
 // Components
 import HomeTab from "./components/tabs/HomeTab";
@@ -48,7 +48,6 @@ import PresetsTab from "./components/tabs/PresetsTab";
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [appReady, setAppReady] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [clientVersion, setClientVersion] = useState("0.0.0");
   const [latestVersion, setLatestVersion] = useState("");
   const [isAutostartEnabled, setIsAutostartEnabled] = useState(false);
@@ -61,7 +60,6 @@ function App() {
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
   useAnalytics();
-  useAutoRestore(lcu, addLog, lcuRequest);
 
 
   const closingRef = useRef(false);
@@ -218,15 +216,15 @@ function App() {
       <div className="main-container">
         <main className="content-area">
           {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} />}
-          {activeTab === 'profile' && <ProfileTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'friends' && <FriendManagerTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'background' && <BackgroundTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'profile' && <ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'friends' && <FriendManagerTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'background' && <BackgroundTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
-          {activeTab === 'tokens' && <TokensTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'tokens' && <TokensTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} />}
-          {activeTab === 'rank' && <RankTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} />}
-          {activeTab === 'lobby' && <LobbyTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'icons' && <IconTab lcu={lcu} loading={loading} setLoading={setLoading} showToast={showToast} addLog={addLog} {...icons} />}
+          {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} />}
+          {activeTab === 'lobby' && <LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
           {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
           {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} />}
         </main>

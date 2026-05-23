@@ -60,6 +60,29 @@ export const buildBioFromTemplate = (template: string, track: NowPlayingTrack) =
     );
 };
 
+// Pure module-level function — not recreated on every render
+async function fetchLastFmNowPlaying(settings: MusicBioSettings): Promise<NowPlayingTrack | null> {
+    const username = settings.lastfmUsername.trim();
+    const apiKey = settings.lastfmApiKey.trim();
+    if (!username || !apiKey) return null;
+    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${encodeURIComponent(apiKey)}&format=json&limit=1`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
+    const payload = await response.json();
+    const recentTracks = payload?.recenttracks?.track;
+    const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
+    if (!track) return null;
+    const nowPlaying = String(track?.["@attr"]?.nowplaying || "").toLowerCase() === "true";
+    if (!nowPlaying) return null;
+
+    return {
+        sourceLabel: "Last.fm",
+        artist: String(track?.artist?.["#text"] || "").trim(),
+        title: String(track?.name || "").trim(),
+        album: String(track?.album?.["#text"] || "").trim()
+    };
+}
+
 export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void) {
     const [musicBio, setMusicBio] = useState<MusicBioSettings>(defaultMusicBioSettings);
     const [musicSettingsHydrated, setMusicSettingsHydrated] = useState(false);
@@ -92,28 +115,6 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
             pollIntervalSec: clampPollInterval(musicBio.pollIntervalSec)
         }));
     }, [musicBio, musicSettingsHydrated]);
-
-    const fetchLastFmNowPlaying = async (settings: MusicBioSettings): Promise<NowPlayingTrack | null> => {
-        const username = settings.lastfmUsername.trim();
-        const apiKey = settings.lastfmApiKey.trim();
-        if (!username || !apiKey) return null;
-        const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${encodeURIComponent(apiKey)}&format=json&limit=1`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
-        const payload = await response.json();
-        const recentTracks = payload?.recenttracks?.track;
-        const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
-        if (!track) return null;
-        const nowPlaying = String(track?.["@attr"]?.nowplaying || "").toLowerCase() === "true";
-        if (!nowPlaying) return null;
-
-        return {
-            sourceLabel: "Last.fm",
-            artist: String(track?.artist?.["#text"] || "").trim(),
-            title: String(track?.name || "").trim(),
-            album: String(track?.album?.["#text"] || "").trim()
-        };
-    };
 
     const applyIdleBio = useCallback(async () => {
         if (!lcu) return;
