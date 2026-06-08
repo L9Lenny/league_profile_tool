@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { LcuInfo } from './useLcu';
 import { SAVED_ENFORCE_OFFLINE_KEY } from '../storageKeys';
 
