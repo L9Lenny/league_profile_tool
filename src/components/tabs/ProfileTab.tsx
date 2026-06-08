@@ -129,14 +129,18 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                                 APPLY
                             </button>
                         </div>
-                        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <input 
-                                type="checkbox" 
-                                id="enforce-offline" 
-                                checked={enforceOffline} 
-                                onChange={(e) => toggleEnforceOffline(e.target.checked)} 
-                            />
-                            <label htmlFor="enforce-offline" style={{ fontSize: '0.8rem' }}>Enforce "Offline" status (even in Champ Select)</label>
+                        <div style={{ marginTop: '12px' }}>
+                            <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={enforceOffline} 
+                                    onChange={(e) => toggleEnforceOffline(e.target.checked)} 
+                                    style={{ width: '18px', height: '18px', accentColor: 'var(--hextech-gold)' }}
+                                />
+                                <span style={{ color: enforceOffline ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s' }}>
+                                    Enforce "Offline" status (even in Champ Select)
+                                </span>
+                            </label>
                         </div>
                     </div>
                 )}
