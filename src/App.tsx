@@ -29,6 +29,7 @@ import { useLcu } from "./hooks/useLcu";
 import { useIcons } from "./hooks/useIcons";
 import { useMusicSync } from "./hooks/useMusicSync";
 import { useAnalytics } from "./hooks/useAnalytics";
+import { useStatusEnforcer } from "./hooks/useStatusEnforcer";
 
 
 // Components
@@ -60,6 +61,7 @@ function App() {
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
   useAnalytics();
+  useStatusEnforcer(lcu, lcuRequest, addLog);
 
 
   const closingRef = useRef(false);

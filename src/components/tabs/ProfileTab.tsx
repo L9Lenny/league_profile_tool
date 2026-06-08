@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
+import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
@@ -14,6 +15,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
+    const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
 
     const statusLabel = (value: string) => {
         switch (value) {
@@ -79,6 +81,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         }
     };
 
+    const toggleEnforceOffline = (checked: boolean) => {
+        setEnforceOffline(checked);
+        localStorage.setItem(SAVED_ENFORCE_OFFLINE_KEY, checked.toString());
+        addLog(`Enforce offline ${checked ? 'enabled' : 'disabled'}.`);
+    };
+
     return (
         <div className="tab-content fadeIn">
             <div className="card">
@@ -120,6 +128,19 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             <button className="primary-btn availability-apply" onClick={() => applyAvailability()} disabled={!lcu || loading} style={{ flex: 1 }}>
                                 APPLY
                             </button>
+                        </div>
+                        <div style={{ marginTop: '12px' }}>
+                            <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={enforceOffline} 
+                                    onChange={(e) => toggleEnforceOffline(e.target.checked)} 
+                                    style={{ width: '18px', height: '18px', accentColor: 'var(--hextech-gold)' }}
+                                />
+                                <span style={{ color: enforceOffline ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s' }}>
+                                    Enforce "Offline" status (even in Champ Select)
+                                </span>
+                            </label>
                         </div>
                     </div>
                 )}
