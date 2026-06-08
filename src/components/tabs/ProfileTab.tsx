@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
+import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
@@ -14,6 +15,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
+    const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
 
     const statusLabel = (value: string) => {
         switch (value) {
@@ -79,6 +81,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         }
     };
 
+    const toggleEnforceOffline = (checked: boolean) => {
+        setEnforceOffline(checked);
+        localStorage.setItem(SAVED_ENFORCE_OFFLINE_KEY, checked.toString());
+        addLog(`Enforce offline ${checked ? 'enabled' : 'disabled'}.`);
+    };
+
     return (
         <div className="tab-content fadeIn">
             <div className="card">
@@ -120,6 +128,15 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             <button className="primary-btn availability-apply" onClick={() => applyAvailability()} disabled={!lcu || loading} style={{ flex: 1 }}>
                                 APPLY
                             </button>
+                        </div>
+                        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <input 
+                                type="checkbox" 
+                                id="enforce-offline" 
+                                checked={enforceOffline} 
+                                onChange={(e) => toggleEnforceOffline(e.target.checked)} 
+                            />
+                            <label htmlFor="enforce-offline" style={{ fontSize: '0.8rem' }}>Enforce "Offline" status (even in Champ Select)</label>
                         </div>
                     </div>
                 )}
