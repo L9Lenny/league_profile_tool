@@ -198,34 +198,38 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
             while ((match = regex.exec(line)) !== null) {
                 const index = match.index;
                 if (index > lastIndex) {
-                    parts.push(line.substring(lastIndex, index));
+                    parts.push(
+                        <span key={`text-${lastIndex}`}>
+                            {line.substring(lastIndex, index)}
+                        </span>
+                    );
                 }
                 
                 const token = match[0];
                 if (token.startsWith('"')) {
                     if (token.endsWith(':')) {
                         parts.push(
-                            <span key={index} className="json-key" style={{ color: 'var(--hextech-gold)', fontWeight: 500 }}>
+                            <span key={`key-${index}`} className="json-key" style={{ color: 'var(--hextech-gold)', fontWeight: 500 }}>
                                 {token.slice(0, -1)}
                             </span>
                         );
-                        parts.push(':');
+                        parts.push(<span key={`colon-${index}`}>:</span>);
                     } else {
                         parts.push(
-                            <span key={index} className="json-string" style={{ color: '#8cdcfe' }}>
+                            <span key={`str-${index}`} className="json-string" style={{ color: '#8cdcfe' }}>
                                 {token}
                             </span>
                         );
                     }
                 } else if (/^(true|false|null)$/.test(token)) {
                     parts.push(
-                        <span key={index} className="json-boolean" style={{ color: '#569cd6', fontWeight: 600 }}>
+                        <span key={`bool-${index}`} className="json-boolean" style={{ color: '#569cd6', fontWeight: 600 }}>
                             {token}
                         </span>
                     );
                 } else {
                     parts.push(
-                        <span key={index} className="json-number" style={{ color: '#b5cea8' }}>
+                        <span key={`num-${index}`} className="json-number" style={{ color: '#b5cea8' }}>
                             {token}
                         </span>
                     );
@@ -235,7 +239,11 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
             }
             
             if (lastIndex < line.length) {
-                parts.push(line.substring(lastIndex));
+                parts.push(
+                    <span key={`text-end-${lastIndex}`}>
+                        {line.substring(lastIndex)}
+                    </span>
+                );
             }
             
             return parts;
@@ -244,7 +252,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         return (
             <div className="json-code-container">
                 {lines.map((line, idx) => (
-                    <div key={idx} className="json-code-line">
+                    <div key={`line-${idx}`} className="json-code-line">
                         <span className="json-line-number">{idx + 1}</span>
                         <span className="json-line-content">{tokenizeLine(line)}</span>
                     </div>
