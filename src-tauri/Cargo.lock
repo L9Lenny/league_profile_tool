@@ -2177,7 +2177,7 @@ dependencies = [
 
 [[package]]
 name = "league-profile-tool"
-version = "1.9.0"
+version = "1.9.2"
 dependencies = [
  "base64 0.22.1",
  "reqwest 0.12.28",
