@@ -19,6 +19,15 @@ interface TokenDef {
 
 const TIERS = ["ALL", "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 
+const safeExtractString = (val: any): string => {
+    if (val === undefined || val === null) return "";
+    if (typeof val === 'object') {
+        const id = val.id ?? val.itemId ?? val.titleId ?? val.value ?? val.name;
+        return id !== undefined && id !== null ? String(id) : "";
+    }
+    return String(val);
+};
+
 const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
     const [loading, setLoading] = useState(false);
     const [tokens, setTokens] = useState<TokenDef[]>([]);
@@ -148,15 +157,9 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
             try {
                 const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
                 if (summary) {
-                    const rawBanner = summary.bannerAccent ?? summary.preferences?.bannerAccent;
-                    bannerAccent = rawBanner !== undefined && rawBanner !== null ? String(rawBanner) : "";
-
-                    const rawTitle = summary.title ?? summary.preferences?.title;
-                    title = rawTitle !== undefined && rawTitle !== null ? String(rawTitle) : "";
-
-                    const rawCrest = summary.crestBorder ?? summary.preferences?.crestBorder;
-                    crestBorder = rawCrest !== undefined && rawCrest !== null ? String(rawCrest) : "";
-
+                    bannerAccent = safeExtractString(summary.bannerAccent ?? summary.preferences?.bannerAccent);
+                    title = safeExtractString(summary.title ?? summary.preferences?.title);
+                    crestBorder = safeExtractString(summary.crestBorder ?? summary.preferences?.crestBorder);
                     prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
                 }
             } catch (err) {

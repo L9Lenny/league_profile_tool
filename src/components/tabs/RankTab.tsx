@@ -16,6 +16,15 @@ interface TitleDef {
     state: string;
 }
 
+const safeExtractString = (val: any): string => {
+    if (val === undefined || val === null) return "";
+    if (typeof val === 'object') {
+        const id = val.id ?? val.itemId ?? val.titleId ?? val.value ?? val.name;
+        return id !== undefined && id !== null ? String(id) : "";
+    }
+    return String(val);
+};
+
 const TIERS = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 const DIVISIONS = ["I", "II", "III", "IV"];
 const QUEUES = [
@@ -82,9 +91,9 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
             // 2. Fetch challenge/preferences summary
             const summaryRes = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player") as any;
             if (summaryRes) {
-                const accent = summaryRes.bannerAccent ?? summaryRes.preferences?.bannerAccent ?? "";
-                const border = summaryRes.crestBorder ?? summaryRes.preferences?.crestBorder ?? "";
-                const activeTitle = summaryRes.title ?? summaryRes.preferences?.title ?? "";
+                const accent = safeExtractString(summaryRes.bannerAccent ?? summaryRes.preferences?.bannerAccent);
+                const border = safeExtractString(summaryRes.crestBorder ?? summaryRes.preferences?.crestBorder);
+                const activeTitle = safeExtractString(summaryRes.title ?? summaryRes.preferences?.title);
                 setBannerAccent(accent);
                 setCrestBorder(border);
                 setTitle(activeTitle);
@@ -148,9 +157,9 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
             // Update customization preferences (banner, crest border, title)
             const prefBody = {
                 challengeIds,
-                bannerAccent: bannerAccent ? String(bannerAccent) : "",
-                title: (customTitleId || title) ? String(customTitleId || title) : "",
-                crestBorder: crestBorder ? String(crestBorder) : "",
+                bannerAccent: safeExtractString(bannerAccent),
+                title: safeExtractString(customTitleId || title),
+                crestBorder: safeExtractString(crestBorder),
                 prestigeCrestBorderLevel
             };
             await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
