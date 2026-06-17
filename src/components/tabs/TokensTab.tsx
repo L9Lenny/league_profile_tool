@@ -38,20 +38,40 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
     const [fetching, setFetching] = useState(false);
     const [challengeDefs, setChallengeDefs] = useState<Record<number, { name: string, description: string }>>({});
 
-    const fetchCurrentSelection = async () => {
-        if (!lcu) return;
+    const CD_CACHE_KEY = "cd_challenge_defs";
+    const CD_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+    const loadCDDefinitions = async (): Promise<Record<number, { name: string, description: string }>> => {
+        // 1. Return in-memory cache if available
+        if (Object.keys(challengeDefs).length > 0) return challengeDefs;
+
+        // 2. Try localStorage cache
         try {
-            const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
-            if (summary?.topChallenges && Array.isArray(summary.topChallenges)) {
-                setSlots([
-                    summary.topChallenges[0]?.id ?? -1,
-                    summary.topChallenges[1]?.id ?? -1,
-                    summary.topChallenges[2]?.id ?? -1
-                ]);
+            const cached = localStorage.getItem(CD_CACHE_KEY);
+            if (cached) {
+                const { data, ts } = JSON.parse(cached);
+                if (Date.now() - ts < CD_CACHE_TTL && data && Object.keys(data).length > 0) {
+                    setChallengeDefs(data);
+                    return data;
+                }
             }
-        } catch (err) {
-            addLog(`Failed to fetch current tokens: ${err}`);
+        } catch { /* ignore corrupt cache */ }
+
+        // 3. Fetch from CDragon
+        try {
+            const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
+            if (cdRes.ok) {
+                const cdData = await cdRes.json();
+                const record: Record<number, { name: string, description: string }> = {};
+                cdData.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
+                setChallengeDefs(record);
+                try { localStorage.setItem(CD_CACHE_KEY, JSON.stringify({ data: record, ts: Date.now() })); } catch { /* quota */ }
+                return record;
+            }
+        } catch (e) {
+            addLog(`CD definitions fetch failed (using client names): ${e}`);
         }
+        return {};
     };
 
     const fetchTokens = async () => {
@@ -59,29 +79,27 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
         setFetching(true);
         try {
             addLog("Syncing challenges from LCU...");
-            const challengesRes: any = await lcuRequest("GET", "/lol-challenges/v1/challenges/local-player");
-            
+
+            // Fire all three requests in parallel
+            const [challengesRes, defs, summaryRes] = await Promise.all([
+                lcuRequest("GET", "/lol-challenges/v1/challenges/local-player").catch(() => null),
+                loadCDDefinitions(),
+                lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player").catch(() => null)
+            ]);
+
+            // Apply current selection from summary
+            if (summaryRes?.topChallenges && Array.isArray(summaryRes.topChallenges)) {
+                setSlots([
+                    summaryRes.topChallenges[0]?.id ?? -1,
+                    summaryRes.topChallenges[1]?.id ?? -1,
+                    summaryRes.topChallenges[2]?.id ?? -1
+                ]);
+            }
+
             if (!challengesRes) {
                 addLog("Empty response from challenges API.");
                 setFetching(false);
                 return;
-            }
-
-            // Fetch definitions from Community Dragon for accurate English names
-            let defs = challengeDefs;
-            if (Object.keys(defs).length === 0) {
-                try {
-                    const cdRes = await fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/en_gb/v1/challenges.json");
-                    if (cdRes.ok) {
-                        const cdData = await cdRes.json();
-                        const record: Record<number, { name: string, description: string }> = {};
-                        cdData.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
-                        defs = record;
-                        setChallengeDefs(record);
-                    }
-                } catch (e) {
-                    addLog(`CD definitions fetch failed (using client names): ${e}`);
-                }
             }
 
             const tokenList: TokenDef[] = [];
@@ -122,7 +140,6 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
 
             setTokens(tokenList.sort((a, b) => a.name.localeCompare(b.name)));
             addLog(`Successfully parsed ${tokenList.length} tokens.`);
-            fetchCurrentSelection();
         } catch (err) {
             addLog(`Error syncing tokens: ${err}`);
             showToast("Failed to sync tokens", "error");
