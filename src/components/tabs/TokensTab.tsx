@@ -352,7 +352,15 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                     maxHeight: '500px',
                     paddingRight: '10px'
                 }}>
-                    {filteredTokens.length === 0 ? (
+                    {fetching ? (
+                        Array.from({ length: 12 }).map((_, i) => (
+                            <div key={i} className="skeleton-card" style={{ animationDelay: `${i * 0.05}s` }}>
+                                <div className="skeleton-shimmer skeleton-circle" style={{ animationDelay: `${i * 0.08}s` }} />
+                                <div className="skeleton-shimmer skeleton-line" style={{ animationDelay: `${i * 0.08 + 0.1}s` }} />
+                                <div className="skeleton-shimmer skeleton-line-short" style={{ animationDelay: `${i * 0.08 + 0.2}s` }} />
+                            </div>
+                        ))
+                    ) : filteredTokens.length === 0 ? (
                         <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
                             <Info size={40} style={{ opacity: 0.2, marginBottom: '15px' }} />
                             <p>No tokens found for your criteria.</p>
