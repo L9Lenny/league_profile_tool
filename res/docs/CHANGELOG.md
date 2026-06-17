@@ -7,12 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.2] - 2026-06-17
 
-### Added
-- **📋 Individual Log Copying**: Added a hover-triggered "Copy" button next to each log line in the System Logs tab for quick clipboard copying.
-- **Selection Highlight**: Integrated selection highlight for logs.
-
 ### Changed
-- **🔍 Selectable System Logs**: Configured the System Logs container to allow text selection directly, bypassing the global app-wide text selection restriction.
+- Modified and enhanced the System Logs user interface.
 
 ## [1.9.1] - 2026-06-08
 

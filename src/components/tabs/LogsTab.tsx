@@ -410,7 +410,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                                 <button
                                                     type="button"
                                                     className="log-copy-btn"
-                                                    aria-label="Copy"
+                                                    aria-label="Copy log line"
                                                     onClick={() => {
                                                         navigator.clipboard.writeText(`[${log.time}] ${log.originalMsg}`)
                                                             .then(() => showToast("Log line copied!", "success"))

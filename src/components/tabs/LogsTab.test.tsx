@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import LogsTab from './LogsTab';
 
 describe('LogsTab', () => {
@@ -12,6 +12,10 @@ describe('LogsTab', () => {
         clearLogs: vi.fn(),
         showToast: vi.fn(),
     };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
     it('should render log entries', () => {
         render(<LogsTab {...mockProps} />);
@@ -57,11 +61,27 @@ describe('LogsTab', () => {
         });
 
         render(<LogsTab {...mockProps} />);
-        const copyBtns = screen.getAllByRole('button', { name: 'Copy' });
+        const copyBtns = screen.getAllByRole('button', { name: 'Copy log line' });
         expect(copyBtns).toHaveLength(2);
         
         fireEvent.click(copyBtns[0]);
         expect(writeTextMock).toHaveBeenCalledWith('[12:00:00] Test Log 1');
-        expect(mockProps.showToast).toHaveBeenCalledWith('Log line copied!', 'success');
+        await waitFor(() => {
+            expect(mockProps.showToast).toHaveBeenCalledWith('Log line copied!', 'success');
+        });
+    });
+
+    it('should filter log entries by search term', () => {
+        render(<LogsTab {...mockProps} />);
+        
+        // Search term filtering
+        const searchInput = screen.getByPlaceholderText('Search logs...');
+        fireEvent.change(searchInput, { target: { value: 'Log 2' } });
+        expect(screen.queryByText('Test Log 1')).toBeNull();
+        expect(screen.getByText('Test Log 2')).toBeDefined();
+
+        // Clear search
+        fireEvent.change(searchInput, { target: { value: '' } });
+        expect(screen.getByText('Test Log 1')).toBeDefined();
     });
 });
