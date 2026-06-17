@@ -1,4 +1,5 @@
 import React from 'react';
+import { Copy } from 'lucide-react';
 import { LogEntry } from '../../hooks/useLogs';
 
 interface LogsTabProps {
@@ -37,6 +38,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                             <button
                                 type="button"
                                 className="log-copy-btn"
+                                aria-label="Copy"
                                 onClick={() => {
                                     navigator.clipboard.writeText(`[${log.time}] ${log.msg}`)
                                         .then(() => showToast("Log line copied!", "success"))
@@ -44,7 +46,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                 }}
                                 title="Copy this log line"
                             >
-                                Copy
+                                <Copy size={12} />
                             </button>
                         </div>
                     ))}

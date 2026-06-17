@@ -619,6 +619,8 @@ input:checked+.slider:before {
 
 .log-text {
   word-break: break-all;
+  flex: 1;
+  min-width: 0;
 }
 
 .log-time {
@@ -634,10 +636,10 @@ input:checked+.slider:before {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s, color 0.2s, border-color 0.2s, background-color 0.2s;
-  padding: 2px 6px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.65rem;
-  text-transform: uppercase;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   -webkit-user-select: none !important;
   user-select: none !important;
