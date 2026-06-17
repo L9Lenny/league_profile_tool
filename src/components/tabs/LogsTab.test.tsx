@@ -33,4 +33,35 @@ describe('LogsTab', () => {
         fireEvent.click(clearBtn);
         expect(mockProps.clearLogs).toHaveBeenCalled();
     });
+
+    it('should copy logs to clipboard when copy button is clicked', async () => {
+        const writeTextMock = vi.fn().mockResolvedValue(undefined);
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: writeTextMock,
+            },
+        });
+
+        render(<LogsTab {...mockProps} />);
+        const copyBtn = screen.getByText('COPY');
+        fireEvent.click(copyBtn);
+        expect(writeTextMock).toHaveBeenCalledWith('[12:00:00] Test Log 1\n[12:00:01] Test Log 2');
+    });
+
+    it('should copy individual log entry when its Copy button is clicked', async () => {
+        const writeTextMock = vi.fn().mockResolvedValue(undefined);
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: writeTextMock,
+            },
+        });
+
+        render(<LogsTab {...mockProps} />);
+        const copyBtns = screen.getAllByRole('button', { name: 'Copy' });
+        expect(copyBtns).toHaveLength(2);
+        
+        fireEvent.click(copyBtns[0]);
+        expect(writeTextMock).toHaveBeenCalledWith('[12:00:00] Test Log 1');
+        expect(mockProps.showToast).toHaveBeenCalledWith('Log line copied!', 'success');
+    });
 });

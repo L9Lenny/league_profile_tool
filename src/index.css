@@ -586,12 +586,71 @@ input:checked+.slider:before {
   padding: 20px;
   font-family: 'Consolas', monospace;
   font-size: 0.75rem;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+.log-container * {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+.log-container ::selection {
+  background: var(--hextech-gold);
+  color: var(--league-blue-deep);
 }
 
 .log-entry {
   color: var(--league-blue-light);
   margin-bottom: 6px;
   opacity: 0.8;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.log-entry:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.log-text {
+  word-break: break-all;
+}
+
+.log-time {
+  color: var(--hextech-gold-dark);
+  margin-right: 10px;
+}
+
+.log-copy-btn {
+  background: transparent;
+  border: 1px solid var(--hextech-gold-dark);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s, border-color 0.2s, background-color 0.2s;
+  padding: 2px 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+.log-entry:hover .log-copy-btn {
+  opacity: 1;
+}
+
+.log-copy-btn:hover {
+  color: var(--hextech-gold-light);
+  border-color: var(--hextech-gold);
+  background-color: rgba(200, 155, 60, 0.1);
 }
 
 /* Status Bar */

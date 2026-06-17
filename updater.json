@@ -1,19 +1,19 @@
 {
-    "version": "1.9.1",
-    "notes": "## [1.9.1] - 2026-06-08  ### Fixed - **Invisible Status**: Implemented an \"Enforce Offline\" feature in the Profile tab to prevent the League client from automatically reverting status to \"Online\" when entering Champion Select.  ",
-    "pub_date": "2026-06-08T20:23:16Z",
+    "version": "1.9.2",
+    "notes": "## [1.9.2] - 2026-06-17  ### Added - **📋 Individual Log Copying**: Added a hover-triggered \"Copy\" button next to each log line in the System Logs tab for quick clipboard copying. - **Selection Highlight**: Integrated a premium Hextech themed selection highlight for logs.  ### Changed - **🔍 Selectable System Logs**: Configured the System Logs container to allow text selection directly, bypassing the global app-wide text selection restriction.",
+    "pub_date": "2026-06-17T22:00:00Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.1/League.Profile.Tool_1.9.1_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.9.2/League.Profile.Tool_1.9.2_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.1/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.9.2/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.1/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/lol-profile-editor/releases/download/v1.9.2/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
