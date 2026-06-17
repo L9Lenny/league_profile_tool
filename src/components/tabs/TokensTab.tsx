@@ -139,7 +139,33 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
         setLoading(true);
         try {
             const challengeIds = slots.filter(id => id !== -1);
-            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { challengeIds });
+            
+            let bannerAccent = "";
+            let title = "";
+            let crestBorder = "";
+            let prestigeCrestBorderLevel = 0;
+            
+            try {
+                const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
+                if (summary) {
+                    bannerAccent = summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
+                    title = summary.title ?? summary.preferences?.title ?? "";
+                    crestBorder = summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
+                    prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
+                }
+            } catch (err) {
+                addLog(`Failed to fetch current player preferences to merge: ${err}`);
+            }
+
+            const payload = {
+                challengeIds,
+                bannerAccent,
+                title,
+                crestBorder,
+                prestigeCrestBorderLevel
+            };
+
+            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", payload);
             localStorage.setItem(SAVED_TOKENS_KEY, JSON.stringify(challengeIds));
             showToast("Tokens updated successfully!", "success");
             addLog(`Equipped tokens: [${challengeIds.join(", ")}]`);

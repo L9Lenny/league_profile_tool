@@ -224,7 +224,7 @@ function App() {
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
           {activeTab === 'tokens' && <TokensTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} />}
-          {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} />}
+          {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'lobby' && <LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
           {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
