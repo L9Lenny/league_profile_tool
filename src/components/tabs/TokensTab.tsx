@@ -148,9 +148,15 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
             try {
                 const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
                 if (summary) {
-                    bannerAccent = summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
-                    title = summary.title ?? summary.preferences?.title ?? "";
-                    crestBorder = summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
+                    const rawBanner = summary.bannerAccent ?? summary.preferences?.bannerAccent;
+                    bannerAccent = rawBanner !== undefined && rawBanner !== null ? String(rawBanner) : "";
+
+                    const rawTitle = summary.title ?? summary.preferences?.title;
+                    title = rawTitle !== undefined && rawTitle !== null ? String(rawTitle) : "";
+
+                    const rawCrest = summary.crestBorder ?? summary.preferences?.crestBorder;
+                    crestBorder = rawCrest !== undefined && rawCrest !== null ? String(rawCrest) : "";
+
                     prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
                 }
             } catch (err) {

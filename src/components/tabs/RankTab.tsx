@@ -148,9 +148,9 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
             // Update customization preferences (banner, crest border, title)
             const prefBody = {
                 challengeIds,
-                bannerAccent: bannerAccent,
-                title: customTitleId || title,
-                crestBorder: crestBorder,
+                bannerAccent: bannerAccent ? String(bannerAccent) : "",
+                title: (customTitleId || title) ? String(customTitleId || title) : "",
+                crestBorder: crestBorder ? String(crestBorder) : "",
                 prestigeCrestBorderLevel
             };
             await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
