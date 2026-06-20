@@ -667,26 +667,50 @@ button.bg-skin-item:focus {
 
 .tokens-tab-layout {
   display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
   box-sizing: border-box;
-  height: 600px;
-  width: 100%;
+  margin: -10px -10px 0 -10px !important;
+  width: calc(100% + 20px);
+  max-width: none !important;
+  height: calc(100vh - 50px);
 }
 
-.tokens-identity-column {
+.tokens-left-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: 230px;
+  gap: 12px;
+  width: auto;
   flex-shrink: 0;
   box-sizing: border-box;
-  height: 600px;
+}
+
+.tokens-identity-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+.tokens-banner-column {
+  width: 230px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tokens-side-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
 }
 
 .tokens-banner-wrapper {
-  width: 230px;
-  height: 430px;
+  width: 100%;
+  height: 400px;
   clip-path: polygon(0% 0%, 100% 0%, 100% 83.7%, 95.6% 88.4%, 87% 91.2%, 50% 100%, 13% 91.2%, 4.4% 88.4%, 0% 83.7%);
   padding: 0;
   box-sizing: border-box;
@@ -910,11 +934,10 @@ button.bg-skin-item:focus {
 
 .tokens-banner-controls-card {
   width: 100%;
-  height: 160px;
   background: rgba(5, 12, 24, 0.55);
   border: 1px solid rgba(200, 155, 60, 0.25);
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -923,47 +946,161 @@ button.bg-skin-item:focus {
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
 }
 
-.tokens-forge-column {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 230px;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  height: 600px;
-}
-
 .tokens-forge-info-card {
   width: 100%;
-  height: 160px;
   background: rgba(5, 12, 24, 0.55);
   border: 1px solid rgba(200, 155, 60, 0.25);
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 14px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 12px;
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
 }
 
-.tokens-forge-info {
+.tokens-selected-preview-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.tokens-mini-forge {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: radial-gradient(circle at center, rgba(10, 25, 47, 0.6) 0%, transparent 80%);
+  border-radius: 50%;
+}
+
+.tokens-mini-rings {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.tokens-mini-rings.outer {
+  width: 50px;
+  height: 50px;
+  border: 1px dashed rgba(200, 155, 60, 0.3);
+  animation: rotateRunic 12s linear infinite;
+}
+
+.tokens-mini-rings.inner {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(200, 155, 60, 0.15);
+  animation: rotateRunicReverse 8s linear infinite;
+}
+
+.tokens-mini-hologram {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  animation: hologramSpin 6s linear infinite;
+  transform-style: preserve-3d;
+  z-index: 2;
+}
+
+@keyframes hologramSpin {
+  0% { transform: perspective(200px) rotateY(0deg); }
+  50% { transform: perspective(200px) rotateY(180deg); }
+  100% { transform: perspective(200px) rotateY(360deg); }
+}
+
+.tokens-selected-details {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tokens-selected-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   gap: 8px;
+}
+
+.tokens-selected-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tokens-selected-desc {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tokens-target-slot-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tokens-target-slot-indicator strong {
+  font-size: 0.65rem;
+  color: var(--hextech-gold-light);
+}
+
+.tokens-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.tokens-clear-btn {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  color: #ff6b6b;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  transition: all 0.2s;
+}
+
+.tokens-clear-btn:hover {
+  background: rgba(255, 80, 80, 0.15);
+  border-color: #ff5050;
+  transform: translateY(-1px);
 }
 
 .tokens-main-card {
   flex: 1;
   min-width: 0;
-  height: 600px;
+  height: 100%;
   background: rgba(5, 12, 24, 0.6);
   border: 1px solid rgba(200, 155, 60, 0.15);
   backdrop-filter: blur(15px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 14px 20px;
   border-radius: 12px;
   box-sizing: border-box;
 }
@@ -971,7 +1108,7 @@ button.bg-skin-item:focus {
 .tokens-search-row {
   display: flex;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .tokens-search-input-wrapper {
@@ -1025,10 +1162,10 @@ button.bg-skin-item:focus {
 .tokens-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
   overflow-y: auto;
-  max-height: 480px;
+  min-height: 0;
   padding-right: 8px;
 }
 
@@ -1203,143 +1340,7 @@ button.bg-skin-item:focus {
 .tokens-glow-grandmaster { box-shadow: 0 0 25px rgba(255, 80, 80, 0.8); border-color: #ff5050 !important; }
 .tokens-glow-challenger { box-shadow: 0 0 30px rgba(240, 230, 210, 0.9), 0 0 10px rgba(200, 155, 60, 0.4); border-color: #f0e6d2 !important; }
 
-/* ── Hextech Hologram Forge Chamber ── */
-.tokens-forge-chamber {
-  position: relative;
-  height: 430px;
-  background: radial-gradient(circle at center, rgba(10, 25, 47, 0.85) 0%, rgba(2, 6, 12, 0.98) 100%);
-  border: 1.5px solid rgba(200, 155, 60, 0.25);
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95);
-  box-sizing: border-box;
-}
 
-.tokens-forge-hud-header {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  display: flex;
-  align-items: center;
-  font-size: 0.6rem;
-  letter-spacing: 1.2px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  font-weight: 700;
-  z-index: 5;
-}
-
-.tokens-forge-grid-lines {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: 
-    linear-gradient(rgba(200, 155, 60, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200, 155, 60, 0.04) 1px, transparent 1px);
-  background-size: 16px 16px;
-  background-position: center;
-  pointer-events: none;
-}
-
-.tokens-forge-beam {
-  position: absolute;
-  width: 120px;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(200, 155, 60, 0.06), transparent);
-  animation: laserSweep 5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes laserSweep {
-  0% { transform: translateX(-160px); }
-  50% { transform: translateX(160px); }
-  100% { transform: translateX(-160px); }
-}
-
-.tokens-forge-rings {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(200, 155, 60, 0.12);
-  pointer-events: none;
-  box-sizing: border-box;
-}
-
-.tokens-forge-rings.outer {
-  width: 140px;
-  height: 140px;
-  border: 1px dashed rgba(200, 155, 60, 0.08);
-  animation: rotateRunic 24s linear infinite;
-}
-
-.tokens-forge-rings.inner {
-  width: 100px;
-  height: 100px;
-  border: 1.5px double rgba(200, 155, 60, 0.16);
-  animation: rotateRunicReverse 16s linear infinite;
-}
-
-.tokens-forge-hologram-token {
-  z-index: 2;
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 25px var(--token-glow-color, rgba(200, 155, 60, 0.5)));
-  animation: hologramFloat 3.2s ease-in-out infinite, hologramSpin 8.5s linear infinite;
-  transform-style: preserve-3d;
-}
-
-@keyframes hologramFloat {
-  0% { margin-top: 0px; }
-  50% { margin-top: -15px; }
-  100% { margin-top: 0px; }
-}
-
-@keyframes hologramSpin {
-  0% { transform: perspective(300px) rotateY(0deg); }
-  50% { transform: perspective(300px) rotateY(180deg); }
-  100% { transform: perspective(300px) rotateY(360deg); }
-}
-
-.tokens-forge-pedestal-base {
-  position: absolute;
-  bottom: 12px;
-  width: 140px;
-  height: 10px;
-  background: linear-gradient(180deg, rgba(200, 155, 60, 0.7) 0%, rgba(30, 27, 21, 0.95) 100%);
-  border-radius: 50%;
-  border: 1px solid rgba(200, 155, 60, 0.35);
-  box-shadow: 0 0 16px rgba(200, 155, 60, 0.5);
-  z-index: 1;
-}
-
-.tokens-forge-status-pulse {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  background-color: #32a865;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #32a865;
-  animation: statusPulse 1.8s infinite;
-  margin-right: 6px;
-}
-
-@keyframes statusPulse {
-  0% { opacity: 0.3; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 12px #32a865; }
-  100% { opacity: 0.3; transform: scale(0.9); }
-}
-
-.tokens-forge-status-pulse.loading {
-  background-color: var(--hextech-gold);
-  box-shadow: 0 0 8px var(--hextech-gold);
-}
-
-.tokens-forge-status-pulse.empty {
-  background-color: rgba(255, 255, 255, 0.25);
-  box-shadow: none;
-}
 
 /* ── Unlocked Vault Cards ── */
 .tokens-card-item {
@@ -1445,17 +1446,19 @@ button.bg-skin-item:focus {
 }
 
 .tokens-banner-customizer-group select {
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(200, 155, 60, 0.25);
-  border-radius: 4px;
-  color: white;
-  font-size: 0.7rem;
-  height: 26px;
-  padding: 0 4px;
+  background: rgba(0, 0, 0, 0.65) !important;
+  border: 1px solid rgba(200, 155, 60, 0.25) !important;
+  border-radius: 4px !important;
+  color: white !important;
+  font-size: 0.75rem !important;
+  height: 30px !important;
+  padding: 0 8px !important;
   outline: none;
   cursor: pointer;
   transition: all 0.2s;
   width: 100%;
+  appearance: auto !important; /* allow default dropdown arrow */
+  background-image: none !important; /* disable global select background arrow */
 }
 
 .tokens-banner-customizer-group select:hover {

@@ -405,7 +405,11 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
     } | null>(null);
     const [titleName, setTitleName] = useState<string>("");
     
-    // Banner Accent and Crest Border customization states
+    // Title selection state
+    const [availableTitles, setAvailableTitles] = useState<any[]>([]);
+    const [selectedTitleId, setSelectedTitleId] = useState<string>("");
+    
+    // Banner Accent and Crest Border customization states (kept for UI rendering if needed, but not updated by user)
     const [bannerAccent, setBannerAccent] = useState<string>("");
     const [crestBorder, setCrestBorder] = useState<string>("");
     
@@ -472,8 +476,10 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 setCrestBorder(activeCrest);
 
                 if (Array.isArray(titlesRes)) {
+                    setAvailableTitles(titlesRes);
                     const activeTitleId = safeExtractString(summaryRes.title ?? summaryRes.preferences?.title);
-                    const matchedTitle = titlesRes.find(t => safeExtractString(t.id) === activeTitleId);
+                    setSelectedTitleId(activeTitleId || "");
+                    const matchedTitle = titlesRes.find(t => safeExtractString(t.id || t.itemId) === activeTitleId);
                     setTitleName(matchedTitle?.name || activeTitleId || "");
                 }
             }
@@ -564,13 +570,15 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
         try {
             const challengeIds = slots.filter(id => id !== -1);
             
-            let currentTitle = "";
+            let currentBannerAccent = "";
+            let currentCrestBorder = "";
             let prestigeCrestBorderLevel = 0;
             
             try {
                 const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
                 if (summary) {
-                    currentTitle = safeExtractString(summary.title ?? summary.preferences?.title);
+                    currentBannerAccent = safeExtractString(summary.bannerAccent ?? summary.preferences?.bannerAccent);
+                    currentCrestBorder = safeExtractString(summary.crestBorder ?? summary.preferences?.crestBorder);
                     prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
                 }
             } catch (err) {
@@ -579,9 +587,9 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
 
             const payload = {
                 challengeIds,
-                bannerAccent: safeExtractString(bannerAccent),
-                title: safeExtractString(currentTitle),
-                crestBorder: safeExtractString(crestBorder),
+                bannerAccent: currentBannerAccent,
+                title: safeExtractString(selectedTitleId),
+                crestBorder: currentCrestBorder,
                 prestigeCrestBorderLevel
             };
 
@@ -649,233 +657,201 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
 
     return (
         <div className="tab-content fadeIn tokens-tab-layout">
-            {/* COLUMN 1: IDENTITY PENNANT & CUSTOMIZER */}
-            <div className="tokens-identity-column">
+            {/* LEFT COLUMN: IDENTITY PENNANT & CONTROLS */}
+            <div className="tokens-left-panel">
                 
-                {/* SUMMONER PROFILE BANNER WRAPPER */}
-                <div className={`tokens-banner-wrapper tokens-banner-accent-${bannerAccent}`}>
-                    <div className="tokens-summoner-banner">
-                        {/* Screen reader / test title element to satisfy the test query */}
-                        <div style={{ display: 'none' }}>Active Selection</div>
-                        
-                        {/* Crest Border around Icon Frame */}
-                        <div className={`tokens-banner-icon-container crest-${crestBorder}`}>
-                            {/* Level Capsule (nested inside container to support absolute overlay) */}
-                            <div className="tokens-banner-level-capsule">
-                                <span className="tokens-banner-level-circle-arc" />
-                                <span className="tokens-banner-level-text">{summoner?.summonerLevel ?? '300'}</span>
-                            </div>
+                <div className="tokens-identity-row">
+                    <div className="tokens-banner-column">
+                        {/* SUMMONER PROFILE BANNER WRAPPER */}
+                        <div className={`tokens-banner-wrapper tokens-banner-accent-${bannerAccent}`}>
+                            <div className="tokens-summoner-banner">
+                                {/* Screen reader / test title element to satisfy the test query */}
+                                <div style={{ display: 'none' }}>Active Selection</div>
+                                
+                                {/* Crest Border around Icon Frame */}
+                                <div className={`tokens-banner-icon-container crest-${crestBorder}`}>
+                                    {/* Level Capsule (nested inside container to support absolute overlay) */}
+                                    <div className="tokens-banner-level-capsule">
+                                        <span className="tokens-banner-level-circle-arc" />
+                                        <span className="tokens-banner-level-text">{summoner?.summonerLevel ?? '300'}</span>
+                                    </div>
 
-                            <CrestBorder tier={crestBorder} />
-                            <div className="tokens-banner-icon-frame">
-                                {summoner ? (
-                                    <img 
-                                        src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${summoner.profileIconId}.jpg`} 
-                                        alt="Summoner Icon" 
-                                    />
-                                ) : (
-                                    <div style={{ width: '100%', height: '100%', background: '#091428' }} />
-                                )}
+                                    <CrestBorder tier={crestBorder} />
+                                    <div className="tokens-banner-icon-frame">
+                                        {summoner ? (
+                                            <img 
+                                                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${summoner.profileIconId}.jpg`} 
+                                                alt="Summoner Icon" 
+                                            />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', background: '#091428' }} />
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {/* Summoner Name Details */}
+                                <div className="tokens-banner-details">
+                                    <div className="tokens-banner-name-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                        <span className="tokens-banner-summoner-name">
+                                            {summoner ? (summoner.gameName ? `${summoner.gameName}` : summoner.displayName) : 'Summoner Name'}
+                                        </span>
+                                        {summoner?.tagLine && (
+                                            <span className="tokens-banner-tagline">#{summoner.tagLine}</span>
+                                        )}
+                                        <button 
+                                            className="tokens-banner-copy-btn" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (summoner) {
+                                                    navigator.clipboard.writeText(summoner.gameName ? `${summoner.gameName}#${summoner.tagLine}` : summoner.displayName);
+                                                    showToast("Summoner name copied to clipboard!", "success");
+                                                }
+                                            }}
+                                            title="Copy Name"
+                                        >
+                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    {titleName && (
+                                        <div className="tokens-banner-title" style={{ marginTop: '2px', opacity: 0.8 }}>
+                                            {titleName}
+                                        </div>
+                                    )}
+                                    
+                                    {/* Token Slots row */}
+                                    <div className="tokens-banner-slots" style={{ marginTop: '28px' }}>
+                                        {[1, 2, 3].map(i => {
+                                            const tokenId = slots[i-1];
+                                            const token = tokens.find(t => t.id === tokenId);
+                                            const isSelected = selectedSlot === i;
+                                            const glowClass = getGlowClass(token?.level);
+                                            
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    onClick={() => handleSelectSlot(i)}
+                                                    className={`tokens-banner-slot ${isSelected ? 'selected' : ''} ${tokenId !== -1 ? glowClass : ''}`}
+                                                    title={tokenId !== -1 ? `${token?.name} (${token?.level})` : `Slot ${i} (Empty)`}
+                                                    style={{ animation: tokenId !== -1 ? 'slotScaleIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards' : 'none' }}
+                                                >
+                                                    {tokenId !== -1 ? (
+                                                        <img 
+                                                            src={getTokenImgUrl(tokenId, token?.level || 'IRON')} 
+                                                            alt="Token" 
+                                                        />
+                                                    ) : (
+                                                        <div className="tokens-banner-slot-empty" />
+                                                    )}
+                                                    {/* Slot markers required by unit tests are hidden visually */}
+                                                    <span style={{ display: 'none' }}>{i}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Banner border and bottom trim overlay */}
+                                <BannerBorderOverlay tier={bannerAccent} />
+                            </div>
+                        </div>
+
+                        {/* Symmetrical chevron arrow below V-trim */}
+                        <div className="tokens-banner-bottom-chevron">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M18 15l-6-6-6 6" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div className="tokens-side-controls">
+                        {/* REGALIA CUSTOMIZER CARD (Title) */}
+                        <div className="tokens-banner-controls-card">
+                            <div className="tokens-banner-customizer-row" style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div className="tokens-banner-customizer-group" style={{ width: '100%' }}>
+                                    <label htmlFor="title-select">Summoner Title</label>
+                                    <select 
+                                        id="title-select"
+                                        value={selectedTitleId} 
+                                        onChange={(e) => {
+                                            setSelectedTitleId(e.target.value);
+                                            const matched = availableTitles.find(t => String(t.id || t.itemId) === e.target.value);
+                                            setTitleName(matched?.name || e.target.value || "");
+                                        }}
+                                        disabled={!lcu}
+                                        style={{ width: '100%' }}
+                                    >
+                                        <option value="">No Title</option>
+                                        {availableTitles.map(t => (
+                                            <option key={t.id || t.itemId || t.name} value={t.id || t.itemId}>{t.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         
-                        {/* Summoner Name Details */}
-                        <div className="tokens-banner-details">
-                            <div className="tokens-banner-name-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                                <span className="tokens-banner-summoner-name">
-                                    {summoner ? (summoner.gameName ? `${summoner.gameName}` : summoner.displayName) : 'Summoner Name'}
-                                </span>
-                                {summoner?.tagLine && (
-                                    <span className="tokens-banner-tagline">#{summoner.tagLine}</span>
-                                )}
+                        {/* FORGE STATS & ACTIONS CARD (Redesigned) */}
+                        <div className="tokens-forge-info-card">
+                            <div className="tokens-selected-preview-row">
+                                <div className="tokens-mini-forge">
+                                    <div className="tokens-mini-rings outer" />
+                                    <div className="tokens-mini-rings inner" />
+                                    {displayedForgeToken ? (
+                                        <img 
+                                            src={getTokenImgUrl(displayedForgeToken.id, displayedForgeToken.level)} 
+                                            alt="Token Preview" 
+                                            className="tokens-mini-hologram"
+                                            style={{ filter: `drop-shadow(0 0 12px ${getTierGlowColor(displayedForgeToken.level)})` }}
+                                        />
+                                    ) : (
+                                        <Award size={24} color="var(--hextech-gold-dark)" opacity={0.5} style={{ zIndex: 2 }} />
+                                    )}
+                                </div>
+                                <div className="tokens-selected-details">
+                                    <div className="tokens-selected-header">
+                                        <span className="tokens-selected-name" title={displayedForgeToken?.name || 'Empty Socket'}>
+                                            {displayedForgeToken?.name || 'Empty Socket'}
+                                        </span>
+                                        {displayedForgeToken && (
+                                            <span className={`tokens-card-item-level level-${displayedForgeToken.level.toLowerCase()}`}>
+                                                {displayedForgeToken.level}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="tokens-selected-desc">
+                                        {displayedForgeToken ? (displayedForgeToken.description || 'No description available for this hextech shard.') : 'Select a shard from the vault to style.'}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="tokens-target-slot-indicator">
+                                <span>Target Socket:</span>
+                                <strong>SLOT {selectedSlot}</strong>
+                            </div>
+
+                            <div className="tokens-actions-row">
                                 <button 
-                                    className="tokens-banner-copy-btn" 
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (summoner) {
-                                            navigator.clipboard.writeText(summoner.gameName ? `${summoner.gameName}#${summoner.tagLine}` : summoner.displayName);
-                                            showToast("Summoner name copied to clipboard!", "success");
-                                        }
-                                    }}
-                                    title="Copy Name"
+                                    className="primary-btn" 
+                                    onClick={handleApply} 
+                                    disabled={!lcu || loading} 
+                                    style={{ flex: 1, height: '28px', fontSize: '0.65rem', letterSpacing: '0.5px' }}
                                 >
-                                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                    </svg>
+                                    {loading ? 'SYNCING...' : 'APPLY CHANGES'}
+                                </button>
+                                <button 
+                                    onClick={clearAll}
+                                    disabled={!lcu || loading}
+                                    className="tokens-clear-btn"
+                                    title="Clear All Slots"
+                                >
+                                    <Trash2 size={13} />
                                 </button>
                             </div>
-                            {titleName && (
-                                <div className="tokens-banner-title" style={{ marginTop: '2px', opacity: 0.8 }}>
-                                    {titleName}
-                                </div>
-                            )}
-                            
-                            {/* Token Slots row */}
-                            <div className="tokens-banner-slots" style={{ marginTop: '28px' }}>
-                                {[1, 2, 3].map(i => {
-                                    const tokenId = slots[i-1];
-                                    const token = tokens.find(t => t.id === tokenId);
-                                    const isSelected = selectedSlot === i;
-                                    const glowClass = getGlowClass(token?.level);
-                                    
-                                    return (
-                                        <div 
-                                            key={i} 
-                                            onClick={() => handleSelectSlot(i)}
-                                            className={`tokens-banner-slot ${isSelected ? 'selected' : ''} ${tokenId !== -1 ? glowClass : ''}`}
-                                            title={tokenId !== -1 ? `${token?.name} (${token?.level})` : `Slot ${i} (Empty)`}
-                                            style={{ animation: tokenId !== -1 ? 'slotScaleIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards' : 'none' }}
-                                        >
-                                            {tokenId !== -1 ? (
-                                                <img 
-                                                    src={getTokenImgUrl(tokenId, token?.level || 'IRON')} 
-                                                    alt="Token" 
-                                                />
-                                            ) : (
-                                                <div className="tokens-banner-slot-empty" />
-                                            )}
-                                            {/* Slot markers required by unit tests are hidden visually */}
-                                            <span style={{ display: 'none' }}>{i}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Banner border and bottom trim overlay */}
-                        <BannerBorderOverlay tier={bannerAccent} />
-                    </div>
-                </div>
-
-                {/* Symmetrical chevron arrow below V-trim */}
-                <div className="tokens-banner-bottom-chevron">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M18 15l-6-6-6 6" />
-                    </svg>
-                </div>
-
-                {/* REGALIA CUSTOMIZER CARD */}
-                <div className="tokens-banner-controls-card">
-                    <div className="tokens-banner-customizer-row">
-                        <div className="tokens-banner-customizer-group">
-                            <label htmlFor="accent-select">Banner Accent</label>
-                            <select 
-                                id="accent-select"
-                                value={bannerAccent} 
-                                onChange={(e) => setBannerAccent(e.target.value)}
-                                disabled={!lcu}
-                            >
-                                {REGALIA_TIERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                            </select>
-                        </div>
-                        <div className="tokens-banner-customizer-group">
-                            <label htmlFor="crest-select">Crest Border</label>
-                            <select 
-                                id="crest-select"
-                                value={crestBorder} 
-                                onChange={(e) => setCrestBorder(e.target.value)}
-                                disabled={!lcu}
-                            >
-                                {REGALIA_TIERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                            </select>
                         </div>
                     </div>
                 </div>
-                
-            </div>
-            
-            {/* COLUMN 2: HOLOGRAPHIC FORGE COLUMN */}
-            <div className="tokens-forge-column">
-                
-                {/* 3D HOLOGRAM CHAMBER */}
-                <div className="tokens-forge-chamber">
-                    {/* HUD Header overlay inside the chamber */}
-                    <div className="tokens-forge-hud-header">
-                        <span className={`tokens-forge-status-pulse ${loading ? 'loading' : !displayedForgeToken ? 'empty' : ''}`} />
-                        {loading ? 'CONVERGING FIELD...' : !displayedForgeToken ? 'CHAMBER STANDBY' : 'SHARD ENGAGED'}
-                    </div>
-
-                    <div className="tokens-forge-grid-lines" />
-                    <div className="tokens-forge-beam" />
-                    <div className="tokens-forge-rings outer" />
-                    <div className="tokens-forge-rings inner" />
-                    
-                    {displayedForgeToken ? (
-                        <img 
-                            src={getTokenImgUrl(displayedForgeToken.id, displayedForgeToken.level)} 
-                            alt="Hologram Preview" 
-                            className="tokens-forge-hologram-token"
-                            style={{ '--token-glow-color': getTierGlowColor(displayedForgeToken.level) } as React.CSSProperties}
-                        />
-                    ) : (
-                        <div style={{ zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.35 }}>
-                            <Award size={36} color="var(--hextech-gold-dark)" style={{ animation: 'hologramFloat 3s ease-in-out infinite' }} />
-                            <span style={{ fontSize: '0.55rem', color: 'var(--hextech-gold-dark)', marginTop: '8px', letterSpacing: '0.5px' }}>SELECT SHARD</span>
-                        </div>
-                    )}
-                    
-                    <div className="tokens-forge-pedestal-base" />
-                </div>
-
-                {/* FORGE STATS & ACTIONS CARD */}
-                <div className="tokens-forge-info-card">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
-                                {displayedForgeToken?.name || 'Empty Socket'}
-                            </span>
-                            {displayedForgeToken && (
-                                <span className={`tokens-card-item-level level-${displayedForgeToken.level.toLowerCase()}`} style={{ fontSize: '0.55rem', fontWeight: 800 }}>
-                                    {displayedForgeToken.level}
-                                </span>
-                            )}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', minHeight: '32px', maxHeight: '32px', overflow: 'hidden', lineHeight: '1.2' }}>
-                            {displayedForgeToken ? (displayedForgeToken.description || 'No description available for this hextech shard.') : 'Select a shard from the vault to style.'}
-                        </div>
-                    </div>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.02)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.02)' }}>
-                        <span style={{ fontSize: '0.52rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target Socket:</span>
-                        <span style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--hextech-gold-light)' }}>SLOT {selectedSlot}</span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <button 
-                            className="primary-btn" 
-                            onClick={handleApply} 
-                            disabled={!lcu || loading} 
-                            style={{ width: '100%', height: '26px', fontSize: '0.62rem', letterSpacing: '0.5px' }}
-                        >
-                            {loading ? 'SYNCING...' : 'APPLY CHANGES'}
-                        </button>
-                        <button 
-                            onClick={clearAll}
-                            disabled={!lcu || loading}
-                            style={{ 
-                                width: '100%', 
-                                background: 'rgba(255, 80, 80, 0.04)', 
-                                border: '1px solid rgba(255, 80, 80, 0.2)', 
-                                color: '#ff6b6b', 
-                                fontSize: '0.58rem', 
-                                borderRadius: '6px', 
-                                cursor: 'pointer', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                gap: '4px', 
-                                height: '24px',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 80, 80, 0.08)'; e.currentTarget.style.borderColor = '#ff5050'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 80, 80, 0.04)'; e.currentTarget.style.borderColor = 'rgba(255, 80, 80, 0.2)'; }}
-                        >
-                            <Trash2 size={11} /> CLEAR ALL SLOTS
-                        </button>
-                    </div>
-                </div>
-                
             </div>
             
             {/* RIGHT COLUMN: UNLOCKED SHARDS VAULT SECTION */}
