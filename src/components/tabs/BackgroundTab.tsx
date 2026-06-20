@@ -141,11 +141,11 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             addLog(`Profile background updated: ${skinName} (ID: ${skinId})`);
             setCurrentBgId(skinId);
         } catch (err) {
-            addLog(`Official background update failed. Trying force method...`);
+            addLog(`Official background update failed (${err}). Trying force method...`);
             try {
                 const chatMe: any = await lcuRequest("GET", "/lol-chat/v1/me");
                 let currentLol = {};
-                if (chatMe && chatMe.lol) {
+                if (chatMe?.lol) {
                     currentLol = typeof chatMe.lol === 'string' ? JSON.parse(chatMe.lol) : chatMe.lol;
                 }
                 const newLol = { ...currentLol, backgroundSkinId: skinId.toString() };
