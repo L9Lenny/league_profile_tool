@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.9.3] - 2026-06-20
+- dependabot: bump vite from 8.0.11 to 8.0.16 in #314
+  
+## [1.9.3] - 2026-06-20
 
 ### Fixed
 - **Presets & Backgrounds**: Resolved an issue where loading presets or applying backgrounds failed if the profile icon or background skin was unowned. The app now properly falls back to the force method to apply them.
