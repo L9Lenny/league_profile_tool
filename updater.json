@@ -1,19 +1,19 @@
 {
-    "version": "1.9.2",
-    "notes": "## [1.9.2] - 2026-06-17  ### Changed - Modified and enhanced the System Logs user interface.  ",
-    "pub_date": "2026-06-17T20:53:04Z",
+    "version": "1.9.3",
+    "notes": "## [1.9.3] - 2026-06-20  ### Fixed - **Presets & Backgrounds**: Resolved an issue where loading presets or applying backgrounds failed if the profile icon or background skin was unowned. The app now properly falls back to the force method to apply them.  ",
+    "pub_date": "2026-06-20T20:59:35Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.2/League.Profile.Tool_1.9.2_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.3/League.Profile.Tool_1.9.3_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.2/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.3/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.2/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.3/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
