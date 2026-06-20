@@ -14,6 +14,7 @@ interface PresetsTabProps {
     lcu: LcuInfo | null;
     showToast: (msg: string, type: 'success' | 'error') => void;
     addLog: (msg: string) => void;
+    lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
 }
 
 interface ProfilePreset {
@@ -29,7 +30,7 @@ interface ProfilePreset {
 /** Legacy key used before disk persistence — kept for migration */
 const PRESETS_LS_KEY = "profile_presets_list_v1";
 
-const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog }) => {
+const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
     const [presets, setPresets] = useState<ProfilePreset[]>([]);
     const [newPresetName, setNewPresetName] = useState("");
     const [saving, setSaving] = useState(false);
@@ -101,24 +102,105 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog }) => {
         setSaving(false);
     };
 
-    const handleLoadPreset = (preset: ProfilePreset) => {
-        if (preset.bio !== null)          localStorage.setItem(SAVED_BIO_KEY, preset.bio);
-        else                              localStorage.removeItem(SAVED_BIO_KEY);
+    const handleLoadPreset = async (preset: ProfilePreset) => {
+        if (!lcu) {
+            showToast("Connect League client first", "error");
+            return;
+        }
 
-        if (preset.availability !== null) localStorage.setItem(SAVED_AVAILABILITY_KEY, preset.availability);
-        else                              localStorage.removeItem(SAVED_AVAILABILITY_KEY);
+        let hasError = false;
 
-        if (preset.iconId !== null)       localStorage.setItem(SAVED_ICON_KEY, preset.iconId);
-        else                              localStorage.removeItem(SAVED_ICON_KEY);
+        // Apply Bio
+        if (preset.bio !== null) {
+            localStorage.setItem(SAVED_BIO_KEY, preset.bio);
+            try {
+                await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: preset.bio });
+            } catch (err) {
+                hasError = true;
+                addLog(`Failed to apply bio from preset: ${err}`);
+            }
+        } else {
+            localStorage.removeItem(SAVED_BIO_KEY);
+        }
 
-        if (preset.backgroundId !== null) localStorage.setItem(SAVED_BACKGROUND_KEY, preset.backgroundId);
-        else                              localStorage.removeItem(SAVED_BACKGROUND_KEY);
+        // Apply Availability
+        if (preset.availability !== null) {
+            localStorage.setItem(SAVED_AVAILABILITY_KEY, preset.availability);
+            try {
+                await lcuRequest("PUT", "/lol-chat/v1/me", { availability: preset.availability });
+            } catch (err) {
+                hasError = true;
+                addLog(`Failed to apply availability from preset: ${err}`);
+            }
+        } else {
+            localStorage.removeItem(SAVED_AVAILABILITY_KEY);
+        }
 
-        if (preset.tokens !== null)       localStorage.setItem(SAVED_TOKENS_KEY, preset.tokens);
-        else                              localStorage.removeItem(SAVED_TOKENS_KEY);
+        // Apply Icon
+        if (preset.iconId !== null) {
+            localStorage.setItem(SAVED_ICON_KEY, preset.iconId);
+            try {
+                await lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", { profileIconId: parseInt(preset.iconId) });
+            } catch (err) {
+                addLog(`Official icon update failed. Trying force method...`);
+                try {
+                    await lcuRequest("PUT", "/lol-chat/v1/me", { icon: parseInt(preset.iconId) });
+                } catch (forceErr) {
+                    hasError = true;
+                    addLog(`Failed to apply icon from preset (Force): ${forceErr}`);
+                }
+            }
+        } else {
+            localStorage.removeItem(SAVED_ICON_KEY);
+        }
 
-        showToast(`Preset "${preset.name}" loaded! Navigate to each tab to apply.`, "success");
-        addLog(`Loaded preset: ${preset.name}.`);
+        // Apply Background
+        if (preset.backgroundId !== null) {
+            localStorage.setItem(SAVED_BACKGROUND_KEY, preset.backgroundId);
+            try {
+                await lcuRequest('POST', '/lol-summoner/v1/current-summoner/summoner-profile', {
+                    key: 'backgroundSkinId',
+                    value: parseInt(preset.backgroundId)
+                });
+            } catch (err) {
+                addLog(`Official background update failed. Trying force method...`);
+                try {
+                    const chatMe: any = await lcuRequest("GET", "/lol-chat/v1/me");
+                    let currentLol = {};
+                    if (chatMe && chatMe.lol) {
+                        currentLol = typeof chatMe.lol === 'string' ? JSON.parse(chatMe.lol) : chatMe.lol;
+                    }
+                    const newLol = { ...currentLol, backgroundSkinId: preset.backgroundId };
+                    await lcuRequest("PUT", "/lol-chat/v1/me", { lol: newLol });
+                } catch (forceErr) {
+                    hasError = true;
+                    addLog(`Failed to apply background from preset (Force): ${forceErr}`);
+                }
+            }
+        } else {
+            localStorage.removeItem(SAVED_BACKGROUND_KEY);
+        }
+
+        // Apply Tokens
+        if (preset.tokens !== null) {
+            localStorage.setItem(SAVED_TOKENS_KEY, preset.tokens);
+            try {
+                const challengeIds = JSON.parse(preset.tokens);
+                await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { challengeIds });
+            } catch (err) {
+                hasError = true;
+                addLog(`Failed to apply tokens from preset: ${err}`);
+            }
+        } else {
+            localStorage.removeItem(SAVED_TOKENS_KEY);
+        }
+
+        if (hasError) {
+            showToast(`Preset "${preset.name}" applied partially (see logs).`, "error");
+        } else {
+            showToast(`Preset "${preset.name}" applied successfully!`, "success");
+        }
+        addLog(`Finished loading preset: ${preset.name}.`);
     };
 
     const handleDeletePreset = async (id: string) => {
