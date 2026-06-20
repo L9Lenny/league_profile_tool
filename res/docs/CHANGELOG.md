@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Token Preview**: The 3D Forge Hologram has been replaced with a sleeker, space-saving 2D preview.
 - **UI Layout**: Shifted to a vertically stacked layout to give maximum vertical space to the Unlocked Tokens grid.
-- Temporarily removed Crest Border and Banner Accent dropdowns to declutter the interface.
 
 ## [1.9.2] - 2026-06-17
 
