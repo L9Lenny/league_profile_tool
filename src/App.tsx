@@ -223,7 +223,7 @@ function App() {
           {activeTab === 'background' && <BackgroundTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
           {activeTab === 'tokens' && <TokensTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} />}
+          {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} />}
           {activeTab === 'lobby' && <LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
