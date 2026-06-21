@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
-import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
+import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
@@ -15,11 +15,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
-    
-    // Auto-Enforcer setting (migrate from old enforceOffline if needed)
-    const [autoEnforce, setAutoEnforce] = useState(() => {
-        return localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true' || localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true';
-    });
+    const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
 
     const statusLabel = (value: string) => {
         switch (value) {
@@ -85,10 +81,10 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         }
     };
 
-    const toggleAutoEnforce = (checked: boolean) => {
-        setAutoEnforce(checked);
-        localStorage.setItem(SAVED_AUTO_ENFORCE_KEY, checked.toString());
-        addLog(`Auto-Enforcer ${checked ? 'enabled' : 'disabled'}.`);
+    const toggleEnforceOffline = (checked: boolean) => {
+        setEnforceOffline(checked);
+        localStorage.setItem(SAVED_ENFORCE_OFFLINE_KEY, checked.toString());
+        addLog(`Enforce offline ${checked ? 'enabled' : 'disabled'}.`);
     };
 
     return (
@@ -137,12 +133,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem' }}>
                                 <input 
                                     type="checkbox" 
-                                    checked={autoEnforce} 
-                                    onChange={(e) => toggleAutoEnforce(e.target.checked)} 
+                                    checked={enforceOffline} 
+                                    onChange={(e) => toggleEnforceOffline(e.target.checked)} 
                                     style={{ width: '18px', height: '18px', accentColor: 'var(--hextech-gold)' }}
                                 />
-                                <span style={{ color: autoEnforce ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s' }}>
-                                    Auto-Apply Profile & Overrides on League Client Startup
+                                <span style={{ color: enforceOffline ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s' }}>
+                                    Enforce "Offline" status (even in Champ Select)
                                 </span>
                             </label>
                         </div>
