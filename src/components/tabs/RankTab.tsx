@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
+import { 
+    SAVED_RANK_QUEUE_KEY, 
+    SAVED_RANK_TIER_KEY, 
+    SAVED_RANK_DIV_KEY, 
+    SAVED_CHALLENGE_CRYSTAL_KEY, 
+    SAVED_CHALLENGE_POINTS_KEY 
+} from '../../storageKeys';
 import { Shield, Sparkles, RefreshCw } from 'lucide-react';
 
 interface RankTabProps {
@@ -105,6 +112,13 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
             };
             
             await lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
+
+            // Save overrides to local storage for the Auto-Enforcer
+            localStorage.setItem(SAVED_RANK_QUEUE_KEY, queueType);
+            localStorage.setItem(SAVED_RANK_TIER_KEY, soloTier);
+            localStorage.setItem(SAVED_RANK_DIV_KEY, soloDiv);
+            localStorage.setItem(SAVED_CHALLENGE_CRYSTAL_KEY, challengeCrystalLevel);
+            localStorage.setItem(SAVED_CHALLENGE_POINTS_KEY, String(challengePoints || "0"));
 
             showToast("Rank Overrides Applied!", "success");
             addLog(`Rank overrides updated successfully.`);

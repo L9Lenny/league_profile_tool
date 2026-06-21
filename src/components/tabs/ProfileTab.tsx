@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
-import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
+import { SAVED_AUTO_ENFORCE_KEY, SAVED_TITLE_KEY, SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
@@ -15,7 +15,13 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
-    const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
+    
+    // Auto-Enforcer setting (migrate from old enforceOffline if needed)
+    const [autoEnforce, setAutoEnforce] = useState(() => {
+        return localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true' || localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true';
+    });
+    
+    const [title, setTitle] = useState(() => localStorage.getItem(SAVED_TITLE_KEY) ?? "");
 
     const statusLabel = (value: string) => {
         switch (value) {
@@ -36,6 +42,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
             if (lcuBio.trim()) {
                 setBio(lcuBio);
                 localStorage.setItem(SAVED_BIO_KEY, lcuBio);
+            }
+
+            const challengeRes = await lcuRequest("GET", "/lol-challenges/v1/challenges/local-player") as Record<string, unknown>;
+            const lcuTitle = (challengeRes?.title as any)?.itemId?.toString() || "";
+            if (lcuTitle && lcuTitle !== "-1") {
+                setTitle(lcuTitle);
             }
         } catch (err) {
             addLog(`Profile sync failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -81,10 +93,24 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         }
     };
 
-    const toggleEnforceOffline = (checked: boolean) => {
-        setEnforceOffline(checked);
-        localStorage.setItem(SAVED_ENFORCE_OFFLINE_KEY, checked.toString());
-        addLog(`Enforce offline ${checked ? 'enabled' : 'disabled'}.`);
+    const toggleAutoEnforce = (checked: boolean) => {
+        setAutoEnforce(checked);
+        localStorage.setItem(SAVED_AUTO_ENFORCE_KEY, checked.toString());
+        addLog(`Auto-Enforcer ${checked ? 'enabled' : 'disabled'}.`);
+    };
+
+    const handleUpdateTitle = async () => {
+        if (!lcu) return;
+        setLoading(true);
+        try {
+            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { title: title.trim() });
+            localStorage.setItem(SAVED_TITLE_KEY, title.trim());
+            addLog(`Title updated: "${title}"`);
+            showToast("Title Updated!", "success");
+        } catch (err: unknown) {
+            showToast("Failed to update title", "error");
+            addLog(`Title update failed: ${err instanceof Error ? err.message : String(err)}`);
+        } finally { setLoading(false); }
     };
 
     return (
@@ -133,17 +159,38 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem' }}>
                                 <input 
                                     type="checkbox" 
-                                    checked={enforceOffline} 
-                                    onChange={(e) => toggleEnforceOffline(e.target.checked)} 
+                                    checked={autoEnforce} 
+                                    onChange={(e) => toggleAutoEnforce(e.target.checked)} 
                                     style={{ width: '18px', height: '18px', accentColor: 'var(--hextech-gold)' }}
                                 />
-                                <span style={{ color: enforceOffline ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s' }}>
-                                    Enforce "Offline" status (even in Champ Select)
+                                <span style={{ color: autoEnforce ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s' }}>
+                                    Auto-Apply Profile & Overrides on League Client Startup
                                 </span>
                             </label>
                         </div>
                     </div>
                 )}
+            </div>
+
+            <div className="card" style={{ marginTop: '20px' }}>
+                <h3 className="card-title">Profile Title</h3>
+                <div className="input-group">
+                    <label htmlFor="title-input">Title ID</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                            id="title-input"
+                            type="text"
+                            placeholder="e.g. 6030005"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            disabled={!lcu || loading}
+                            style={{ flex: 2, background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '10px', borderRadius: '4px' }}
+                        />
+                        <button className="primary-btn" onClick={handleUpdateTitle} disabled={!lcu || loading || !title.trim()} style={{ flex: 1 }}>
+                            APPLY TITLE
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {!lcu && <p style={{ color: '#ff3232', fontSize: '0.8rem', marginTop: '15px', textAlign: 'center' }}>⚠ Start League of Legends to enable this feature.</p>}
