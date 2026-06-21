@@ -5,15 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.3] - 2026-06-20
+## [1.9.4] - 2026-06-20
+- dependabot: bump vite from 8.0.11 to 8.0.16 in #314
 
 ### Added
 - **Tokens Redesign**: Completely overhauled the Tokens tab with a new UI that utilizes full horizontal space.
 - **Summoner Title Selection**: Added the ability to dynamically select the Summoner Title directly from the Tokens tab.
 
-### Changed
-- **Token Preview**: The 3D Forge Hologram has been replaced with a sleeker, space-saving 2D preview.
-- **UI Layout**: Shifted to a vertically stacked layout to give maximum vertical space to the Unlocked Tokens grid.
+  
+## [1.9.3] - 2026-06-20
+
+### Fixed
+- **Presets & Backgrounds**: Resolved an issue where loading presets or applying backgrounds failed if the profile icon or background skin was unowned. The app now properly falls back to the force method to apply them.
 
 ## [1.9.2] - 2026-06-17
 
