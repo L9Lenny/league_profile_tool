@@ -93,7 +93,6 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
             }
 
             const updatedLol = {
-                ...baseLol,
                 rankedLeagueTier: soloTier,
                 rankedLeagueDivision: soloDiv,
                 rankedLeagueQueue: queueType,
