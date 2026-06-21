@@ -98,11 +98,11 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                 rankedLeagueDivision: soloDiv,
                 rankedLeagueQueue: queueType,
                 challengeCrystalLevel: challengeCrystalLevel,
-                challengePoints: parseInt(challengePoints) || 0
+                challengePoints: String(challengePoints || "0")
             };
 
             const chatBody = {
-                lol: JSON.stringify(updatedLol)
+                lol: updatedLol
             };
             
             await lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
