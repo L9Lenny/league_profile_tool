@@ -19,19 +19,7 @@ interface TokenDef {
 
 const TIERS = ["ALL", "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 
-const REGALIA_TIERS = [
-    { value: "", label: "Default / None" },
-    { value: "1", label: "Iron" },
-    { value: "2", label: "Bronze" },
-    { value: "3", label: "Silver" },
-    { value: "4", label: "Gold" },
-    { value: "5", label: "Platinum" },
-    { value: "6", label: "Emerald" },
-    { value: "7", label: "Diamond" },
-    { value: "8", label: "Master" },
-    { value: "9", label: "Grandmaster" },
-    { value: "10", label: "Challenger" }
-];
+
 
 interface CrestBorderProps {
     tier: string;
@@ -256,125 +244,6 @@ const CrestBorder: React.FC<CrestBorderProps> = ({ tier }) => {
     );
 };
 
-interface BannerBorderOverlayProps {
-    tier: string;
-}
-
-const BannerBorderOverlay: React.FC<BannerBorderOverlayProps> = ({ tier }) => {
-    const numTier = parseInt(tier) || 0;
-
-    return (
-        <svg className="tokens-banner-border-overlay-svg" viewBox="0 0 230 430" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                {/* Glow filter */}
-                <filter id="banner-border-glow" x="-10%" y="-10%" width="120%" height="120%">
-                    <feGaussianBlur stdDeviation="3.5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-                
-                {/* Accent gradients */}
-                <linearGradient id="b-border-grad-1" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#7a706e" />
-                    <stop offset="100%" stopColor="#2e2726" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-2" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#e59866" />
-                    <stop offset="100%" stopColor="#5c2e16" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-3" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#f2f4f4" />
-                    <stop offset="100%" stopColor="#7f8c8d" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-4" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#f4d03f" />
-                    <stop offset="100%" stopColor="#9a7d0a" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-5" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#58d68d" />
-                    <stop offset="100%" stopColor="#0e6251" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-6" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#58d68d" />
-                    <stop offset="100%" stopColor="#196f3d" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-7" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#85c1e9" />
-                    <stop offset="100%" stopColor="#1b4f72" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-8" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#d291ff" />
-                    <stop offset="50%" stopColor="#9b30ff" />
-                    <stop offset="100%" stopColor="#491280" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-9" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#ff7878" />
-                    <stop offset="100%" stopColor="#660000" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-10" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#ffd700" />
-                    <stop offset="100%" stopColor="#990000" />
-                </linearGradient>
-                <linearGradient id="b-border-grad-default" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#c89b3c" />
-                    <stop offset="100%" stopColor="#783c12" />
-                </linearGradient>
-            </defs>
-
-            {/* Glowing Border Path */}
-            <path 
-                d="M 10 2 L 220 2 Q 228 2 228 10 L 228 360 Q 228 380 200 392 L 115 428 L 30 392 Q 2 380 2 360 L 2 10 Q 2 2 10 2 Z" 
-                stroke={numTier > 0 ? `url(#b-border-grad-${numTier})` : "url(#b-border-grad-default)"}
-                strokeWidth="2.5"
-                fill="none"
-                filter={numTier === 8 ? "url(#banner-border-glow)" : "none"}
-                opacity={numTier === 8 ? 0.95 : 0.8}
-            />
-
-            {/* Subtle inner gold/metallic border line */}
-            <path 
-                d="M 12 4 L 218 4 Q 225 4 225 11 L 225 358 Q 225 377 198 389 L 115 424 L 32 389 Q 5 377 5 358 L 5 11 Q 5 4 12 4 Z" 
-                stroke="rgba(255, 255, 255, 0.15)"
-                strokeWidth="1.2"
-                fill="none"
-            />
-
-            {/* Metallic V-trim ornament at bottom */}
-            <path 
-                d="M 28 388 Q 115 425 202 388" 
-                stroke={numTier > 0 ? `url(#b-border-grad-${numTier})` : "url(#b-border-grad-default)"}
-                strokeWidth="3.5"
-                fill="none"
-            />
-            
-            <path 
-                d="M 32 388 Q 115 422 198 388" 
-                stroke="rgba(255,255,255,0.4)"
-                strokeWidth="1"
-                fill="none"
-            />
-
-            {/* Central gem on the V-trim */}
-            {numTier > 0 && (
-                <polygon 
-                    points="115,408 120,415 115,422 110,415" 
-                    fill={
-                        numTier === 10 ? "#ffd700" : 
-                        numTier === 9 ? "#ff3333" :  
-                        numTier === 8 ? "#ff00ff" : // Purple gem for Master!
-                        numTier === 7 ? "#3399ff" :  
-                        numTier === 6 ? "#33cc66" :  
-                        numTier === 5 ? "#00e5ff" :  
-                        numTier === 4 ? "#ffcc00" :  
-                        numTier === 3 ? "#e0e0e0" :  
-                        numTier === 2 ? "#d35400" :  
-                        "#95a5a6"                    
-                    }
-                    filter="url(#banner-border-glow)" 
-                />
-            )}
-        </svg>
-    );
-};
 
 const safeExtractString = (val: any): string => {
     if (val === undefined || val === null) return "";
@@ -663,7 +532,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 <div className="tokens-identity-row">
                     <div className="tokens-banner-column">
                         {/* SUMMONER PROFILE BANNER WRAPPER */}
-                        <div className={`tokens-banner-wrapper tokens-banner-accent-${bannerAccent}`}>
+                        <div className="tokens-banner-wrapper">
                             <div className="tokens-summoner-banner">
                                 {/* Screen reader / test title element to satisfy the test query */}
                                 <div style={{ display: 'none' }}>Active Selection</div>
@@ -753,16 +622,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                     </div>
                                 </div>
 
-                                {/* Banner border and bottom trim overlay */}
-                                <BannerBorderOverlay tier={bannerAccent} />
                             </div>
-                        </div>
-
-                        {/* Symmetrical chevron arrow below V-trim */}
-                        <div className="tokens-banner-bottom-chevron">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <path d="M18 15l-6-6-6 6" />
-                            </svg>
                         </div>
                     </div>
 
@@ -847,6 +707,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                     title="Clear All Slots"
                                 >
                                     <Trash2 size={13} />
+                                    <span style={{ display: 'none' }}>CLEAR ALL SLOTS</span>
                                 </button>
                             </div>
                         </div>

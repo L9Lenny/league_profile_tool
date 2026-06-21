@@ -695,7 +695,7 @@ button.bg-skin-item:focus {
 }
 
 .tokens-banner-column {
-  width: 230px;
+  width: 188px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -710,8 +710,8 @@ button.bg-skin-item:focus {
 
 .tokens-banner-wrapper {
   width: 100%;
-  height: 400px;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 83.7%, 95.6% 88.4%, 87% 91.2%, 50% 100%, 13% 91.2%, 4.4% 88.4%, 0% 83.7%);
+  height: 380px;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 83.7%, 50% 100%, 0% 83.7%);
   padding: 0;
   box-sizing: border-box;
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.65));
@@ -722,8 +722,8 @@ button.bg-skin-item:focus {
 .tokens-summoner-banner {
   width: 100%;
   height: 100%;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 83.7%, 95.6% 88.4%, 87% 91.2%, 50% 100%, 13% 91.2%, 4.4% 88.4%, 0% 83.7%);
-  background: linear-gradient(180deg, rgba(14, 8, 30, 0.98) 0%, rgba(4, 2, 8, 0.99) 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 83.7%, 50% 100%, 0% 83.7%);
+  background: radial-gradient(circle at 50% 45%, #232a35 0%, #0f1318 100%);
   padding: 24px 14px 30px 14px;
   display: flex;
   flex-direction: column;
@@ -732,14 +732,6 @@ button.bg-skin-item:focus {
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-}
-
-.tokens-summoner-banner::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(192, 88, 255, 0.08) 0%, transparent 60%);
-  pointer-events: none;
 }
 
 .tokens-banner-icon-container {
@@ -826,11 +818,12 @@ button.bg-skin-item:focus {
   justify-content: center;
   gap: 6px;
   width: 100%;
+  position: relative;
 }
 
 .tokens-banner-summoner-name {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.25rem;
+  font-size: 14px;
   font-weight: bold;
   color: #f0e6d2;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
@@ -841,13 +834,13 @@ button.bg-skin-item:focus {
 }
 
 .tokens-banner-tagline {
-  font-size: 0.72rem;
+  font-size: 11px;
   color: var(--text-secondary);
   font-weight: 600;
 }
 
 .tokens-banner-title {
-  font-size: 0.65rem;
+  font-size: 10px;
   color: var(--hextech-gold);
   font-weight: 800;
   text-transform: uppercase;
@@ -1477,6 +1470,8 @@ button.bg-skin-item:focus {
 }
 
 .tokens-banner-copy-btn {
+  position: absolute;
+  right: 12px;
   background: transparent;
   border: none;
   color: var(--text-secondary);
