@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.4] - 2026-06-20
 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314
+
+### Added
+- **Tokens Redesign**: Completely overhauled the Tokens tab with a new UI that utilizes full horizontal space.
+- **Summoner Title Selection**: Added the ability to dynamically select the Summoner Title directly from the Tokens tab.
+
   
 ## [1.9.3] - 2026-06-20
 
