@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
-import { Shield, Award, Sparkles, RefreshCw } from 'lucide-react';
+import { Shield, Sparkles, RefreshCw } from 'lucide-react';
 
 interface RankTabProps {
     lcu: LcuInfo | null;
@@ -9,45 +9,29 @@ interface RankTabProps {
     lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
 }
 
-interface TitleDef {
-    id: number;
-    name: string;
-    description: string;
-    state: string;
-}
-
-const safeExtractString = (val: any): string => {
-    if (val === undefined || val === null) return "";
-    if (typeof val === 'object') {
-        const id = val.id ?? val.itemId ?? val.titleId ?? val.value ?? val.name;
-        return id !== undefined && id !== null ? String(id) : "";
-    }
-    return String(val);
-};
-
 const TIERS = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 const DIVISIONS = ["I", "II", "III", "IV"];
 const QUEUES = [
-    { value: "RANKED_SOLO_5x5", label: "Ranked Solo/Duo" },
-    { value: "RANKED_FLEX_SR", label: "Ranked Flex 5v5" },
-    { value: "RANKED_FLEX_TT", label: "Ranked Flex 3v3" },
-    { value: "RANKED_TFT", label: "Ranked TFT" }
+    { value: "RANKED_SOLO_5x5", label: "Solo/Duo" },
+    { value: "RANKED_FLEX_SR", label: "Flex 5v5" },
+    { value: "RANKED_FLEX_TT", label: "Flex 3v3" },
+    { value: "RANKED_TFT", label: "TFT" }
 ];
 const CRYSTAL_TIERS = ["NONE", "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
 
-const REGALIA_TIERS = [
-    { value: "", label: "Default / None" },
-    { value: "1", label: "Iron" },
-    { value: "2", label: "Bronze" },
-    { value: "3", label: "Silver" },
-    { value: "4", label: "Gold" },
-    { value: "5", label: "Platinum" },
-    { value: "6", label: "Emerald" },
-    { value: "7", label: "Diamond" },
-    { value: "8", label: "Master" },
-    { value: "9", label: "Grandmaster" },
-    { value: "10", label: "Challenger" }
-];
+const TIER_COLORS: Record<string, string> = {
+    NONE: "#595959",
+    IRON: "#595959",
+    BRONZE: "#8b5a2b",
+    SILVER: "#c0c0c0",
+    GOLD: "#ffd700",
+    PLATINUM: "#00ced1",
+    EMERALD: "#2ecc71",
+    DIAMOND: "#1e90ff",
+    MASTER: "#8a2be2",
+    GRANDMASTER: "#ff4500",
+    CHALLENGER: "#00ffff"
+};
 
 const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
     const [loading, setLoading] = useState(false);
@@ -62,53 +46,27 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
     const [challengeCrystalLevel, setChallengeCrystalLevel] = useState("CHALLENGER");
     const [challengePoints, setChallengePoints] = useState("1200");
 
-    // Customization states
-    const [bannerAccent, setBannerAccent] = useState("");
-    const [crestBorder, setCrestBorder] = useState("");
-    const [title, setTitle] = useState("");
-    const [customTitleId, setCustomTitleId] = useState("");
-
-    // Unlocked titles list
-    const [titlesList, setTitlesList] = useState<TitleDef[]>([]);
+    // Full lol object state to preserve other properties like background, icons, etc.
+    const [currentLolObj, setCurrentLolObj] = useState<any>({});
 
     const fetchCurrentData = useCallback(async () => {
         if (!lcu) return;
         setFetching(true);
         try {
-            addLog("Syncing profile & rank customization from LCU...");
+            addLog("Syncing rank status from LCU...");
             
-            // 1. Fetch chat status
             const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as any;
             if (chatRes?.lol) {
-                const lol = chatRes.lol;
+                const lol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
+                setCurrentLolObj(lol);
                 if (lol.rankedLeagueTier) setSoloTier(lol.rankedLeagueTier);
                 if (lol.rankedLeagueDivision) setSoloDiv(lol.rankedLeagueDivision);
                 if (lol.rankedLeagueQueue) setQueueType(lol.rankedLeagueQueue);
                 if (lol.challengeCrystalLevel) setChallengeCrystalLevel(lol.challengeCrystalLevel);
-                if (lol.challengePoints) setChallengePoints(String(lol.challengePoints));
+                if (lol.challengePoints !== undefined) setChallengePoints(String(lol.challengePoints));
             }
 
-            // 2. Fetch challenge/preferences summary
-            const summaryRes = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player") as any;
-            if (summaryRes) {
-                const accent = safeExtractString(summaryRes.bannerAccent ?? summaryRes.preferences?.bannerAccent);
-                const border = safeExtractString(summaryRes.crestBorder ?? summaryRes.preferences?.crestBorder);
-                const activeTitle = safeExtractString(summaryRes.title ?? summaryRes.preferences?.title);
-                setBannerAccent(accent);
-                setCrestBorder(border);
-                setTitle(activeTitle);
-                setCustomTitleId(activeTitle);
-            }
-
-            // 3. Fetch unlocked titles
-            const titlesRes = await lcuRequest("GET", "/lol-challenges/v2/titles/local-player") as any;
-            if (Array.isArray(titlesRes)) {
-                // Keep only unlocked or equipped titles to populate the selector
-                const filteredTitles = titlesRes.filter(t => t.state === "UNLOCKED" || t.state === "EQUIPPED");
-                setTitlesList(filteredTitles);
-            }
-
-            addLog("Profile customization synced successfully.");
+            addLog("Rank status synced successfully.");
         } catch (err) {
             addLog(`Failed to fetch current status: ${err}`);
         } finally {
@@ -126,46 +84,31 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
         if (!lcu) return;
         setLoading(true);
         try {
-            // First update chat presence status (ranked indicators, challenge level/points)
-            const chatBody = {
-                lol: {
-                    rankedLeagueTier: soloTier,
-                    rankedLeagueDivision: soloDiv,
-                    rankedLeagueQueue: queueType,
-                    challengeCrystalLevel: challengeCrystalLevel,
-                    challengePoints: parseInt(challengePoints) || 0
-                }
-            };
-            await lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
-
-            // Fetch current equipped challengeIds to merge them and avoid clearing tokens
-            let challengeIds: number[] = [];
-            let prestigeCrestBorderLevel = 0;
-            try {
-                const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
-                if (summary) {
-                    if (summary.topChallenges && Array.isArray(summary.topChallenges)) {
-                        challengeIds = summary.topChallenges.map((c: any) => c.id).filter((id: number) => id && id !== -1);
-                    }
-                    prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
-                }
-            } catch (err) {
-                // If it fails, fallback to empty tokens rather than failing the whole apply
-                addLog(`Could not load topChallenges to merge: ${err}`);
+            // Re-fetch latest to ensure we don't overwrite other recent changes
+            const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as any;
+            let baseLol = currentLolObj;
+            if (chatRes?.lol) {
+                baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
+                setCurrentLolObj(baseLol);
             }
 
-            // Update customization preferences (banner, crest border, title)
-            const prefBody = {
-                challengeIds,
-                bannerAccent: safeExtractString(bannerAccent),
-                title: safeExtractString(customTitleId || title),
-                crestBorder: safeExtractString(crestBorder),
-                prestigeCrestBorderLevel
+            const updatedLol = {
+                ...baseLol,
+                rankedLeagueTier: soloTier,
+                rankedLeagueDivision: soloDiv,
+                rankedLeagueQueue: queueType,
+                challengeCrystalLevel: challengeCrystalLevel,
+                challengePoints: parseInt(challengePoints) || 0
             };
-            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
 
-            showToast("Profile Customizations Applied!", "success");
-            addLog(`Rank overrides & profile customizations updated successfully.`);
+            const chatBody = {
+                lol: JSON.stringify(updatedLol)
+            };
+            
+            await lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
+
+            showToast("Rank Overrides Applied!", "success");
+            addLog(`Rank overrides updated successfully.`);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             showToast(`Customization failed: ${errorMessage}`, "error");
@@ -175,11 +118,13 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
         }
     };
 
+    const hasDivision = !["MASTER", "GRANDMASTER", "CHALLENGER"].includes(soloTier);
+
     return (
         <div className="tab-content fadeIn" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
             
-            {/* LEFT PANEL: Ranks & Challenge Stats */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* LEFT PANEL: Ranks & Challenge Stats Selectors */}
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Shield size={20} color="var(--hextech-gold)" />
@@ -194,204 +139,135 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                         <RefreshCw size={16} />
                     </button>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 4px 0' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '-10px 0 0 0' }}>
                     Modify your visible rank, queue type, and challenge stats displayed in the client chat and hover cards.
                 </p>
 
-                {/* Queue & Tier/Division Selection */}
-                <div className="input-group">
-                    <label htmlFor="queue-select">Rank Queue Type</label>
-                    <select id="queue-select" value={queueType} onChange={(e) => setQueueType(e.target.value)} disabled={!lcu}>
-                        {QUEUES.map(q => <option key={q.value} value={q.value}>{q.label}</option>)}
-                    </select>
-                </div>
-
-                <div className="input-group">
-                    <label htmlFor="solo-tier-select">Rank Override (Tier &amp; Division)</label>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <select id="solo-tier-select" value={soloTier} onChange={(e) => setSoloTier(e.target.value)} style={{ flex: 2 }} disabled={!lcu}>
-                            {TIERS.map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
-                        <select value={soloDiv} onChange={(e) => setSoloDiv(e.target.value)} style={{ flex: 1 }} disabled={!lcu}>
-                            {DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-                    </div>
-                </div>
-
-                <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '8px 0' }} />
-
-                {/* Challenge Crystal Level & Points */}
-                <div className="input-group">
-                    <label htmlFor="crystal-tier-select">Challenge Crystal Level</label>
-                    <select id="crystal-tier-select" value={challengeCrystalLevel} onChange={(e) => setChallengeCrystalLevel(e.target.value)} disabled={!lcu}>
-                        {CRYSTAL_TIERS.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                </div>
-
-                <div className="input-group">
-                    <label htmlFor="challenge-points-input">Challenge Points</label>
-                    <input 
-                        id="challenge-points-input" 
-                        type="number" 
-                        value={challengePoints} 
-                        onChange={(e) => setChallengePoints(e.target.value)} 
-                        placeholder="e.g. 1200"
-                        disabled={!lcu}
-                    />
-                </div>
-            </div>
-
-            {/* RIGHT PANEL: Banners, Crests & Titles */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Award size={20} color="var(--hextech-gold)" />
-                    <h3 className="card-title" style={{ margin: 0 }}>Identity &amp; Regalia Overrides</h3>
-                </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 4px 0' }}>
-                    Customize your profile card decoration, including your title, crest border, and banner accent.
-                </p>
-
-                {/* Title Selector */}
-                <div className="input-group">
-                    <label htmlFor="title-select">Equipped Title</label>
-                    <select 
-                        id="title-select" 
-                        value={title} 
-                        onChange={(e) => {
-                            setTitle(e.target.value);
-                            setCustomTitleId(e.target.value);
-                        }}
-                        disabled={!lcu}
-                    >
-                        <option value="">None / Hide Title</option>
-                        {titlesList.map(t => (
-                            <option key={t.id} value={String(t.id)}>
-                                {t.name}
-                            </option>
+                {/* Queue Selection (Segmented Control) */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Queue Type</label>
+                    <div className="rank-queue-toggles">
+                        {QUEUES.map(q => (
+                            <button
+                                key={q.value}
+                                className={`rank-queue-btn ${queueType === q.value ? 'active' : ''}`}
+                                onClick={() => setQueueType(q.value)}
+                                disabled={!lcu}
+                            >
+                                {q.label}
+                            </button>
                         ))}
-                    </select>
+                    </div>
                 </div>
 
-                <div className="input-group">
-                    <label htmlFor="custom-title-input">Custom Title ID Override</label>
-                    <input 
-                        id="custom-title-input" 
-                        type="text" 
-                        value={customTitleId} 
-                        onChange={(e) => setCustomTitleId(e.target.value)} 
-                        placeholder="Paste numeric Title ID (exploit/manual override)"
-                        disabled={!lcu}
-                    />
+                {/* Tier Selection Grid */}
+                <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rank Tier</label>
+                    <div className="tier-grid">
+                        {TIERS.map(t => {
+                            const isActive = soloTier === t;
+                            const color = TIER_COLORS[t] || "#ffffff";
+                            return (
+                                <button
+                                    key={t}
+                                    className={`tier-btn ${isActive ? 'active' : ''}`}
+                                    style={isActive ? { color, borderColor: color, boxShadow: `0 0 15px ${color}40, inset 0 0 8px ${color}20` } : {}}
+                                    onClick={() => setSoloTier(t)}
+                                    disabled={!lcu}
+                                >
+                                    <Shield size={24} color={isActive ? color : "var(--text-secondary)"} />
+                                    {t}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
-                <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '8px 0' }} />
+                {/* Division Selection Grid */}
+                {hasDivision && (
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Division</label>
+                        <div className="division-grid">
+                            {DIVISIONS.map(d => (
+                                <button
+                                    key={d}
+                                    className={`division-btn ${soloDiv === d ? 'active' : ''}`}
+                                    onClick={() => setSoloDiv(d)}
+                                    disabled={!lcu}
+                                >
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                {/* Banner Accent Selector */}
-                <div className="input-group">
-                    <label htmlFor="banner-select">Banner Accent Preset</label>
-                    <select id="banner-select" value={bannerAccent} onChange={(e) => setBannerAccent(e.target.value)} disabled={!lcu}>
-                        {REGALIA_TIERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                    </select>
-                </div>
+                <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)' }} />
 
-                <div className="input-group">
-                    <label htmlFor="custom-banner-input">Custom Banner Accent ID</label>
-                    <input 
-                        id="custom-banner-input" 
-                        type="text" 
-                        value={bannerAccent} 
-                        onChange={(e) => setBannerAccent(e.target.value)} 
-                        placeholder="e.g. 10 (Challenger)"
-                        disabled={!lcu}
-                    />
-                </div>
+                {/* Challenge Stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div className="input-group">
+                        <label htmlFor="crystal-tier-select">Challenge Crystal Level</label>
+                        <select id="crystal-tier-select" value={challengeCrystalLevel} onChange={(e) => setChallengeCrystalLevel(e.target.value)} disabled={!lcu}>
+                            {CRYSTAL_TIERS.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
 
-                {/* Crest Border Selector */}
-                <div className="input-group">
-                    <label htmlFor="crest-select">Crest Border Preset</label>
-                    <select id="crest-select" value={crestBorder} onChange={(e) => setCrestBorder(e.target.value)} disabled={!lcu}>
-                        {REGALIA_TIERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                    </select>
-                </div>
-
-                <div className="input-group">
-                    <label htmlFor="custom-crest-input">Custom Crest Border ID</label>
-                    <input 
-                        id="custom-crest-input" 
-                        type="text" 
-                        value={crestBorder} 
-                        onChange={(e) => setCrestBorder(e.target.value)} 
-                        placeholder="e.g. 10 (Challenger)"
-                        disabled={!lcu}
-                    />
+                    <div className="input-group">
+                        <label htmlFor="challenge-points-input">Challenge Points</label>
+                        <input 
+                            id="challenge-points-input" 
+                            type="number" 
+                            value={challengePoints} 
+                            onChange={(e) => setChallengePoints(e.target.value)} 
+                            placeholder="e.g. 1200"
+                            disabled={!lcu}
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* FULL WIDTH PREVIEW & APPLY BUTTON */}
-            <div className="card" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Sparkles size={18} color="var(--hextech-gold)" />
-                    <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-secondary)' }}>
-                        Draft Override Preview
-                    </span>
-                </div>
+            {/* RIGHT PANEL: Preview & Apply */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                <div className="profile-preview-card">
+                    <div style={{ position: 'absolute', top: 15, left: 15, display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <Sparkles size={14} color="var(--hextech-gold)" /> Preview
+                    </div>
+                    
+                    <div className="profile-rank-display">
+                        <div className="profile-rank-tier" style={{ color: TIER_COLORS[soloTier] || "#ffffff" }}>
+                            {soloTier} {hasDivision ? soloDiv : ''}
+                        </div>
+                        <div className="profile-rank-queue">
+                            {QUEUES.find(q => q.value === queueType)?.label || queueType}
+                        </div>
+                    </div>
 
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
-                    gap: '15px', 
-                    padding: '12px', 
-                    background: 'rgba(0, 0, 0, 0.3)', 
-                    borderRadius: '8px',
-                    fontSize: '0.8rem'
-                }}>
-                    <div>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>Rank / Queue</div>
-                        <div style={{ fontWeight: 700, color: 'white' }}>
-                            {soloTier} {soloDiv} <span style={{ fontSize: '0.7rem', color: 'var(--hextech-gold)', fontWeight: 400 }}>({QUEUES.find(q => q.value === queueType)?.label})</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>Challenge Level</div>
-                        <div style={{ fontWeight: 700, color: 'white' }}>
-                            {challengeCrystalLevel} <span style={{ fontSize: '0.7rem', color: 'var(--hextech-gold)', fontWeight: 400 }}>({challengePoints} pts)</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>Title ID</div>
-                        <div style={{ fontWeight: 700, color: 'white' }}>
-                            {customTitleId || title ? (
-                                <span style={{ color: 'var(--hextech-gold)' }}>
-                                    {titlesList.find(t => String(t.id) === (customTitleId || title))?.name || `ID: ${customTitleId || title}`}
-                                </span>
-                            ) : (
-                                <span style={{ opacity: 0.3 }}>None</span>
-                            )}
-                        </div>
-                    </div>
-                    <div>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>Banner / Crest</div>
-                        <div style={{ fontWeight: 700, color: 'white' }}>
-                            Accent: {bannerAccent || 'None'} / Crest: {crestBorder || 'None'}
-                        </div>
+                    <div className="profile-challenge-crystal">
+                        <div className="profile-crystal-dot" style={{ color: TIER_COLORS[challengeCrystalLevel] || "#595959", backgroundColor: TIER_COLORS[challengeCrystalLevel] || "#595959" }}></div>
+                        {challengeCrystalLevel} Crystal
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>• {challengePoints} pts</span>
                     </div>
                 </div>
 
-                <button 
-                    className="primary-btn" 
-                    style={{ width: '100%', padding: '12px', fontSize: '0.9rem' }} 
-                    onClick={applyChanges} 
-                    disabled={!lcu || loading}
-                >
-                    {loading ? 'APPLYING CUSTOMIZATIONS...' : 'APPLY OVERRIDES'}
-                </button>
+                <div className="card">
+                    <button 
+                        className="primary-btn" 
+                        style={{ width: '100%', padding: '16px', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '1px' }} 
+                        onClick={applyChanges} 
+                        disabled={!lcu || loading}
+                    >
+                        {loading ? 'APPLYING...' : 'APPLY RANK OVERRIDES'}
+                    </button>
+                    {!lcu && (
+                        <p style={{ color: '#ff3232', fontSize: '0.85rem', margin: '10px 0 0 0', textAlign: 'center' }}>
+                            ⚠ League client connection required.
+                        </p>
+                    )}
+                </div>
+
             </div>
-
-            {!lcu && (
-                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '10px' }}>
-                    <p style={{ color: '#ff3232', fontSize: '0.85rem', margin: 0 }}>⚠ League client connection required to apply overrides.</p>
-                </div>
-            )}
         </div>
     );
 };
