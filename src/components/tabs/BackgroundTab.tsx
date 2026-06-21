@@ -141,9 +141,25 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             addLog(`Profile background updated: ${skinName} (ID: ${skinId})`);
             setCurrentBgId(skinId);
         } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            showToast('Failed to set background', 'error');
-            addLog(`Background update failed: ${msg}`);
+            addLog(`Official background update failed (${err}). Trying force method...`);
+            try {
+                const chatMe: any = await lcuRequest("GET", "/lol-chat/v1/me");
+                let currentLol = {};
+                if (chatMe?.lol) {
+                    currentLol = typeof chatMe.lol === 'string' ? JSON.parse(chatMe.lol) : chatMe.lol;
+                }
+                const newLol = { ...currentLol, backgroundSkinId: skinId.toString() };
+                await lcuRequest("PUT", "/lol-chat/v1/me", { lol: newLol });
+                
+                localStorage.setItem(SAVED_BACKGROUND_KEY, skinId.toString());
+                showToast(`Background forced to ${skinName}!`, 'success');
+                addLog(`Profile background forced: ${skinName} (ID: ${skinId})`);
+                setCurrentBgId(skinId);
+            } catch (forceErr) {
+                const msg = forceErr instanceof Error ? forceErr.message : String(forceErr);
+                showToast('Failed to set background', 'error');
+                addLog(`Background update failed: ${msg}`);
+            }
         } finally {
             setLoading(false);
         }
