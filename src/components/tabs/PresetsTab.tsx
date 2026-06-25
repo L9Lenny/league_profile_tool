@@ -7,8 +7,9 @@ import {
     SAVED_BIO_KEY,
     SAVED_ICON_KEY,
     SAVED_BACKGROUND_KEY,
-    SAVED_TOKENS_KEY
-} from '../../hooks/useAutoRestore';
+    SAVED_TOKENS_KEY,
+    SAVED_TITLE_KEY
+} from '../../storageKeys';
 
 interface PresetsTabProps {
     lcu: LcuInfo | null;
@@ -25,6 +26,7 @@ interface ProfilePreset {
     iconId: string | null;
     backgroundId: string | null;
     tokens: string | null;
+    title?: string | null;
 }
 
 /** Legacy key used before disk persistence — kept for migration */
@@ -92,7 +94,8 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
             availability: localStorage.getItem(SAVED_AVAILABILITY_KEY),
             iconId:       localStorage.getItem(SAVED_ICON_KEY),
             backgroundId: localStorage.getItem(SAVED_BACKGROUND_KEY),
-            tokens:       localStorage.getItem(SAVED_TOKENS_KEY)
+            tokens:       localStorage.getItem(SAVED_TOKENS_KEY),
+            title:        localStorage.getItem(SAVED_TITLE_KEY)
         };
         const updated = [...presets, newPreset];
         await persistPresets(updated);
@@ -183,20 +186,32 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
         }
     };
 
-    const applyPresetTokens = async (tokens: string | null): Promise<boolean> => {
-        if (tokens === null) {
+    const applyPresetTokensAndTitle = async (tokens: string | null, title?: string | null): Promise<boolean> => {
+        const payload: any = {};
+        
+        if (tokens !== null) {
+            localStorage.setItem(SAVED_TOKENS_KEY, tokens);
+            try { payload.challengeIds = JSON.parse(tokens); } catch { /* ignore */ }
+        } else {
             localStorage.removeItem(SAVED_TOKENS_KEY);
-            return true;
         }
-        localStorage.setItem(SAVED_TOKENS_KEY, tokens);
-        try {
-            const challengeIds = JSON.parse(tokens);
-            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", { challengeIds });
-            return true;
-        } catch (err) {
-            addLog(`Failed to apply tokens from preset: ${err}`);
-            return false;
+
+        if (title !== null && title !== undefined) {
+            localStorage.setItem(SAVED_TITLE_KEY, title);
+            payload.title = title;
+        } else {
+            localStorage.removeItem(SAVED_TITLE_KEY);
         }
+
+        if (Object.keys(payload).length > 0) {
+            try {
+                await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", payload);
+            } catch (err) {
+                addLog(`Failed to apply tokens/title from preset: ${err}`);
+                return false;
+            }
+        }
+        return true;
     };
 
     const handleLoadPreset = async (preset: ProfilePreset) => {
@@ -209,7 +224,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
         const availOk = await applyPresetAvailability(preset.availability);
         const iconOk = await applyPresetIcon(preset.iconId);
         const bgOk = await applyPresetBackground(preset.backgroundId);
-        const tokensOk = await applyPresetTokens(preset.tokens);
+        const tokensOk = await applyPresetTokensAndTitle(preset.tokens, preset.title);
 
         const hasError = !bioOk || !availOk || !iconOk || !bgOk || !tokensOk;
 
