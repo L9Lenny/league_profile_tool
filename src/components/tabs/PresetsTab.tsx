@@ -189,11 +189,15 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const applyPresetTokensAndTitle = async (tokens: string | null, title?: string | null): Promise<boolean> => {
         const payload: any = {};
         
-        if (tokens !== null) {
-            localStorage.setItem(SAVED_TOKENS_KEY, tokens);
-            try { payload.challengeIds = JSON.parse(tokens); } catch { /* ignore */ }
-        } else {
+        if (tokens === null) {
             localStorage.removeItem(SAVED_TOKENS_KEY);
+        } else {
+            localStorage.setItem(SAVED_TOKENS_KEY, tokens);
+            try { 
+                payload.challengeIds = JSON.parse(tokens); 
+            } catch (e) {
+                console.debug("Failed to parse preset tokens JSON:", e);
+            }
         }
 
         if (title !== null && title !== undefined) {
@@ -295,7 +299,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             let bgUrl: string | null = null;
                             if (preset.backgroundId) {
                                 const bgIdNum = Number.parseInt(preset.backgroundId, 10);
-                                if (!isNaN(bgIdNum)) {
+                                if (!Number.isNaN(bgIdNum)) {
                                     const champId = Math.floor(bgIdNum / 1000);
                                     bgUrl = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/${champId}/${bgIdNum}.jpg`;
                                 }
@@ -350,19 +354,24 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
                                             </div>
                                             <div style={{ flex: 1, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
                                                 <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: '#fff', letterSpacing: '0.5px' }}>{preset.name}</h4>
-                                                {preset.availability && (
-                                                    <span style={{
-                                                        fontSize: '0.7rem', textTransform: 'uppercase', padding: '2px 6px',
-                                                        borderRadius: '3px',
-                                                        background: preset.availability === 'chat' ? 'rgba(40, 167, 69, 0.2)' :
-                                                            preset.availability === 'away' ? 'rgba(220, 53, 69, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                                                        color: preset.availability === 'chat' ? '#28a745' :
-                                                            preset.availability === 'away' ? '#dc3545' : '#aaa',
-                                                        border: '1px solid currentColor'
-                                                    }}>
-                                                        {preset.availability}
-                                                    </span>
-                                                )}
+                                                {preset.availability && (() => {
+                                                    const getBadgeStyles = (avail: string) => {
+                                                        if (avail === 'chat') return { background: 'rgba(40, 167, 69, 0.2)', color: '#28a745' };
+                                                        if (avail === 'away') return { background: 'rgba(220, 53, 69, 0.2)', color: '#dc3545' };
+                                                        return { background: 'rgba(255, 255, 255, 0.1)', color: '#aaa' };
+                                                    };
+                                                    const badgeStyle = getBadgeStyles(preset.availability);
+                                                    return (
+                                                        <span style={{
+                                                            fontSize: '0.7rem', textTransform: 'uppercase', padding: '2px 6px',
+                                                            borderRadius: '3px',
+                                                            ...badgeStyle,
+                                                            border: '1px solid currentColor'
+                                                        }}>
+                                                            {preset.availability}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
 
@@ -386,7 +395,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
                                                     onClick={() => handleLoadPreset(preset)}
                                                     style={{ padding: '6px 14px', fontSize: '0.75rem', display: 'flex', gap: '5px', alignItems: 'center' }}
                                                     disabled={!lcu}
-                                                    title={!lcu ? 'Connect League client first' : 'Load preset'}
+                                                    title={lcu ? 'Load preset' : 'Connect League client first'}
                                                 >
                                                     <CheckCircle2 size={13} /> LOAD
                                                 </button>
