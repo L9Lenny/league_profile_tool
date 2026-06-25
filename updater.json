@@ -1,19 +1,19 @@
 {
-    "version": "1.9.4",
-    "notes": "## [1.9.4] - 2026-06-25 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314  ### Added - **Tokens Redesign**: Completely overhauled the Tokens tab with a new UI that utilizes full horizontal space. - **Summoner Title Selection**: Added the ability to dynamically select the Summoner Title directly from the Tokens tab. - **Auto-Enforcer Resilience**: The Auto-Enforcer now isolates each configuration restore. If one fails (e.g. background application), it won't prevent the rest from being applied. - **Auto-Enforcer Retry Mechanism**: Added an intelligent retry mechanism. If applying settings fails due to the League client loading slowly, the tool will retry every 10 seconds (for up to 60 seconds).  ### Fixed - **Title Persistence**: Fixed an issue where the Summoner Title was not being saved in the Presets and was missing from the Auto-Restore cycle. - **Settings Toggle Bug**: Fixed a bug where toggles in the Settings tab would fire twice due to an incorrect HTML structure.     ",
-    "pub_date": "2026-06-25T08:11:35Z",
+    "version": "1.9.5",
+    "notes": "## [1.9.5] - 2026-06-25  ### Added - **Test Coverage**: Created new comprehensive unit test suites for `FriendManagerTab`, `LobbyTab`, `PresetsTab`, `useProfileEnforcer`, and `useAutoRestore` hooks, successfully increasing overall statement test coverage to over 80%.  ### Fixed - **Security Vulnerability**: Updated `undici` to `7.28.0` in package-lock.json to resolve multiple CVEs in #315 (TLS validation bypass, cross-origin request routing, HTTP header injection, SameSite downgrade, and HTTP response queue poisoning). - **Security Vulnerability**: Updated `tar` to `0.4.46` in Cargo.lock to resolve PAX header desynchronization issue in #316. - **Security Vulnerability**: Updated `openssl` to `0.10.81` in Cargo.lock to resolve potential out-of-bounds write in #317. - **Security Vulnerability**: Configured NPM `overrides` to force `tmp` to `0.2.7` to resolve path traversal vulnerabilities. - **SonarQube Quality Refactoring**: Resolved code quality and accessibility issues including contrast ratio adjustments for log level badges, adding appropriate ARIA attributes/native button roles to list components, removing duplicate CSS classes, and simplifying regex patterns/cognitive complexity.  ### Changed - **Dependencies**: Updated `tauri` to `2.11.3` in #307, `tauri-build` to `2.6.3` in #308, `serde_json` to `1.0.150` in #301, and `sysinfo` to `0.39.3` in #302 in Cargo.lock. - **Dependencies**: Updated `lucide-react` to `1.14.0` in #292, `vitest` to `4.1.7` in #295, `@vitest/coverage-v8` to `4.1.7` in #296, `typescript` to `6.0.3` in #291, and `@types/node` to `25.7.0` in #294 in package.json. - **CI/CD**: Updated GitHub Actions workflows in #311 and SonarSource scanner action in #306. - **CI/CD**: Added new `ci.yml` workflow with TypeScript compile check, frontend tests, and Rust `cargo check`/`clippy` linting on every push and PR. - **CI/CD**: Added `test-and-lint` prerequisite job to `release.yml` to block broken builds from being released. - **TypeScript 6 Migration**: Migrated all test files from `global.fetch` to `globalThis.fetch` for TypeScript 6.0 compatibility in #291.  ",
+    "pub_date": "2026-06-25T18:19:56Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.4/League.Profile.Tool_1.9.4_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.5/League.Profile.Tool_1.9.5_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.4/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.5/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.4/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.5/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
