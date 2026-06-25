@@ -10,7 +10,28 @@ permissions:
   contents: write
 
 jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: install frontend dependencies
+        run: npm ci
+
+      - name: TypeScript Compile Check
+        run: npx tsc --noEmit
+
+      - name: Run Frontend Tests
+        run: npm run test
+
   publish-tauri:
+    needs: test-and-lint
     env:
       RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
     strategy:
