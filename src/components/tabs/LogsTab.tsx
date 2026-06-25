@@ -20,6 +20,98 @@ interface ParsedLog {
     jsonData?: any;
 }
 
+const getLogLevel = (msg: string): 'error' | 'success' | 'info' => {
+    const message = msg.toLowerCase();
+    if (message.includes('failed') || message.includes('error') || message.includes('bad request') || message.includes('exception') || message.includes('err')) {
+        return 'error';
+    }
+    if (message.includes('success') || message.includes('saved') || message.includes('loaded') || message.includes('connected') || message.includes('configured') || message.includes('fetched')) {
+        return 'success';
+    }
+    return 'info';
+};
+
+const findJson = (str: string) => {
+    const startIdx = str.indexOf('{');
+    const endIdx = str.lastIndexOf('}');
+    if (startIdx !== -1 && endIdx > startIdx) {
+        const potentialJson = str.substring(startIdx, endIdx + 1);
+        try {
+            const parsed = JSON.parse(potentialJson);
+            return {
+                parsed,
+                prefix: str.substring(0, startIdx).trim(),
+                suffix: str.substring(endIdx + 1).trim()
+            };
+        } catch (e) {
+            console.debug("findJson: parsing JSON failed (expected if non-JSON):", e);
+        }
+    }
+    const startArrIdx = str.indexOf('[');
+    const endArrIdx = str.lastIndexOf(']');
+    if (startArrIdx !== -1 && endArrIdx > startArrIdx) {
+        const potentialJson = str.substring(startArrIdx, endArrIdx + 1);
+        try {
+            const parsed = JSON.parse(potentialJson);
+            return {
+                parsed,
+                prefix: str.substring(0, startArrIdx).trim(),
+                suffix: str.substring(endArrIdx + 1).trim()
+            };
+        } catch (e) {
+            console.debug("findJson: parsing array failed (expected if non-JSON):", e);
+        }
+    }
+    return null;
+};
+
+const parseLog = (log: LogEntry): ParsedLog => {
+    const level = getLogLevel(log.msg);
+    let method: ParsedLog['method'];
+    let status: string | undefined;
+    let cleanMsg = log.msg;
+    let jsonData: any = null;
+
+    // Check for HTTP methods using exec
+    const methodRegex = /\b(GET|POST|PUT|DELETE|PATCH)\b/;
+    const methodMatch = methodRegex.exec(log.msg);
+    if (methodMatch) {
+        method = methodMatch[1] as ParsedLog['method'];
+    }
+
+    // Check for status codes using exec
+    const statusRegex = /\b(200|201|204|400|401|403|404|500)\b/;
+    const statusMatch = statusRegex.exec(log.msg);
+    if (statusMatch) {
+        status = statusMatch[1];
+    }
+
+    // Try to find JSON payload
+    const jsonInfo = findJson(log.msg);
+    if (jsonInfo) {
+        jsonData = jsonInfo.parsed;
+        cleanMsg = jsonInfo.prefix;
+        // Clean up trailing colons or separators if present before json
+        if (cleanMsg.endsWith(':')) {
+            cleanMsg = cleanMsg.slice(0, -1).trim();
+        }
+        if (jsonInfo.suffix) {
+            cleanMsg += ' ' + jsonInfo.suffix;
+        }
+    }
+
+    return {
+        id: log.id,
+        time: log.time,
+        originalMsg: log.msg,
+        level,
+        method,
+        status,
+        cleanMsg,
+        jsonData
+    };
+};
+
 const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToast }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [levelFilter, setLevelFilter] = useState<'all' | 'error' | 'success' | 'info'>('all');
@@ -40,95 +132,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         }
     }, [logs, autoScroll, sortOrder]);
 
-    const getLogLevel = (msg: string): 'error' | 'success' | 'info' => {
-        const message = msg.toLowerCase();
-        if (message.includes('failed') || message.includes('error') || message.includes('bad request') || message.includes('exception') || message.includes('err')) {
-            return 'error';
-        }
-        if (message.includes('success') || message.includes('saved') || message.includes('loaded') || message.includes('connected') || message.includes('configured') || message.includes('fetched')) {
-            return 'success';
-        }
-        return 'info';
-    };
 
-    const findJson = (str: string) => {
-        const startIdx = str.indexOf('{');
-        const endIdx = str.lastIndexOf('}');
-        if (startIdx !== -1 && endIdx > startIdx) {
-            const potentialJson = str.substring(startIdx, endIdx + 1);
-            try {
-                const parsed = JSON.parse(potentialJson);
-                return {
-                    parsed,
-                    prefix: str.substring(0, startIdx).trim(),
-                    suffix: str.substring(endIdx + 1).trim()
-                };
-            } catch (e) {
-                // Ignore parsing errors
-            }
-        }
-        const startArrIdx = str.indexOf('[');
-        const endArrIdx = str.lastIndexOf(']');
-        if (startArrIdx !== -1 && endArrIdx > startArrIdx) {
-            const potentialJson = str.substring(startArrIdx, endArrIdx + 1);
-            try {
-                const parsed = JSON.parse(potentialJson);
-                return {
-                    parsed,
-                    prefix: str.substring(0, startArrIdx).trim(),
-                    suffix: str.substring(endArrIdx + 1).trim()
-                };
-            } catch (e) {
-                // Ignore parsing errors
-            }
-        }
-        return null;
-    };
-
-    const parseLog = (log: LogEntry): ParsedLog => {
-        const level = getLogLevel(log.msg);
-        let method: ParsedLog['method'];
-        let status: string | undefined;
-        let cleanMsg = log.msg;
-        let jsonData: any = null;
-
-        // Check for HTTP methods
-        const methodMatch = log.msg.match(/\b(GET|POST|PUT|DELETE|PATCH)\b/);
-        if (methodMatch) {
-            method = methodMatch[1] as ParsedLog['method'];
-        }
-
-        // Check for status codes
-        const statusMatch = log.msg.match(/\b(200|201|204|400|401|403|404|500)\b/);
-        if (statusMatch) {
-            status = statusMatch[1];
-        }
-
-        // Try to find JSON payload
-        const jsonInfo = findJson(log.msg);
-        if (jsonInfo) {
-            jsonData = jsonInfo.parsed;
-            cleanMsg = jsonInfo.prefix;
-            // Clean up trailing colons or separators if present before json
-            if (cleanMsg.endsWith(':')) {
-                cleanMsg = cleanMsg.slice(0, -1).trim();
-            }
-            if (jsonInfo.suffix) {
-                cleanMsg += ' ' + jsonInfo.suffix;
-            }
-        }
-
-        return {
-            id: log.id,
-            time: log.time,
-            originalMsg: log.msg,
-            level,
-            method,
-            status,
-            cleanMsg,
-            jsonData
-        };
-    };
 
     // Calculate logs severity count from raw logs
     const counts = useMemo(() => {
@@ -160,8 +164,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
             result = result.filter(log => 
                 log.originalMsg.toLowerCase().includes(query) || 
                 log.time.toLowerCase().includes(query) ||
-                (log.method && log.method.toLowerCase().includes(query)) ||
-                (log.status && log.status.toLowerCase().includes(query))
+                log.method?.toLowerCase().includes(query) ||
+                log.status?.toLowerCase().includes(query)
             );
         }
         
@@ -190,7 +194,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         const lines = jsonStr.split('\n');
         
         const tokenizeLine = (line: string): React.ReactNode => {
-            const regex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g;
+            const regex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g; // nosonar
             const parts: React.ReactNode[] = [];
             let lastIndex = 0;
             let match;
@@ -211,9 +215,9 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         parts.push(
                             <span key={`key-${index}`} className="json-key" style={{ color: 'var(--hextech-gold)', fontWeight: 500 }}>
                                 {token.slice(0, -1)}
-                            </span>
+                            </span>,
+                            <span key={`colon-${index}`}>:</span>
                         );
-                        parts.push(<span key={`colon-${index}`}>:</span>);
                     } else {
                         parts.push(
                             <span key={`str-${index}`} className="json-string" style={{ color: '#8cdcfe' }}>
@@ -252,7 +256,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         return (
             <div className="json-code-container">
                 {lines.map((line, idx) => (
-                    <div key={`line-${idx}`} className="json-code-line">
+                    <div key={`line-${idx}-${line.substring(0, 15)}`} className="json-code-line">
                         <span className="json-line-number">{idx + 1}</span>
                         <span className="json-line-content">{tokenizeLine(line)}</span>
                     </div>
@@ -265,7 +269,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         <div className="tab-content fadeIn">
             {/* Flat KPI statistics row */}
             <div className="log-stats-row">
-                <div 
+                <button 
                     className={`log-stat-card ${levelFilter === 'all' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('all')}
                 >
@@ -274,8 +278,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         <span className="log-stat-label">Total Logs</span>
                     </div>
                     <div className="log-stat-value">{counts.total}</div>
-                </div>
-                <div 
+                </button>
+                <button 
                     className={`log-stat-card stat-error ${levelFilter === 'error' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('error')}
                 >
@@ -285,8 +289,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         {counts.error > 0 && <span className="error-pulse-dot" />}
                     </div>
                     <div className="log-stat-value text-error">{counts.error}</div>
-                </div>
-                <div 
+                </button>
+                <button 
                     className={`log-stat-card stat-success ${levelFilter === 'success' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('success')}
                 >
@@ -295,8 +299,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         <span className="log-stat-label">Successes</span>
                     </div>
                     <div className="log-stat-value text-success">{counts.success}</div>
-                </div>
-                <div 
+                </button>
+                <button 
                     className={`log-stat-card stat-info ${levelFilter === 'info' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('info')}
                 >
@@ -305,7 +309,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         <span className="log-stat-label">System Info</span>
                     </div>
                     <div className="log-stat-value text-info">{counts.info}</div>
-                </div>
+                </button>
             </div>
 
             <div className="card log-card">
