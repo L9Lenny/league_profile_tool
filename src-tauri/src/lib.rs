@@ -14,17 +14,9 @@ use std::path::PathBuf;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default)]
 struct Settings {
     minimize_to_tray: bool,
-}
-
-impl Default for Settings {
-    fn default() -> Self {
-        Settings {
-            minimize_to_tray: false,
-        }
-    }
 }
 
 struct AppSettings {
