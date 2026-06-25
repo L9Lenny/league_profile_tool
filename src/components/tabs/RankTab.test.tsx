@@ -16,20 +16,6 @@ describe('RankTab', () => {
                     }
                 });
             }
-            if (method === "GET" && endpoint === "/lol-challenges/v1/summary-player-data/local-player") {
-                return Promise.resolve({
-                    bannerAccent: "1",
-                    crestBorder: "2",
-                    title: "1001",
-                    topChallenges: [{ id: 50 }, { id: 60 }]
-                });
-            }
-            if (method === "GET" && endpoint === "/lol-challenges/v2/titles/local-player") {
-                return Promise.resolve([
-                    { id: 1001, name: "Unstoppable", description: "Test title description", state: "UNLOCKED" },
-                    { id: 1002, name: "LOCKED TITLE", description: "Hidden", state: "LOCKED" }
-                ]);
-            }
             return Promise.resolve({});
         });
 
@@ -52,27 +38,20 @@ describe('RankTab', () => {
         });
 
         expect(screen.getByText('Rank & Stats Overrides')).toBeDefined();
-        expect(screen.getByText('Identity & Regalia Overrides')).toBeDefined();
-        expect(screen.getByLabelText('Rank Queue Type')).toBeDefined();
         
         // Wait for sync to pre-populate elements
         expect(props.lcuRequest).toHaveBeenCalledWith("GET", "/lol-chat/v1/me");
-        expect(props.lcuRequest).toHaveBeenCalledWith("GET", "/lol-challenges/v1/summary-player-data/local-player");
-        expect(props.lcuRequest).toHaveBeenCalledWith("GET", "/lol-challenges/v2/titles/local-player");
-
-        // Verify title select option for 'Unstoppable' is rendered
-        expect(screen.getAllByText('Unstoppable').length).toBeGreaterThan(0);
     });
 
-    it('should update rank preview and preview fields when selection changes', async () => {
+    it('should update rank preview when selection changes', async () => {
         const props = createMockProps();
         await act(async () => {
             render(<RankTab {...props} />);
         });
 
-        const tierSelect = screen.getByLabelText('Rank Override (Tier & Division)');
+        const goldBtn = screen.getAllByText('GOLD')[0];
         await act(async () => {
-            fireEvent.change(tierSelect, { target: { value: 'GOLD' } });
+            fireEvent.click(goldBtn);
         });
 
         // The preview section should now show GOLD
@@ -86,7 +65,7 @@ describe('RankTab', () => {
             render(<RankTab {...props} />);
         });
 
-        const applyBtn = screen.getByText('APPLY OVERRIDES');
+        const applyBtn = screen.getByText('APPLY RANK OVERRIDES');
         await act(async () => {
             fireEvent.click(applyBtn);
         });
@@ -98,19 +77,11 @@ describe('RankTab', () => {
                 rankedLeagueDivision: "I",
                 rankedLeagueQueue: "RANKED_SOLO_5x5",
                 challengeCrystalLevel: "CHALLENGER",
-                challengePoints: 1200
+                challengePoints: "1200"
             })
         }));
 
-        // Verify POST /lol-challenges/v1/update-player-preferences (which merges token challengeIds from summary)
-        expect(props.lcuRequest).toHaveBeenCalledWith("POST", "/lol-challenges/v1/update-player-preferences", expect.objectContaining({
-            challengeIds: [50, 60],
-            bannerAccent: "1",
-            title: "1001",
-            crestBorder: "2"
-        }));
-
-        expect(props.showToast).toHaveBeenCalledWith("Profile Customizations Applied!", "success");
+        expect(props.showToast).toHaveBeenCalledWith("Rank Overrides Applied!", "success");
     });
 
     it('should handle apply errors gracefully', async () => {
@@ -126,7 +97,7 @@ describe('RankTab', () => {
             render(<RankTab {...props} />);
         });
 
-        const applyBtn = screen.getByText('APPLY OVERRIDES');
+        const applyBtn = screen.getByText('APPLY RANK OVERRIDES');
         await act(async () => {
             fireEvent.click(applyBtn);
         });
@@ -141,7 +112,7 @@ describe('RankTab', () => {
             render(<RankTab {...props} lcu={null} />);
         });
 
-        const applyBtn = screen.getByText('APPLY OVERRIDES') as HTMLButtonElement;
+        const applyBtn = screen.getByText('APPLY RANK OVERRIDES') as HTMLButtonElement;
         expect(applyBtn.disabled).toBe(true);
     });
 });

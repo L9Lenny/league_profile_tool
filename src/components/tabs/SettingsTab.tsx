@@ -41,11 +41,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <span className="settings-label">Auto-launch</span>
                         <p className="settings-desc">Launch the app automatically when your PC starts.</p>
                     </div>
-                    <label className="switch">
+                    <span className="switch">
                         <span className="sr-only">Toggle Auto-launch</span>
                         <input type="checkbox" checked={isAutostartEnabled} readOnly />
                         <span className="slider"></span>
-                    </label>
+                    </span>
                 </button>
 
                 <button type="button" className="settings-row" onClick={toggleMinimizeToTray} style={{ marginTop: '10px' }}>
@@ -53,11 +53,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <span className="settings-label">Minimize to Tray</span>
                         <p className="settings-desc">Close button will minimize the app to the system tray.</p>
                     </div>
-                    <label className="switch">
+                    <span className="switch">
                         <span className="sr-only">Toggle Minimize to Tray</span>
                         <input type="checkbox" checked={minimizeToTray} readOnly />
                         <span className="slider"></span>
-                    </label>
+                    </span>
                 </button>
 
                 <button type="button" className="settings-row" onClick={() => toggleAutoEnforce(!autoEnforce)} style={{ marginTop: '10px' }}>
@@ -65,11 +65,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <span className="settings-label">Auto-Restore Profile</span>
                         <p className="settings-desc">Automatically re-apply profile overrides (rank, icons, status) when the League Client opens.</p>
                     </div>
-                    <label className="switch">
+                    <span className="switch">
                         <span className="sr-only">Toggle Auto Restore</span>
                         <input type="checkbox" checked={autoEnforce} readOnly />
                         <span className="slider"></span>
-                    </label>
+                    </span>
                 </button>
             </div>
 
