@@ -82,12 +82,27 @@ function makeRequest(url, options = {}) {
  * Get open SonarQube issues
  */
 async function getSonarQubeIssues() {
-  const url = `https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&branch=${SONAR_BRANCH}&statuses=OPEN&ps=500`;
+  const urlWithBranch = `https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&branch=${SONAR_BRANCH}&statuses=OPEN&ps=500`;
+  const urlWithoutBranch = `https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&statuses=OPEN&ps=500`;
 
-  console.log(`📊 Fetching SonarQube issues...`);
-  const response = await makeRequest(url);
-
-  return response.issues || [];
+  console.log(`📊 Fetching SonarQube issues (with branch)...`);
+  try {
+    const response = await makeRequest(urlWithBranch);
+    return response.issues || [];
+  } catch (error) {
+    if (error.message.includes('non main branches') || error.message.includes('403')) {
+      console.warn(`⚠️  Branch query failed or restricted. Retrying without branch parameter...`);
+      console.log(`📊 Fetching SonarQube issues (without branch)...`);
+      try {
+        const response = await makeRequest(urlWithoutBranch);
+        return response.issues || [];
+      } catch (retryError) {
+        console.error('❌ Failed to fetch SonarQube issues without branch:', retryError.message);
+        throw retryError;
+      }
+    }
+    throw error;
+  }
 }
 
 /**
