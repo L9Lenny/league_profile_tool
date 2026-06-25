@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Security Vulnerability**: Updated `openssl` to `0.10.81` in Cargo.lock to resolve potential out-of-bounds write in #317.
 - **Security Vulnerability**: Configured NPM `overrides` to force `tmp` to `0.2.7` to resolve path traversal vulnerabilities.
 
+### Changed
+- **Dependencies**: Updated `tauri` to `2.11.3`, `tauri-build` to `2.6.3`, and `serde_json` to `1.0.150` in Cargo.lock.
+- **Dependencies**: Updated `lucide-react` to `1.14.0`, `vitest` to `4.1.6`, and `@types/node` to `25.7.0` in package.json.
+- **CI/CD**: Updated GitHub Actions workflows and SonarSource scanner action.
+
 ## [1.9.4] - 2026-06-25
 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314
 
