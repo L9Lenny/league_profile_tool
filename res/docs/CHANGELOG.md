@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI/CD**: Updated GitHub Actions workflows in #311 and SonarSource scanner action in #306.
 - **CI/CD**: Added new `ci.yml` workflow with TypeScript compile check, frontend tests, and Rust `cargo check`/`clippy` linting on every push and PR.
 - **CI/CD**: Added `test-and-lint` prerequisite job to `release.yml` to block broken builds from being released.
-- **TypeScript 6 Migration**: Migrated all test files from `global.fetch` to `globalThis.fetch` for TypeScript 6.0 compatibility.
+- **TypeScript 6 Migration**: Migrated all test files from `global.fetch` to `globalThis.fetch` for TypeScript 6.0 compatibility in #291.
 
 ## [1.9.4] - 2026-06-25
 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314
