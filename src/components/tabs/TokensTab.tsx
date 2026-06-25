@@ -42,7 +42,7 @@ const getCrystalColors = (numTier: number) => {
 };
 
 const CrestBorder: React.FC<CrestBorderProps> = ({ tier }) => {
-    const numTier = parseInt(tier) || 0;
+    const numTier = Number.parseInt(tier, 10) || 0;
     const colors = getCrystalColors(numTier);
 
     return (
@@ -385,7 +385,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 if (!ch || typeof ch !== 'object') return;
 
                 const rawId = ch.id || ch.challengeId || ch._idFromKey;
-                const id = typeof rawId === 'number' ? rawId : parseInt(String(rawId));
+                const id = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
                 const level = ch.currentLevel || ch.level;
                 
                 const cdDef = defs[id];
@@ -401,7 +401,8 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 }
             });
 
-            setTokens(tokenList.sort((a, b) => a.name.localeCompare(b.name)));
+            tokenList.sort((a, b) => a.name.localeCompare(b.name));
+            setTokens(tokenList);
             addLog(`Successfully parsed ${tokenList.length} tokens.`);
         } catch (err) {
             addLog(`Error syncing tokens: ${err}`);
@@ -567,7 +568,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                 <div className="tokens-banner-details">
                                     <div className="tokens-banner-name-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                                         <span className="tokens-banner-summoner-name">
-                                            {summoner ? (summoner.gameName ? `${summoner.gameName}` : summoner.displayName) : 'Summoner Name'}
+                                            {summoner ? (summoner.gameName || summoner.displayName) : 'Summoner Name'}
                                         </span>
                                         {summoner?.tagLine && (
                                             <span className="tokens-banner-tagline">#{summoner.tagLine}</span>
@@ -602,16 +603,17 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             const token = tokens.find(t => t.id === tokenId);
                                             const isSelected = selectedSlot === i;
                                             const glowClass = getGlowClass(token?.level);
+                                            const hasToken = tokenId >= 0;
                                             
                                             return (
                                                 <div 
                                                     key={i} 
                                                     onClick={() => handleSelectSlot(i)}
-                                                    className={`tokens-banner-slot ${isSelected ? 'selected' : ''} ${tokenId !== -1 ? glowClass : ''}`}
-                                                    title={tokenId !== -1 ? `${token?.name} (${token?.level})` : `Slot ${i} (Empty)`}
-                                                    style={{ animation: tokenId !== -1 ? 'slotScaleIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards' : 'none' }}
+                                                    className={`tokens-banner-slot ${isSelected ? 'selected' : ''} ${hasToken ? glowClass : ''}`}
+                                                    title={hasToken ? `${token?.name} (${token?.level})` : `Slot ${i} (Empty)`}
+                                                    style={{ animation: hasToken ? 'slotScaleIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards' : 'none' }}
                                                 >
-                                                    {tokenId !== -1 ? (
+                                                    {hasToken ? (
                                                         <img 
                                                             src={getTokenImgUrl(tokenId, token?.level || 'IRON')} 
                                                             alt="Token" 
@@ -759,20 +761,22 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 </div>
                 
                 <div className="tokens-grid">
-                    {fetching ? (
+                    {fetching && (
                         Array.from({ length: 12 }).map((_, i) => (
-                            <div key={i} className="skeleton-card" style={{ animationDelay: `${i * 0.05}s` }}>
+                            <div key={`skeleton-${i}`} className="skeleton-card" style={{ animationDelay: `${i * 0.05}s` }}>
                                 <div className="skeleton-shimmer skeleton-circle" style={{ animationDelay: `${i * 0.08}s` }} />
                                 <div className="skeleton-shimmer skeleton-line" style={{ animationDelay: `${i * 0.08 + 0.1}s` }} />
                                 <div className="skeleton-shimmer skeleton-line-short" style={{ animationDelay: `${i * 0.08 + 0.2}s` }} />
                             </div>
                         ))
-                    ) : filteredTokens.length === 0 ? (
+                    )}
+                    {!fetching && filteredTokens.length === 0 && (
                         <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                             <Info size={32} style={{ opacity: 0.2, marginBottom: '10px' }} />
                             <p style={{ fontSize: '0.8rem' }}>No tokens found for your criteria.</p>
                         </div>
-                    ) : (
+                    )}
+                    {!fetching && filteredTokens.length > 0 && (
                         filteredTokens.map((token, index) => {
                             const isEquipped = slots.includes(token.id);
                             return (

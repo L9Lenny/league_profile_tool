@@ -21,9 +21,8 @@ export function useLcu(addLog: (msg: string) => void) {
                 addLogRef.current("League client connected.");
             }
             if (
-                !prevLcuRef.current ||
-                prevLcuRef.current.port !== info.port ||
-                prevLcuRef.current.token !== info.token
+                prevLcuRef.current?.port !== info.port ||
+                prevLcuRef.current?.token !== info.token
             ) {
                 prevLcuRef.current = info;
                 setLcu(info);

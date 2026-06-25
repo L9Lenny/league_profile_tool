@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RefreshCw, Cpu } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
-import { useState } from 'react';
 import { SAVED_AUTO_ENFORCE_KEY } from '../../storageKeys';
 
 interface SettingsTabProps {

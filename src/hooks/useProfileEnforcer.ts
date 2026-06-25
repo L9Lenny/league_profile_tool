@@ -21,11 +21,11 @@ export function useProfileEnforcer(
 
     // Reset the enforcer state when the LCU disconnects
     useEffect(() => {
-        if (!lcu) {
+        if (lcu) {
+            sessionActive.current = true;
+        } else {
             hasEnforcedThisSession.current = false;
             sessionActive.current = false;
-        } else {
-            sessionActive.current = true;
         }
     }, [lcu]);
 
@@ -69,7 +69,7 @@ export function useProfileEnforcer(
             // 1. Icon
             const savedIcon = localStorage.getItem(SAVED_ICON_KEY);
             if (savedIcon) {
-                runWithRetry("Icon", () => lcuRequest("PUT", "/lol-chat/v1/me", { icon: parseInt(savedIcon, 10) }));
+                runWithRetry("Icon", () => lcuRequest("PUT", "/lol-chat/v1/me", { icon: Number.parseInt(savedIcon, 10) }));
             }
 
             // 2. Status & Bio
@@ -102,9 +102,10 @@ export function useProfileEnforcer(
                         // Try official method first
                         await lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile/", {
                             key: "backgroundSkinId",
-                            value: parseInt(savedBackground, 10)
+                            value: Number.parseInt(savedBackground, 10)
                         });
                     } catch (err) {
+                        addLog(`Auto-Enforcer Background: Official update failed (${err}). Trying force chat fallback...`);
                         // Fallback to chat presence force method
                         const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as any;
                         let baseLol = {};
