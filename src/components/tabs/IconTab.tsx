@@ -59,6 +59,18 @@ const IconTab: React.FC<IconTabProps> = ({
         <div className="tab-content fadeIn">
             <div className="card">
                 <h3 className="card-title">Icon Swapper</h3>
+                <div style={{ 
+                    background: 'rgba(200, 155, 60, 0.05)', 
+                    border: '1px solid rgba(200, 155, 60, 0.2)', 
+                    borderRadius: '8px', 
+                    padding: '10px 12px', 
+                    marginBottom: '15px', 
+                    fontSize: '0.75rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: '1.4'
+                }}>
+                    <strong style={{ color: 'var(--hextech-gold)' }}>Note:</strong> Due to server-side ownership checks by Riot, equipping an icon you do not own will only display in chat and above the friends list. Your official profile page inside the client will continue to display your previously owned icon.
+                </div>
                 <div style={{ marginBottom: '12px' }}>
                     <div style={{ position: 'relative', width: '100%' }}>
                         <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />

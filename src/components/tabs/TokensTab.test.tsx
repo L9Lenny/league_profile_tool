@@ -66,7 +66,7 @@ describe('TokensTab', () => {
             render(<TokensTab {...props} />);
         });
 
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Error syncing tokens"));
+        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Empty response from challenges API"));
     });
 
     it('should trigger apply logic', async () => {

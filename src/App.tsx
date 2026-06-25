@@ -29,7 +29,7 @@ import { useLcu } from "./hooks/useLcu";
 import { useIcons } from "./hooks/useIcons";
 import { useMusicSync } from "./hooks/useMusicSync";
 import { useAnalytics } from "./hooks/useAnalytics";
-import { useStatusEnforcer } from "./hooks/useStatusEnforcer";
+import { useProfileEnforcer } from "./hooks/useProfileEnforcer";
 
 
 // Components
@@ -61,7 +61,7 @@ function App() {
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
   useAnalytics();
-  useStatusEnforcer(lcu, lcuRequest, addLog);
+  useProfileEnforcer(lcu, lcuRequest, addLog);
 
 
   const closingRef = useRef(false);
@@ -224,7 +224,7 @@ function App() {
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
           {activeTab === 'tokens' && <TokensTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} />}
+          {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'lobby' && <LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
           {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}

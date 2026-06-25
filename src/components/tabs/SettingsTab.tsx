@@ -1,6 +1,8 @@
 import React from 'react';
 import { RefreshCw, Cpu } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
+import { useState } from 'react';
+import { SAVED_AUTO_ENFORCE_KEY } from '../../storageKeys';
 
 interface SettingsTabProps {
     isAutostartEnabled: boolean;
@@ -17,6 +19,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     minimizeToTray, toggleMinimizeToTray,
     latestVersion, clientVersion, addLog
 }) => {
+    const [autoEnforce, setAutoEnforce] = useState(() => localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true');
+
+    const toggleAutoEnforce = (checked: boolean) => {
+        setAutoEnforce(checked);
+        localStorage.setItem(SAVED_AUTO_ENFORCE_KEY, checked.toString());
+        addLog(`Auto-Enforcer ${checked ? 'enabled' : 'disabled'}.`);
+    };
+
     return (
         <div className="tab-content fadeIn">
             <div className="card">
@@ -31,11 +41,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <span className="settings-label">Auto-launch</span>
                         <p className="settings-desc">Launch the app automatically when your PC starts.</p>
                     </div>
-                    <label className="switch">
+                    <span className="switch">
                         <span className="sr-only">Toggle Auto-launch</span>
                         <input type="checkbox" checked={isAutostartEnabled} readOnly />
                         <span className="slider"></span>
-                    </label>
+                    </span>
                 </button>
 
                 <button type="button" className="settings-row" onClick={toggleMinimizeToTray} style={{ marginTop: '10px' }}>
@@ -43,11 +53,23 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <span className="settings-label">Minimize to Tray</span>
                         <p className="settings-desc">Close button will minimize the app to the system tray.</p>
                     </div>
-                    <label className="switch">
+                    <span className="switch">
                         <span className="sr-only">Toggle Minimize to Tray</span>
                         <input type="checkbox" checked={minimizeToTray} readOnly />
                         <span className="slider"></span>
-                    </label>
+                    </span>
+                </button>
+
+                <button type="button" className="settings-row" onClick={() => toggleAutoEnforce(!autoEnforce)} style={{ marginTop: '10px' }}>
+                    <div className="settings-info">
+                        <span className="settings-label">Auto-Restore Profile</span>
+                        <p className="settings-desc">Automatically re-apply profile overrides (rank, icons, status) when the League Client opens.</p>
+                    </div>
+                    <span className="switch">
+                        <span className="sr-only">Toggle Auto Restore</span>
+                        <input type="checkbox" checked={autoEnforce} readOnly />
+                        <span className="slider"></span>
+                    </span>
                 </button>
             </div>
 
