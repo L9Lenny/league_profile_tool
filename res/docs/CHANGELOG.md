@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.5] - 2026-06-25
+
+### Fixed
+- **Security Vulnerability**: Updated `undici` to `7.28.0` in package-lock.json to resolve multiple CVEs (TLS validation bypass, cross-origin request routing, HTTP header injection, SameSite downgrade, and HTTP response queue poisoning).
+
 ## [1.9.4] - 2026-06-25
 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314
 
