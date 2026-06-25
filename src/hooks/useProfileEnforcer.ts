@@ -98,23 +98,6 @@ export function useProfileEnforcer(
                 runWithRetry("Tokens & Title", () => lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody));
             }
 
-            // 4. Rank & Challenge Crystals
-            const savedQueue = localStorage.getItem(SAVED_RANK_QUEUE_KEY);
-            const savedTier = localStorage.getItem(SAVED_RANK_TIER_KEY);
-            const savedDiv = localStorage.getItem(SAVED_RANK_DIV_KEY);
-            const savedCrystal = localStorage.getItem(SAVED_CHALLENGE_CRYSTAL_KEY);
-            const savedPoints = localStorage.getItem(SAVED_CHALLENGE_POINTS_KEY);
-            
-            if (savedTier || savedCrystal) {
-                const rankLol: any = {};
-                if (savedQueue) rankLol.rankedLeagueQueue = savedQueue;
-                if (savedTier) rankLol.rankedLeagueTier = savedTier;
-                if (savedDiv) rankLol.rankedLeagueDivision = savedDiv;
-                if (savedCrystal) rankLol.challengeCrystalLevel = savedCrystal;
-                if (savedPoints) rankLol.challengePoints = savedPoints;
-
-                runWithRetry("Rank & Stats Overrides", () => lcuRequest("PUT", "/lol-chat/v1/me", { lol: rankLol }));
-            }
 
             // 5. Background
             const savedBackground = localStorage.getItem(SAVED_BACKGROUND_KEY);
