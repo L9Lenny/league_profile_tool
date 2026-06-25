@@ -568,7 +568,10 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                 <div className="tokens-banner-details">
                                     <div className="tokens-banner-name-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                                         <span className="tokens-banner-summoner-name">
-                                            {summoner ? (summoner.gameName ? summoner.gameName : summoner.displayName) : 'Summoner Name'}
+                                            {(() => {
+                                                if (!summoner) return 'Summoner Name';
+                                                return summoner.gameName ? summoner.gameName : summoner.displayName;
+                                            })()}
                                         </span>
                                         {summoner?.tagLine && (
                                             <span className="tokens-banner-tagline">#{summoner.tagLine}</span>
@@ -657,9 +660,12 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                         style={{ width: '100%' }}
                                     >
                                         <option value="">No Title</option>
-                                        {availableTitles.map(t => (
-                                            <option key={t.id || t.itemId || t.name} value={t.id || t.itemId}>{t.name}</option>
-                                        ))}
+                                        {availableTitles.map((t, idx) => {
+                                            const optionKey = t.id || t.itemId || `title-fallback-${idx}`;
+                                            return (
+                                                <option key={optionKey} value={t.id || t.itemId}>{t.name}</option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                             </div>

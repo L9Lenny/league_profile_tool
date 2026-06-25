@@ -393,18 +393,20 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                 const isExpanded = expandedLogId === log.id;
                                 return (
                                     <div key={log.id} className={`log-row-wrapper ${isExpanded ? 'expanded' : ''}`}>
-                                        <div 
-                                            role="button"
-                                            tabIndex={0}
+                                        <button 
+                                            type="button"
                                             className={`log-entry ${isExpanded ? 'active' : ''}`}
                                             onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
-                                                    setExpandedLogId(isExpanded ? null : log.id);
-                                                }
+                                            style={{ 
+                                                cursor: 'pointer',
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: '0',
+                                                textAlign: 'left',
+                                                width: '100%',
+                                                fontFamily: 'inherit',
+                                                color: 'inherit'
                                             }}
-                                            style={{ cursor: 'pointer' }}
                                         >
                                             <div className="log-left-gutter">
                                                 <div className={`log-indicator-dot ${log.level}`} />
@@ -436,22 +438,23 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                                     {log.cleanMsg}
                                                 </span>
                                             </div>
+                                        </button>
 
-                                            <div className="log-row-actions" onClick={(e) => e.stopPropagation()}>
-                                                <button
-                                                    type="button"
-                                                    className="log-copy-btn"
-                                                    aria-label="Copy log line"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(`[${log.time}] ${log.originalMsg}`)
-                                                            .then(() => showToast("Log line copied!", "success"))
-                                                            .catch(() => showToast("Failed to copy line", "error"));
-                                                    }}
-                                                    title="Copy log line"
-                                                >
-                                                    <Copy size={12} />
-                                                </button>
-                                            </div>
+                                        <div className="log-row-actions">
+                                            <button
+                                                type="button"
+                                                className="log-copy-btn"
+                                                aria-label="Copy log line"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigator.clipboard.writeText(`[${log.time}] ${log.originalMsg}`)
+                                                        .then(() => showToast("Log line copied!", "success"))
+                                                        .catch(() => showToast("Failed to copy line", "error"));
+                                                }}
+                                                title="Copy log line"
+                                            >
+                                                <Copy size={12} />
+                                            </button>
                                         </div>
                                         
                                         {isExpanded && (
@@ -484,11 +487,12 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         ) : (
                             <div className="log-empty-state">
                                 <p style={{ margin: 0, opacity: 0.5 }}>
-                                    {searchTerm ? (
-                                        `No logs match "${searchTerm}"`
-                                    ) : (
-                                        levelFilter !== 'all' ? `No ${levelFilter} logs recorded` : 'No diagnostics available'
-                                    )}
+                                    {(() => {
+                                        if (searchTerm) {
+                                            return `No logs match "${searchTerm}"`;
+                                        }
+                                        return levelFilter !== 'all' ? `No ${levelFilter} logs recorded` : 'No diagnostics available';
+                                    })()}
                                 </p>
                             </div>
                         )}

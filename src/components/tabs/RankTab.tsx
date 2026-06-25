@@ -157,9 +157,9 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                 </p>
 
                 {/* Queue Selection (Segmented Control) */}
-                <div>
-                    <label id="queue-type-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Queue Type</label>
-                    <div role="group" aria-labelledby="queue-type-label" className="rank-queue-toggles">
+                <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+                    <legend style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Queue Type</legend>
+                    <div className="rank-queue-toggles">
                         {QUEUES.map(q => (
                             <button
                                 key={q.value}
@@ -171,12 +171,12 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                             </button>
                         ))}
                     </div>
-                </div>
+                </fieldset>
 
                 {/* Tier Selection Grid */}
-                <div>
-                    <label id="rank-tier-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rank Tier</label>
-                    <div role="group" aria-labelledby="rank-tier-label" className="tier-grid">
+                <fieldset style={{ border: 'none', padding: 0, margin: '15px 0 0 0' }}>
+                    <legend style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Rank Tier</legend>
+                    <div className="tier-grid">
                         {TIERS.map(t => {
                             const isActive = soloTier === t;
                             const color = TIER_COLORS[t] || "#ffffff";
@@ -194,13 +194,13 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                             );
                         })}
                     </div>
-                </div>
+                </fieldset>
 
                 {/* Division Selection Grid */}
                 {hasDivision && (
-                    <div>
-                        <label id="division-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Division</label>
-                        <div role="group" aria-labelledby="division-label" className="division-grid">
+                    <fieldset style={{ border: 'none', padding: 0, margin: '15px 0 0 0' }}>
+                        <legend style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Division</legend>
+                        <div className="division-grid">
                             {DIVISIONS.map(d => (
                                 <button
                                     key={d}
@@ -212,7 +212,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </fieldset>
                 )}
 
                 <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)' }} />

@@ -58,7 +58,7 @@ describe('useIcons', () => {
 
         // useDeferredValue might need some wait
         await waitFor(() => {
-            expect(result.current.visibleIcons.length).toBe(1);
+            expect(result.current.visibleIcons).toHaveLength(1);
             expect(result.current.visibleIcons[0].name).toBe('Mage');
         });
     });
@@ -69,7 +69,7 @@ describe('useIcons', () => {
 
         const { result } = renderHook(() => useIcons(mockAddLog));
 
-        expect(result.current.visibleIcons.length).toBe(100);
+        expect(result.current.visibleIcons).toHaveLength(100);
 
         act(() => {
             const event = {
@@ -82,6 +82,6 @@ describe('useIcons', () => {
             result.current.handleScroll(event);
         });
 
-        expect(result.current.visibleIcons.length).toBe(200);
+        expect(result.current.visibleIcons).toHaveLength(200);
     });
 });
