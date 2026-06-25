@@ -172,40 +172,52 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                 )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px', maxHeight: '550px', overflowY: 'auto' }}>
-                    {filteredFriends.map(friend => (
-                        <div 
-                            key={friend.id}
-                            className={`feature-card ${selected.has(friend.id) ? 'active' : ''}`}
-                            onClick={() => toggleSelect(friend.id)}
-                            style={{ 
-                                padding: '12px', 
-                                border: selected.has(friend.id) ? '1px solid #ff4e50' : '1px solid rgba(255,255,255,0.05)',
-                                background: selected.has(friend.id) ? 'rgba(255, 78, 80, 0.05)' : 'rgba(0,0,0,0.2)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <div style={{ color: selected.has(friend.id) ? '#ff4e50' : 'var(--text-secondary)' }}>
-                                {selected.has(friend.id) ? <CheckSquare size={20} /> : <Square size={20} />}
-                            </div>
-                            
-                            <div style={{ position: 'relative' }}>
-                                <img src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${friend.icon}.jpg`} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-                                <div style={{ 
-                                    position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', 
-                                    background: friend.availability === 'chat' ? '#00ff88' : friend.availability === 'away' ? '#ffcc00' : '#888',
-                                    border: '1.5px solid black'
-                                }} />
-                            </div>
+                    {filteredFriends.map(friend => {
+                        const getAvailabilityColor = (avail: string) => {
+                            if (avail === 'chat') return '#00ff88';
+                            if (avail === 'away') return '#ffcc00';
+                            return '#888';
+                        };
 
-                            <div style={{ flex: 1, overflow: 'hidden' }}>
-                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{friend.name}</div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{friend.availability.toUpperCase()} {friend.groupName ? ` • ${friend.groupName}` : ''}</div>
-                            </div>
-                        </div>
-                    ))}
+                        return (
+                            <button 
+                                key={friend.id}
+                                className={`feature-card ${selected.has(friend.id) ? 'active' : ''}`}
+                                onClick={() => toggleSelect(friend.id)}
+                                style={{ 
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    fontFamily: 'inherit',
+                                    color: 'inherit',
+                                    padding: '12px', 
+                                    border: selected.has(friend.id) ? '1px solid #ff4e50' : '1px solid rgba(255,255,255,0.05)',
+                                    background: selected.has(friend.id) ? 'rgba(255, 78, 80, 0.05)' : 'rgba(0,0,0,0.2)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <div style={{ color: selected.has(friend.id) ? '#ff4e50' : 'var(--text-secondary)' }}>
+                                    {selected.has(friend.id) ? <CheckSquare size={20} /> : <Square size={20} />}
+                                </div>
+                                
+                                <div style={{ position: 'relative' }}>
+                                    <img src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${friend.icon}.jpg`} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+                                    <div style={{ 
+                                        position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', 
+                                        background: getAvailabilityColor(friend.availability),
+                                        border: '1.5px solid black'
+                                    }} />
+                                </div>
+
+                                <div style={{ flex: 1, overflow: 'hidden' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{friend.name}</div>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{friend.availability.toUpperCase()} {friend.groupName ? ` • ${friend.groupName}` : ''}</div>
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

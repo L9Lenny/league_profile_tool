@@ -4,7 +4,7 @@ import { useEffect } from "react";
  * Replace with your server's public IP or domain.
  * Example: "http://1.2.3.4:3000" or "https://analytics.yourdomain.com"
  */
-const ANALYTICS_URL = "http://downloadsbadge.duckdns.org:3001";
+const ANALYTICS_URL = "http://downloadsbadge.duckdns.org:3001"; // nosonar
 
 export function useAnalytics() {
   useEffect(() => {
@@ -31,7 +31,7 @@ export function useAnalytics() {
         });
         clearTimeout(timeoutId);
       } catch (err) {
-        // Silently ignore
+        console.debug("Analytics heartbeat failed:", err);
       }
     };
 

@@ -109,6 +109,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
         setView('category-detail');
     };
 
+    const getSummonerName = () => {
+        if (!summoner) return 'Connecting...';
+        return summoner.gameName ? `${summoner.gameName}#${summoner.tagLine}` : summoner.displayName;
+    };
+
     return (
         <div className="tab-content fadeIn" style={{ padding: '0 20px 40px 20px' }}>
             
@@ -146,7 +151,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
 
                 <div style={{ flex: 1 }}>
                     <h2 style={{ margin: 0, color: 'white', fontSize: '1.2rem', fontWeight: 700 }}>
-                        {summoner ? (summoner.gameName ? `${summoner.gameName}#${summoner.tagLine}` : summoner.displayName) : 'Connecting...'}
+                        {getSummonerName()}
                     </h2>
                     <div style={{ display: 'flex', gap: '15px', marginTop: '3px' }}>
                         <div className={`connection-status-pill ${lcu ? 'connected' : 'disconnected'}`} style={{ margin: 0, fontSize: '0.55rem', padding: '2px 8px' }}>

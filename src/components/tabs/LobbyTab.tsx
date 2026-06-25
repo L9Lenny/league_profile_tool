@@ -60,7 +60,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                 const currentLobby: any = await lcuRequest("GET", "/lol-lobby/v2/lobby");
                 addLog(`Current lobby found: ${currentLobby?.gameConfig?.gameMode || "Custom/Other"}`);
             } catch (err) {
-                addLog("No active lobby. Creating a new Normal 5v5 lobby...");
+                addLog(`No active lobby (${err}). Creating a new Normal 5v5 lobby...`);
                 await lcuRequest("POST", "/lol-lobby/v2/lobby", { queueId: 430 }); 
             }
 
@@ -158,10 +158,14 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
                             {friends.map(friend => (
-                                <div 
+                                <button 
                                     key={friend.summonerId}
                                     onClick={() => toggleFriend(friend.summonerId)}
                                     style={{ 
+                                        width: '100%',
+                                        textAlign: 'left',
+                                        fontFamily: 'inherit',
+                                        color: 'inherit',
                                         padding: '10px 14px',
                                         borderRadius: '8px',
                                         display: 'flex',
@@ -186,7 +190,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                                         {friend.summonerName}
                                     </span>
                                     {selectedIds.includes(friend.summonerId) && <UserCheck size={16} color="var(--hextech-gold)" />}
-                                </div>
+                                </button>
                             ))}
                         </div>
                     )}
