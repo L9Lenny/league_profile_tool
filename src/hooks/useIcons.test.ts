@@ -36,7 +36,7 @@ describe('useIcons', () => {
         const { result } = renderHook(() => useIcons(mockAddLog));
 
         await waitFor(() => {
-            expect(result.current.allIcons.length).toBe(2);
+            expect(result.current.allIcons).toHaveLength(2);
         });
 
         expect(result.current.allIcons[0].name).toBe('First Icon');

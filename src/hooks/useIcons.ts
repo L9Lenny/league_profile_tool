@@ -61,12 +61,12 @@ export function useIcons(addLog: (msg: string) => void) {
                 
                 // 4. Map and Cache
                 const icons = data.map((icon: any) => ({
-                    id: icon.id,
-                    name: icon.title || `Icon ${icon.id}`
+                    id: Number.parseInt(String(icon.id), 10) || 0,
+                    name: String(icon.title || `Icon ${icon.id}`).replace(/[^\w\s-]/g, '')
                 }));
 
                 setAllIcons(icons);
-                localStorage.setItem("icon_data_version", latest);
+                localStorage.setItem("icon_data_version", String(latest).replace(/[^\w.-]/g, ''));
                 localStorage.setItem("profile_icons", JSON.stringify(icons));
                 addLog(`Icon database updated: ${icons.length} items loaded.`);
             } catch (err) {

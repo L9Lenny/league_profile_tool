@@ -59,8 +59,8 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
             try {
                 const currentLobby: any = await lcuRequest("GET", "/lol-lobby/v2/lobby");
                 addLog(`Current lobby found: ${currentLobby?.gameConfig?.gameMode || "Custom/Other"}`);
-            } catch (err) {
-                addLog(`No active lobby (${err}). Creating a new Normal 5v5 lobby...`);
+            } catch (err: any) {
+                addLog(`No active lobby (${err?.message || err}). Creating a new Normal 5v5 lobby...`);
                 await lcuRequest("POST", "/lol-lobby/v2/lobby", { queueId: 430 }); 
             }
 

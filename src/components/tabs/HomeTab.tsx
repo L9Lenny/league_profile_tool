@@ -145,7 +145,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
                         background: 'var(--hextech-gold)', color: 'black', 
                         fontSize: '0.55rem', fontWeight: 'bold', padding: '1px 5px', borderRadius: '6px'
                     }}>
-                        {summoner?.summonerLevel || '??'}
+                        {summoner ? summoner.summonerLevel : '??'}
                     </div>
                 </div>
 

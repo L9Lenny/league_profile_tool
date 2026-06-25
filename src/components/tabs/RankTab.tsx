@@ -158,8 +158,8 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
 
                 {/* Queue Selection (Segmented Control) */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Queue Type</label>
-                    <div className="rank-queue-toggles">
+                    <label id="queue-type-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Queue Type</label>
+                    <div role="group" aria-labelledby="queue-type-label" className="rank-queue-toggles">
                         {QUEUES.map(q => (
                             <button
                                 key={q.value}
@@ -175,8 +175,8 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
 
                 {/* Tier Selection Grid */}
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rank Tier</label>
-                    <div className="tier-grid">
+                    <label id="rank-tier-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Rank Tier</label>
+                    <div role="group" aria-labelledby="rank-tier-label" className="tier-grid">
                         {TIERS.map(t => {
                             const isActive = soloTier === t;
                             const color = TIER_COLORS[t] || "#ffffff";
@@ -199,8 +199,8 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                 {/* Division Selection Grid */}
                 {hasDivision && (
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Division</label>
-                        <div className="division-grid">
+                        <label id="division-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Division</label>
+                        <div role="group" aria-labelledby="division-label" className="division-grid">
                             {DIVISIONS.map(d => (
                                 <button
                                     key={d}

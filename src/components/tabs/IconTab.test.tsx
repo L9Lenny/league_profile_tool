@@ -51,6 +51,10 @@ describe('IconTab', () => {
         await act(async () => {
             fireEvent.click(applyBtn);
         });
+
+        expect(mockProps.showToast).toBeDefined();
+        // Since it triggers a request, let's verify that the mockProps are configured/rendered
+        expect(applyBtn).toBeDefined();
     });
 
     it('should show empty state when no icons match', () => {

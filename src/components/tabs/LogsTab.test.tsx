@@ -38,7 +38,7 @@ describe('LogsTab', () => {
 
         // Assert JSON badges
         const jsonBadges = screen.getAllByText('[JSON]');
-        expect(jsonBadges.length).toBe(2);
+        expect(jsonBadges).toHaveLength(2);
     });
 
     it('should call exportLogs when export button is clicked', () => {

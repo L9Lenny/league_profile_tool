@@ -30,8 +30,8 @@ export function useAnalytics() {
           signal: controller.signal
         });
         clearTimeout(timeoutId);
-      } catch (err) {
-        console.debug("Analytics heartbeat failed:", err);
+      } catch (err: any) {
+        console.debug("Analytics heartbeat failed:", err?.message || err);
       }
     };
 

@@ -401,8 +401,8 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 }
             });
 
-            tokenList.sort((a, b) => a.name.localeCompare(b.name));
-            setTokens(tokenList);
+            const sortedTokens = [...tokenList].sort((a, b) => a.name.localeCompare(b.name));
+            setTokens(sortedTokens);
             addLog(`Successfully parsed ${tokenList.length} tokens.`);
         } catch (err) {
             addLog(`Error syncing tokens: ${err}`);
@@ -568,7 +568,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                 <div className="tokens-banner-details">
                                     <div className="tokens-banner-name-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                                         <span className="tokens-banner-summoner-name">
-                                            {summoner ? (summoner.gameName || summoner.displayName) : 'Summoner Name'}
+                                            {summoner ? (summoner.gameName ? summoner.gameName : summoner.displayName) : 'Summoner Name'}
                                         </span>
                                         {summoner?.tagLine && (
                                             <span className="tokens-banner-tagline">#{summoner.tagLine}</span>
@@ -606,12 +606,18 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             const hasToken = tokenId >= 0;
                                             
                                             return (
-                                                <div 
+                                                <button 
                                                     key={i} 
                                                     onClick={() => handleSelectSlot(i)}
                                                     className={`tokens-banner-slot ${isSelected ? 'selected' : ''} ${hasToken ? glowClass : ''}`}
                                                     title={hasToken ? `${token?.name} (${token?.level})` : `Slot ${i} (Empty)`}
-                                                    style={{ animation: hasToken ? 'slotScaleIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards' : 'none' }}
+                                                    style={{ 
+                                                        animation: hasToken ? 'slotScaleIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards' : 'none',
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        padding: 0,
+                                                        cursor: 'pointer'
+                                                    }}
                                                 >
                                                     {hasToken ? (
                                                         <img 
@@ -623,7 +629,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                                     )}
                                                     {/* Slot markers required by unit tests are hidden visually */}
                                                     <span style={{ display: 'none' }}>{i}</span>
-                                                </div>
+                                                </button>
                                             );
                                         })}
                                     </div>
@@ -762,13 +768,17 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 
                 <div className="tokens-grid">
                     {fetching && (
-                        Array.from({ length: 12 }).map((_, i) => (
-                            <div key={`skeleton-${i}`} className="skeleton-card" style={{ animationDelay: `${i * 0.05}s` }}>
-                                <div className="skeleton-shimmer skeleton-circle" style={{ animationDelay: `${i * 0.08}s` }} />
-                                <div className="skeleton-shimmer skeleton-line" style={{ animationDelay: `${i * 0.08 + 0.1}s` }} />
-                                <div className="skeleton-shimmer skeleton-line-short" style={{ animationDelay: `${i * 0.08 + 0.2}s` }} />
-                            </div>
-                        ))
+                        Array.from({ length: 12 }).map((_, i) => {
+                            const delayBase = i * 0.05;
+                            const circleDelay = i * 0.08;
+                            return (
+                                <div key={`tokens-skeleton-card-${i}`} className="skeleton-card" style={{ animationDelay: `${delayBase}s` }}>
+                                    <div className="skeleton-shimmer skeleton-circle" style={{ animationDelay: `${circleDelay}s` }} />
+                                    <div className="skeleton-shimmer skeleton-line" style={{ animationDelay: `${circleDelay + 0.1}s` }} />
+                                    <div className="skeleton-shimmer skeleton-line-short" style={{ animationDelay: `${circleDelay + 0.2}s` }} />
+                                </div>
+                            );
+                        })
                     )}
                     {!fetching && filteredTokens.length === 0 && (
                         <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
@@ -779,15 +789,23 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                     {!fetching && filteredTokens.length > 0 && (
                         filteredTokens.map((token, index) => {
                             const isEquipped = slots.includes(token.id);
+                            const delayVal = (index % 24) * 0.015;
                             return (
-                                <div 
+                                <button 
                                     key={token.id}
+                                    type="button"
                                     className={`tokens-card-item ${isEquipped ? 'equipped' : ''}`}
                                     onClick={() => setSlot(token.id)}
                                     onMouseEnter={() => setActiveForgeToken(token)}
                                     onContextMenu={(e) => { e.preventDefault(); fillAllSlots(token.id); }}
                                     title={`${token.name} (${token.level})\nRight click to fill all 3 slots.`}
-                                    style={{ animationDelay: `${(index % 24) * 0.015}s` }}
+                                    style={{ 
+                                        animationDelay: `${delayVal}s`,
+                                        background: 'none',
+                                        border: '1px solid rgba(255, 255, 255, 0.04)',
+                                        padding: '8px 4px',
+                                        cursor: 'pointer'
+                                    }}
                                 >
                                     <img 
                                         src={getTokenImgUrl(token.id, token.level)} 
@@ -802,7 +820,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             <CheckCircle2 size={11} color="var(--hextech-gold)" />
                                         </div>
                                     )}
-                                </div>
+                                </button>
                             );
                         })
                     )}

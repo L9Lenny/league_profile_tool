@@ -22,10 +22,13 @@ interface ParsedLog {
 
 const getLogLevel = (msg: string): 'error' | 'success' | 'info' => {
     const message = msg.toLowerCase();
-    if (message.includes('failed') || message.includes('error') || message.includes('bad request') || message.includes('exception') || message.includes('err')) {
+    const errorKeywords = ['failed', 'error', 'bad request', 'exception', 'err'];
+    const successKeywords = ['success', 'saved', 'loaded', 'connected', 'configured', 'fetched'];
+    
+    if (errorKeywords.some(kw => message.includes(kw))) {
         return 'error';
     }
-    if (message.includes('success') || message.includes('saved') || message.includes('loaded') || message.includes('connected') || message.includes('configured') || message.includes('fetched')) {
+    if (successKeywords.some(kw => message.includes(kw))) {
         return 'success';
     }
     return 'info';
@@ -44,7 +47,7 @@ const findJson = (str: string) => {
                 suffix: str.substring(endIdx + 1).trim()
             };
         } catch (e) {
-            console.debug("findJson: parsing JSON failed (expected if non-JSON):", e);
+            console.debug("findJson: parsing JSON failed", e);
         }
     }
     const startArrIdx = str.indexOf('[');
@@ -59,7 +62,7 @@ const findJson = (str: string) => {
                 suffix: str.substring(endArrIdx + 1).trim()
             };
         } catch (e) {
-            console.debug("findJson: parsing array failed (expected if non-JSON):", e);
+            console.debug("findJson: parsing array failed", e);
         }
     }
     return null;
@@ -164,8 +167,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
             result = result.filter(log => 
                 log.originalMsg.toLowerCase().includes(query) || 
                 log.time.toLowerCase().includes(query) ||
-                log.method?.toLowerCase().includes(query) ||
-                log.status?.toLowerCase().includes(query)
+                (log.method?.toLowerCase()?.includes(query) ?? false) ||
+                (log.status?.toLowerCase()?.includes(query) ?? false)
             );
         }
         
@@ -194,7 +197,8 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         const lines = jsonStr.split('\n');
         
         const tokenizeLine = (line: string): React.ReactNode => {
-            const regex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g; // nosonar
+            // Simplified regex to match string keys/values, booleans/nulls, and numbers
+            const regex = /("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?)/g; // nosonar
             const parts: React.ReactNode[] = [];
             let lastIndex = 0;
             let match;
@@ -212,11 +216,14 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                 const token = match[0];
                 if (token.startsWith('"')) {
                     if (token.endsWith(':')) {
+                        // Push them together to avoid multiple pushes where a single block or fragment works
                         parts.push(
-                            <span key={`key-${index}`} className="json-key" style={{ color: 'var(--hextech-gold)', fontWeight: 500 }}>
-                                {token.slice(0, -1)}
-                            </span>,
-                            <span key={`colon-${index}`}>:</span>
+                            <React.Fragment key={`key-${index}`}>
+                                <span className="json-key" style={{ color: 'var(--hextech-gold)', fontWeight: 500 }}>
+                                    {token.slice(0, -1)}
+                                </span>
+                                <span>:</span>
+                            </React.Fragment>
                         );
                     } else {
                         parts.push(
@@ -387,8 +394,16 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                 return (
                                     <div key={log.id} className={`log-row-wrapper ${isExpanded ? 'expanded' : ''}`}>
                                         <div 
+                                            role="button"
+                                            tabIndex={0}
                                             className={`log-entry ${isExpanded ? 'active' : ''}`}
                                             onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    setExpandedLogId(isExpanded ? null : log.id);
+                                                }
+                                            }}
                                             style={{ cursor: 'pointer' }}
                                         >
                                             <div className="log-left-gutter">
@@ -403,11 +418,15 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                                         {log.method}
                                                     </span>
                                                 )}
-                                                {log.status && (
-                                                    <span className={`log-badge-status badge-${parseInt(log.status) >= 400 ? 'error' : 'success'}`}>
-                                                        {log.status}
-                                                    </span>
-                                                )}
+                                                {log.status && (() => {
+                                                    const statusCode = Number.parseInt(log.status, 10);
+                                                    const badgeClass = statusCode >= 400 ? 'error' : 'success';
+                                                    return (
+                                                        <span className={`log-badge-status badge-${badgeClass}`}>
+                                                            {log.status}
+                                                        </span>
+                                                    );
+                                                })()}
                                                 {log.jsonData && (
                                                     <span className="log-badge-json">
                                                         [JSON]
@@ -465,11 +484,11 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                         ) : (
                             <div className="log-empty-state">
                                 <p style={{ margin: 0, opacity: 0.5 }}>
-                                    {searchTerm 
-                                        ? `No logs match "${searchTerm}"` 
-                                        : levelFilter !== 'all' 
-                                            ? `No ${levelFilter} logs recorded` 
-                                            : 'No diagnostics available'}
+                                    {searchTerm ? (
+                                        `No logs match "${searchTerm}"`
+                                    ) : (
+                                        levelFilter !== 'all' ? `No ${levelFilter} logs recorded` : 'No diagnostics available'
+                                    )}
                                 </p>
                             </div>
                         )}

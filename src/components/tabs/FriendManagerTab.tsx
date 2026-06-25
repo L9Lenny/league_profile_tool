@@ -179,10 +179,12 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                             return '#888';
                         };
 
+                        const isSelected = selected.has(friend.id);
+
                         return (
                             <button 
                                 key={friend.id}
-                                className={`feature-card ${selected.has(friend.id) ? 'active' : ''}`}
+                                className={`feature-card ${isSelected ? 'active' : ''}`}
                                 onClick={() => toggleSelect(friend.id)}
                                 style={{ 
                                     width: '100%',
@@ -190,16 +192,16 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                                     fontFamily: 'inherit',
                                     color: 'inherit',
                                     padding: '12px', 
-                                    border: selected.has(friend.id) ? '1px solid #ff4e50' : '1px solid rgba(255,255,255,0.05)',
-                                    background: selected.has(friend.id) ? 'rgba(255, 78, 80, 0.05)' : 'rgba(0,0,0,0.2)',
+                                    border: isSelected ? '1px solid #ff4e50' : '1px solid rgba(255,255,255,0.05)',
+                                    background: isSelected ? 'rgba(255, 78, 80, 0.05)' : 'rgba(0,0,0,0.2)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
                                     cursor: 'pointer'
                                 }}
                             >
-                                <div style={{ color: selected.has(friend.id) ? '#ff4e50' : 'var(--text-secondary)' }}>
-                                    {selected.has(friend.id) ? <CheckSquare size={20} /> : <Square size={20} />}
+                                <div style={{ color: isSelected ? '#ff4e50' : 'var(--text-secondary)' }}>
+                                    {isSelected ? <CheckSquare size={20} /> : <Square size={20} />}
                                 </div>
                                 
                                 <div style={{ position: 'relative' }}>

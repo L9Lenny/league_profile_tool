@@ -1213,27 +1213,27 @@ input:checked+.slider:before {
 }
 
 .badge-get { 
-  color: #40c057; 
+  color: #51cf66; 
   background: rgba(64, 192, 87, 0.08); 
   border: 1px solid rgba(64, 192, 87, 0.2); 
 }
 .badge-post { 
-  color: #339af0; 
+  color: #4dadf7; 
   background: rgba(51, 154, 240, 0.08); 
   border: 1px solid rgba(51, 154, 240, 0.2); 
 }
 .badge-put { 
-  color: #fab005; 
+  color: #fcc419; 
   background: rgba(250, 176, 5, 0.08); 
   border: 1px solid rgba(250, 176, 5, 0.2); 
 }
 .badge-delete { 
-  color: #ff6b6b; 
+  color: #ff8787; 
   background: rgba(255, 107, 107, 0.08); 
   border: 1px solid rgba(255, 107, 107, 0.2); 
 }
 .badge-patch { 
-  color: #be4bdb; 
+  color: #d0bfff; 
   background: rgba(190, 75, 219, 0.08); 
   border: 1px solid rgba(190, 75, 219, 0.2); 
 }
@@ -1248,13 +1248,13 @@ input:checked+.slider:before {
 }
 
 .log-badge-status.badge-success {
-  color: #40c057;
+  color: #51cf66;
   background: rgba(64, 192, 87, 0.08);
   border: 1px solid rgba(64, 192, 87, 0.15);
 }
 
 .log-badge-status.badge-error {
-  color: #ff6b6b;
+  color: #ff8787;
   background: rgba(255, 107, 107, 0.08);
   border: 1px solid rgba(255, 107, 107, 0.2);
 }

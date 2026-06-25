@@ -1067,7 +1067,7 @@ button.bg-skin-item:focus {
 .tokens-clear-btn {
   background: rgba(255, 80, 80, 0.08);
   border: 1px solid rgba(255, 80, 80, 0.3);
-  color: #ff6b6b;
+  color: #ff8e8e; /* Increased contrast on dark background */
   border-radius: 6px;
   cursor: pointer;
   display: flex;
@@ -1336,20 +1336,7 @@ button.bg-skin-item:focus {
 
 
 /* ── Unlocked Vault Cards ── */
-.tokens-card-item {
-  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.005) 100%);
-  border: 1px solid rgba(200, 155, 60, 0.1);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.tokens-card-item:hover {
-  background: radial-gradient(circle at top, rgba(200, 155, 60, 0.06) 0%, rgba(200, 155, 60, 0.01) 100%);
-  border-color: var(--hextech-gold-light);
-  box-shadow: 0 6px 20px rgba(200, 155, 60, 0.18), 0 4px 10px rgba(0, 0, 0, 0.4);
-  transform: translateY(-4px) scale(1.02);
-}
+/* Duplicate selectors removed: .tokens-card-item and .tokens-card-item:hover have been defined earlier */
 
 /* ── Banner Accent Backdrop Gradients ── */
 .tokens-banner-accent- { background: linear-gradient(185deg, rgba(9, 20, 40, 0.95) 0%, rgba(2, 6, 12, 0.98) 100%); border-color: var(--hextech-gold); }
