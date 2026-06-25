@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dependencies**: Updated `tauri` to `2.11.3` in #307, `tauri-build` to `2.6.3` in #308, `serde_json` to `1.0.150` in #301, and `sysinfo` to `0.39.3` in #302 in Cargo.lock.
 - **Dependencies**: Updated `lucide-react` to `1.14.0` in #292, `vitest` to `4.1.7` in #295, `@vitest/coverage-v8` to `4.1.7` in #296, `typescript` to `6.0.3` in #291, and `@types/node` to `25.7.0` in #294 in package.json.
 - **CI/CD**: Updated GitHub Actions workflows in #311 and SonarSource scanner action in #306.
+- **CI/CD**: Added new `ci.yml` workflow with TypeScript compile check, frontend tests, and Rust `cargo check`/`clippy` linting on every push and PR.
+- **CI/CD**: Added `test-and-lint` prerequisite job to `release.yml` to block broken builds from being released.
+- **TypeScript 6 Migration**: Migrated all test files from `global.fetch` to `globalThis.fetch` for TypeScript 6.0 compatibility.
 
 ## [1.9.4] - 2026-06-25
 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314
