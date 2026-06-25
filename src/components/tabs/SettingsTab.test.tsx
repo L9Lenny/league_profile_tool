@@ -61,4 +61,19 @@ describe('SettingsTab', () => {
         fireEvent.click(minimizeRow);
         expect(mockProps.toggleMinimizeToTray).toHaveBeenCalled();
     });
+
+    it('should toggle auto-restore profile state', () => {
+        localStorage.clear();
+        render(<SettingsTab {...mockProps} />);
+        const autoRestoreRow = screen.getByText('Auto-Restore Profile').closest('button');
+        if (!autoRestoreRow) throw new Error('Button not found');
+
+        fireEvent.click(autoRestoreRow);
+        expect(localStorage.getItem('profile_auto_enforce_v1')).toBe('true');
+        expect(mockProps.addLog).toHaveBeenCalledWith('Auto-Enforcer enabled.');
+
+        fireEvent.click(autoRestoreRow);
+        expect(localStorage.getItem('profile_auto_enforce_v1')).toBe('false');
+        expect(mockProps.addLog).toHaveBeenCalledWith('Auto-Enforcer disabled.');
+    });
 });

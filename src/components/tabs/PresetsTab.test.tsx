@@ -83,6 +83,8 @@ describe('PresetsTab', () => {
         localStorage.setItem(SAVED_AVAILABILITY_KEY, 'chat');
         localStorage.setItem(SAVED_ICON_KEY, '23');
         localStorage.setItem(SAVED_BACKGROUND_KEY, '103001');
+        localStorage.setItem(SAVED_TOKENS_KEY, '[1,2,3]');
+        localStorage.setItem(SAVED_TITLE_KEY, 'Challenger');
 
         render(
             <PresetsTab 

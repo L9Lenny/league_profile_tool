@@ -7,6 +7,8 @@ vi.mock('@tauri-apps/api/core', () => ({
     invoke: vi.fn(),
 }));
 
+import { invoke } from '@tauri-apps/api/core';
+
 describe('IconTab', () => {
     const mockProps = {
         lcu: { port: '1234', token: 'secret' },
@@ -38,7 +40,9 @@ describe('IconTab', () => {
         expect(screen.getByText('Icon Two')).toBeDefined();
     });
 
-    it('should handle icon selection and apply', async () => {
+    it('should handle icon selection and apply successfully', async () => {
+        vi.mocked(invoke).mockResolvedValue({});
+
         render(<IconTab {...mockProps} />);
         const iconBtn = screen.getByText('Icon One').closest('button');
         if (!iconBtn) throw new Error('Icon button not found');
@@ -52,9 +56,66 @@ describe('IconTab', () => {
             fireEvent.click(applyBtn);
         });
 
-        expect(mockProps.showToast).toBeDefined();
-        // Since it triggers a request, let's verify that the mockProps are configured/rendered
-        expect(applyBtn).toBeDefined();
+        expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
+            method: 'PUT',
+            endpoint: '/lol-summoner/v1/current-summoner/icon',
+            body: { profileIconId: 1 }
+        }));
+        expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
+            method: 'PUT',
+            endpoint: '/lol-chat/v1/me',
+            body: { icon: 1 }
+        }));
+        expect(mockProps.showToast).toHaveBeenCalledWith('Icon Applied!', 'success');
+    });
+
+    it('should handle fallback to force method when official icon update fails', async () => {
+        vi.mocked(invoke).mockImplementation(async (cmd, args: any) => {
+            if (cmd === 'lcu_request' && args.endpoint.includes('summoner')) {
+                throw new Error('Unowned');
+            }
+            return {};
+        });
+
+        render(<IconTab {...mockProps} />);
+        const iconBtn = screen.getByText('Icon One').closest('button');
+        if (!iconBtn) throw new Error('Icon button not found');
+
+        await act(async () => {
+            fireEvent.click(iconBtn);
+        });
+
+        const applyBtn = screen.getByText('APPLY ICON');
+        await act(async () => {
+            fireEvent.click(applyBtn);
+        });
+
+        expect(mockProps.addLog).toHaveBeenCalledWith('Official icon update failed (likely unowned). Trying Force method...');
+        expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
+            method: 'PUT',
+            endpoint: '/lol-chat/v1/me',
+            body: { icon: 1 }
+        }));
+        expect(mockProps.showToast).toHaveBeenCalledWith('Icon Applied!', 'success');
+    });
+
+    it('should show toast error when all icon update methods fail', async () => {
+        vi.mocked(invoke).mockRejectedValue(new Error('Fatal Connection Error'));
+
+        render(<IconTab {...mockProps} />);
+        const iconBtn = screen.getByText('Icon One').closest('button');
+        if (!iconBtn) throw new Error('Icon button not found');
+
+        await act(async () => {
+            fireEvent.click(iconBtn);
+        });
+
+        const applyBtn = screen.getByText('APPLY ICON');
+        await act(async () => {
+            fireEvent.click(applyBtn);
+        });
+
+        expect(mockProps.showToast).toHaveBeenCalledWith('Failed to apply icon', 'error');
     });
 
     it('should show empty state when no icons match', () => {
