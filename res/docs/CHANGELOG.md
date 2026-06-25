@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.5] - 2026-06-25
 
 ### Fixed
-- **Security Vulnerability**: Updated `undici` to `7.28.0` in package-lock.json to resolve multiple CVEs (TLS validation bypass, cross-origin request routing, HTTP header injection, SameSite downgrade, and HTTP response queue poisoning).
+- **Security Vulnerability**: Updated `undici` to `7.28.0` in package-lock.json to resolve multiple CVEs in #315 (TLS validation bypass, cross-origin request routing, HTTP header injection, SameSite downgrade, and HTTP response queue poisoning).
+- **Security Vulnerability**: Updated `tar` to `0.4.46` in Cargo.lock to resolve PAX header desynchronization issue in #316.
+- **Security Vulnerability**: Updated `openssl` to `0.10.81` in Cargo.lock to resolve potential out-of-bounds write in #317.
 
 ## [1.9.4] - 2026-06-25
 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314
