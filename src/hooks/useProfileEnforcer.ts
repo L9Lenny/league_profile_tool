@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { LcuInfo } from './useLcu';
-import { 
+import {
     SAVED_AUTO_ENFORCE_KEY,
     SAVED_ENFORCE_OFFLINE_KEY,
     SAVED_AVAILABILITY_KEY,
@@ -8,12 +8,7 @@ import {
     SAVED_ICON_KEY,
     SAVED_BACKGROUND_KEY,
     SAVED_TOKENS_KEY,
-    SAVED_TITLE_KEY,
-    SAVED_RANK_QUEUE_KEY,
-    SAVED_RANK_TIER_KEY,
-    SAVED_RANK_DIV_KEY,
-    SAVED_CHALLENGE_CRYSTAL_KEY,
-    SAVED_CHALLENGE_POINTS_KEY
+    SAVED_TITLE_KEY
 } from '../storageKeys';
 
 export function useProfileEnforcer(
