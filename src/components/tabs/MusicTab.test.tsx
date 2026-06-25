@@ -20,7 +20,7 @@ describe('MusicTab', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        global.fetch = vi.fn();
+        globalThis.fetch = vi.fn();
     });
 
     it('should render music auto bio card', () => {

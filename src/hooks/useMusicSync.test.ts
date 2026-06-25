@@ -45,7 +45,7 @@ describe('useMusicSync hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
-        global.fetch = vi.fn();
+        globalThis.fetch = vi.fn();
     });
 
     it('should initialize with default settings', () => {
@@ -68,7 +68,7 @@ describe('useMusicSync hook', () => {
             }
         };
 
-        vi.mocked(global.fetch).mockResolvedValue({
+        vi.mocked(globalThis.fetch).mockResolvedValue({
             ok: true,
             json: async () => mockTrack
         } as Response);

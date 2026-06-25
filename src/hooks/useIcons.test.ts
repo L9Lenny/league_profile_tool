@@ -9,7 +9,7 @@ describe('useIcons', () => {
         vi.clearAllMocks();
         localStorage.clear();
         // Mock global fetch
-        global.fetch = vi.fn();
+        globalThis.fetch = vi.fn();
     });
 
     it('should initialize with empty icons and load from cache', () => {

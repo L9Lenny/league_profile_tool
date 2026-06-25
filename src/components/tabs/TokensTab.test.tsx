@@ -22,7 +22,7 @@ describe('TokensTab', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         // Mock global fetch
-        global.fetch = vi.fn().mockResolvedValue({
+        globalThis.fetch = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => []
         } as Response);

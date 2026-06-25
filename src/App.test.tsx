@@ -35,7 +35,7 @@ describe('App', () => {
             onCloseRequested: vi.fn().mockResolvedValue(vi.fn()),
         } as any);
 
-        global.fetch = vi.fn().mockResolvedValue({
+        globalThis.fetch = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({ version: '1.3.7' })
         } as Response);
@@ -138,7 +138,7 @@ describe('App', () => {
 
     it('should show update beacon if NEW version available', async () => {
         vi.mocked(app.getVersion).mockResolvedValue('1.0.0');
-        global.fetch = vi.fn().mockResolvedValue({
+        globalThis.fetch = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({ tag_name: 'v2.0.0' })
         } as Response);

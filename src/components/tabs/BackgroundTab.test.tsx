@@ -25,7 +25,7 @@ describe('BackgroundTab', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        global.fetch = vi.fn().mockImplementation((url) => {
+        globalThis.fetch = vi.fn().mockImplementation((url) => {
             if (url.includes('champion-summary.json')) {
                 return Promise.resolve({
                     ok: true,
@@ -160,7 +160,7 @@ describe('BackgroundTab', () => {
     });
 
     it('should show error toast if champion fetch fails', async () => {
-        global.fetch = vi.fn().mockResolvedValue({ ok: false });
+        globalThis.fetch = vi.fn().mockResolvedValue({ ok: false });
         const props = createProps();
         
         await act(async () => {
