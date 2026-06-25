@@ -778,7 +778,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                             const delayBase = i * 0.05;
                             const circleDelay = i * 0.08;
                             return (
-                                <div key={`tokens-skeleton-card-${i}`} className="skeleton-card" style={{ animationDelay: `${delayBase}s` }}>
+                                <div key={`tokens-skeleton-card-delay-${delayBase}`} className="skeleton-card" style={{ animationDelay: `${delayBase}s` }}>
                                     <div className="skeleton-shimmer skeleton-circle" style={{ animationDelay: `${circleDelay}s` }} />
                                     <div className="skeleton-shimmer skeleton-line" style={{ animationDelay: `${circleDelay + 0.1}s` }} />
                                     <div className="skeleton-shimmer skeleton-line-short" style={{ animationDelay: `${circleDelay + 0.2}s` }} />

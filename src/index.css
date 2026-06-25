@@ -9,7 +9,7 @@
   --league-blue-light: #0ac1ff;
   --league-dark-grey: #1e2328;
   --text-primary: #f0e6d2;
-  --text-secondary: #a09b8c;
+  --text-secondary: #cabfa3;
   --glass-bg: rgba(9, 20, 40, 0.4);
   --glass-border: rgba(255, 255, 255, 0.05);
   --nav-active-bg: rgba(200, 155, 60, 0.1);
@@ -943,7 +943,7 @@ input:checked+.slider:before {
 
 .flat-btn.danger-btn:hover {
   border-color: #ff6b6b;
-  color: #ff8787;
+  color: #ffb3b3; /* Increased contrast on hover */
   background: rgba(255, 107, 107, 0.05);
 }
 
@@ -1084,8 +1084,8 @@ input:checked+.slider:before {
 }
 
 .log-container ::selection {
-  background: rgba(200, 155, 60, 0.2);
-  color: #fff;
+  background: rgba(200, 155, 60, 0.35); /* Increased background contrast */
+  color: #ffffff;
 }
 
 .log-row-wrapper {

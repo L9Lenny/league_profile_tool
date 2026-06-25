@@ -491,7 +491,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                                         if (searchTerm) {
                                             return `No logs match "${searchTerm}"`;
                                         }
-                                        return levelFilter !== 'all' ? `No ${levelFilter} logs recorded` : 'No diagnostics available';
+                                        return levelFilter === 'all' ? 'No diagnostics available' : `No ${levelFilter} logs recorded`;
                                     })()}
                                 </p>
                             </div>

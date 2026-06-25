@@ -1067,7 +1067,7 @@ button.bg-skin-item:focus {
 .tokens-clear-btn {
   background: rgba(255, 80, 80, 0.08);
   border: 1px solid rgba(255, 80, 80, 0.3);
-  color: #ff8e8e; /* Increased contrast on dark background */
+  color: #ffa6a6; /* Further increased contrast on dark background */
   border-radius: 6px;
   cursor: pointer;
   display: flex;
