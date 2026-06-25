@@ -122,10 +122,20 @@ async function getGitHubIssues() {
  * Extract SonarQube key from GitHub issue title
  * Pattern: "[SEVERITY] message (SONARKEY)"
  */
-function extractSonarKey(title) {
-  // Matches any sequence inside the last pair of parentheses
-  const match = title.match(/\(([^()]+)\)$/);
-  return match ? match[1] : null;
+function extractSonarKey(issue) {
+  if (!issue) return null;
+  
+  // Try to find the key in the body first (HTML comment)
+  const body = issue.body || '';
+  const bodyMatch = body.match(/<!-- sonarIssueKey:\s*([a-zA-Z0-9_\-]+)\s*-->/);
+  if (bodyMatch) {
+    return bodyMatch[1];
+  }
+
+  // Fallback to title parentheses match
+  const title = issue.title || '';
+  const titleMatch = title.match(/\(([^()]+)\)$/);
+  return titleMatch ? titleMatch[1] : null;
 }
 
 /**
@@ -199,7 +209,7 @@ async function main() {
 
     // Check each GitHub issue
     for (const githubIssue of githubIssues) {
-      const sonarKey = extractSonarKey(githubIssue.title);
+      const sonarKey = extractSonarKey(githubIssue);
 
       if (!sonarKey) {
         console.log(`⏭️  Issue #${githubIssue.number}: Could not extract SonarQube key`);
