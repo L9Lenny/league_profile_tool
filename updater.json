@@ -1,19 +1,19 @@
 {
-    "version": "1.9.3",
-    "notes": "## [1.9.3] - 2026-06-20\n\n### Added\n- **Tokens Redesign**: Completely overhauled the Tokens tab with a new UI that utilizes full horizontal space.\n- **Summoner Title Selection**: Added the ability to dynamically select the Summoner Title directly from the Tokens tab.\n\n### Changed\n- **Token Preview**: The 3D Forge Hologram has been replaced with a sleeker, space-saving 2D preview.\n- **UI Layout**: Shifted to a vertically stacked layout to give maximum vertical space to the Unlocked Tokens grid.\n- Temporarily removed Crest Border and Banner Accent dropdowns to declutter the interface.\n\n### Fixed\n- **Presets & Backgrounds**: Resolved an issue where loading presets or applying backgrounds failed if the profile icon or background skin was unowned. The app now properly falls back to the force method to apply them.\n\n## [1.9.2] - 2026-06-17  \n### Added \n- **📋 Individual Log Copying**: Added a hover-triggered \"Copy\" button next to each log line in the System Logs tab for quick clipboard copying. \n- **Selection Highlight**: Integrated a premium Hextech themed selection highlight for logs.  \n### Changed \n- **🔍 Selectable System Logs**: Configured the System Logs container to allow text selection directly, bypassing the global app-wide text selection restriction.",
-    "pub_date": "2026-06-20T20:59:35Z",
+    "version": "1.9.4",
+    "notes": "## [1.9.4] - 2026-06-25 - dependabot: bump vite from 8.0.11 to 8.0.16 in #314  ### Added - **Tokens Redesign**: Completely overhauled the Tokens tab with a new UI that utilizes full horizontal space. - **Summoner Title Selection**: Added the ability to dynamically select the Summoner Title directly from the Tokens tab. - **Auto-Enforcer Resilience**: The Auto-Enforcer now isolates each configuration restore. If one fails (e.g. background application), it won't prevent the rest from being applied. - **Auto-Enforcer Retry Mechanism**: Added an intelligent retry mechanism. If applying settings fails due to the League client loading slowly, the tool will retry every 10 seconds (for up to 60 seconds).  ### Fixed - **Title Persistence**: Fixed an issue where the Summoner Title was not being saved in the Presets and was missing from the Auto-Restore cycle. - **Settings Toggle Bug**: Fixed a bug where toggles in the Settings tab would fire twice due to an incorrect HTML structure.     ",
+    "pub_date": "2026-06-25T08:11:35Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.3/League.Profile.Tool_1.9.3_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.4/League.Profile.Tool_1.9.4_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.3/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.4/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.3/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.4/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
