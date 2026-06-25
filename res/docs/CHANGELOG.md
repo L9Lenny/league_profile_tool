@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.5] - 2026-06-25
 
+### Added
+- **Test Coverage**: Created new comprehensive unit test suites for `FriendManagerTab`, `LobbyTab`, `PresetsTab`, `useProfileEnforcer`, and `useAutoRestore` hooks, successfully increasing overall statement test coverage to over 80%.
+
 ### Fixed
 - **Security Vulnerability**: Updated `undici` to `7.28.0` in package-lock.json to resolve multiple CVEs in #315 (TLS validation bypass, cross-origin request routing, HTTP header injection, SameSite downgrade, and HTTP response queue poisoning).
 - **Security Vulnerability**: Updated `tar` to `0.4.46` in Cargo.lock to resolve PAX header desynchronization issue in #316.
 - **Security Vulnerability**: Updated `openssl` to `0.10.81` in Cargo.lock to resolve potential out-of-bounds write in #317.
 - **Security Vulnerability**: Configured NPM `overrides` to force `tmp` to `0.2.7` to resolve path traversal vulnerabilities.
+- **SonarQube Quality Refactoring**: Resolved code quality and accessibility issues including contrast ratio adjustments for log level badges, adding appropriate ARIA attributes/native button roles to list components, removing duplicate CSS classes, and simplifying regex patterns/cognitive complexity.
 
 ### Changed
 - **Dependencies**: Updated `tauri` to `2.11.3` in #307, `tauri-build` to `2.6.3` in #308, `serde_json` to `1.0.150` in #301, and `sysinfo` to `0.39.3` in #302 in Cargo.lock.
