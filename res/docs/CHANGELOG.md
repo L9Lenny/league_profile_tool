@@ -7,14 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.6] - 2026-06-28
 
-### Fixed
-- **Minimize to Tray**: The close button now correctly hides the window to the system tray instead of force-quitting the app when the "Minimize to Tray" setting is enabled. The app stays running in the background, allowing the Auto-Restore Profile enforcer to re-apply bio and settings on LCU reconnect.
-- **Missing Background Skins**: Added a supplemental skin data system to include skins missing from CommunityDragon, starting with Immortalized Legend Ahri (ID: 103086).
+### Added
+- **Supplemental Skin Data**: Added a system to include skins missing from CommunityDragon via `src/data/supplemental-skins.json`. The first entry is Immortalized Legend Ahri (ID: 103086). Extend the JSON file to add more missing skins.
+- **Fallback Splash Placeholder**: When a splash image fails to load (404), a styled placeholder with "Preview not available" text is now shown instead of a broken image icon.
+- **Custom Skin Name in Direct Skin ID**: Added an optional "Skin name" field next to the Direct Skin ID input. When provided, the custom name is used in toast notifications and logs instead of the generic "Skin {id}".
 
 ### Changed
-- **Dependencies**: Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json.
-- **Dependencies**: Updated `vite` to `8.1.0` in #404, `@tauri-apps/cli` to `2.11.3` in #407 in devDependencies.
-- **Dependencies**: Updated `sysinfo` to `0.39.5` in #405 in Cargo.lock.
+- **Skin Name Overlay**: The skin name overlay now appears only on hover with a smooth slide-up animation, keeping the splash art fully visible by default.
+
+### Fixed
+- **Minimize to Tray**: The close button now correctly hides the window to the system tray instead of force-quitting the app when the "Minimize to Tray" setting is enabled. The app stays running in the background, allowing the Auto-Restore Profile enforcer to re-apply bio and settings on LCU reconnect.
+
+### Dependencies
+- Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json.
+- Updated `vite` to `8.1.0` in #404, `@tauri-apps/cli` to `2.11.3` in #407 in devDependencies.
+- Updated `sysinfo` to `0.39.5` in #405 in Cargo.lock.
 
 ## [1.9.5] - 2026-06-25
 
