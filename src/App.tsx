@@ -132,8 +132,13 @@ function App() {
         addLog(`Shutdown bio application failed: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
         if (minimizeToTray) {
-          await appWindow.hide().catch(() => { });
-          closingRef.current = false;
+          try {
+            await appWindow.hide();
+            closingRef.current = false;
+          } catch (err) {
+            addLog(`Failed to hide window: ${err}`);
+            await invoke("force_quit");
+          }
         } else {
           await invoke("force_quit").catch(() => { });
         }
@@ -141,7 +146,7 @@ function App() {
     }).then((fn) => { unlisten = fn; });
 
     return () => { if (unlisten) unlisten(); };
-  }, [musicBio.enabled, lcu, applyIdleBio, minimizeToTray]);
+  }, [musicBio.enabled, lcu, applyIdleBio, minimizeToTray, addLog]);
 
   const toggleMinimizeToTray = async () => {
     try {
