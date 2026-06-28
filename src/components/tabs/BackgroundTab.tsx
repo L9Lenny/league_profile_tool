@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BACKGROUND_KEY } from '../../hooks/useAutoRestore';
 import { Search, Image, Loader2, Hash } from 'lucide-react';
+import supplementalSkins from '../../data/supplemental-skins.json';
 
 interface BackgroundTabProps {
     lcu: LcuInfo | null;
@@ -107,6 +108,18 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                 isBase: s.isBase,
                 splashPath: s.splashPath,
             }));
+
+            // Merge supplemental skins (missing from CommunityDragon)
+            const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(champ.id)];
+            if (extras) {
+                const existingIds = new Set(skinList.map(s => s.id));
+                for (const extra of extras) {
+                    if (!existingIds.has(extra.id)) {
+                        skinList.push(extra);
+                    }
+                }
+            }
+
             skinCacheRef.current.set(champ.id, skinList);
             setSkins(skinList);
         } catch (err) {
