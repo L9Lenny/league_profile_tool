@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.9.6] - 2026-06-28
 
+### Fixed
+- **Minimize to Tray**: The close button now correctly hides the window to the system tray instead of force-quitting the app when the "Minimize to Tray" setting is enabled. The app stays running in the background, allowing the Auto-Restore Profile enforcer to re-apply bio and settings on LCU reconnect.
+
 ### Changed
 - **Dependencies**: Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json.
 - **Dependencies**: Updated `vite` to `8.1.0` in #404, `@tauri-apps/cli` to `2.11.3` in #407 in devDependencies.
