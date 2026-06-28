@@ -33,19 +33,11 @@ function cdnUrl(path: string): string {
 
 const FALLBACK_SPLASH = "data:image/svg+xml," + encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
-        <defs>
-            <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#0f0f23"/>
-                <stop offset="100%" stop-color="#1a1a2e"/>
-            </linearGradient>
-        </defs>
-        <rect width="400" height="225" fill="url(#bg)"/>
-        <rect x="140" y="60" width="120" height="80" rx="4" fill="none" stroke="#c8aa6e" stroke-opacity="0.2" stroke-width="1.5"/>
-        <circle cx="175" cy="85" r="6" fill="none" stroke="#c8aa6e" stroke-opacity="0.2" stroke-width="1.5"/>
-        <path d="M145 135 L175 110 L200 125 L225 95 L245 115" fill="none" stroke="#c8aa6e" stroke-opacity="0.15" stroke-width="1.5" stroke-linejoin="round"/>
-        <line x1="145" y1="65" x2="255" y2="135" stroke="#e74c3c" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="255" y1="65" x2="145" y2="135" stroke="#e74c3c" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
-        <text x="200" y="185" fill="#c8aa6e" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle" letter-spacing="1.5" opacity="0.5">PREVIEW NOT AVAILABLE</text>
+        <rect width="400" height="225" fill="#1e1e2f"/>
+        <rect x="155" y="60" width="90" height="70" rx="4" fill="none" stroke="#555" stroke-width="1.5"/>
+        <circle cx="185" cy="82" r="5" fill="none" stroke="#555" stroke-width="1.5"/>
+        <path d="M160 125 L185 103 L205 115 L225 95 L240 110" fill="none" stroke="#555" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="200" y="172" fill="#666" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">Preview not available</text>
     </svg>`
 );
 
