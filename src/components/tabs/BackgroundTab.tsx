@@ -33,8 +33,24 @@ function cdnUrl(path: string): string {
 
 const FALLBACK_SPLASH = "data:image/svg+xml," + encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
-        <rect width="400" height="225" fill="#1a1a2e"/>
-        <text x="50%" y="50%" fill="#666" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">Preview not available</text>
+        <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#0f0f23"/>
+                <stop offset="100%" stop-color="#1a1a2e"/>
+            </linearGradient>
+            <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#c8aa6e" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#c8aa6e" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <rect width="400" height="225" fill="url(#bg)"/>
+        <rect x="120" y="65" width="160" height="96" rx="8" fill="none" stroke="#c8aa6e" stroke-opacity="0.25" stroke-width="1.5"/>
+        <path d="M160 130 L180 110 L200 130 L230 100 L260 120" fill="none" stroke="#c8aa6e" stroke-opacity="0.12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="160" y1="90" x2="240" y2="130" stroke="#c8aa6e" stroke-opacity="0.2" stroke-width="1.5"/>
+        <circle cx="220" cy="93" r="3" fill="#c8aa6e" fill-opacity="0.2"/>
+        <rect x="150" y="78" width="100" height="2" rx="1" fill="#c8aa6e" fill-opacity="0.08" transform="rotate(-20 200 79)"/>
+        <rect x="150" y="78" width="100" height="2" rx="1" fill="#c8aa6e" fill-opacity="0.08" transform="rotate(20 200 79)"/>
+        <text x="200" y="192" fill="#c8aa6e" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle" letter-spacing="1.5" opacity="0.5">PREVIEW NOT AVAILABLE</text>
     </svg>`
 );
 
