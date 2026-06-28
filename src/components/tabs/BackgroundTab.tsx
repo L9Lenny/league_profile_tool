@@ -34,10 +34,10 @@ function cdnUrl(path: string): string {
 const FALLBACK_SPLASH = "data:image/svg+xml," + encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
         <rect width="400" height="225" fill="#1e1e2f"/>
-        <rect x="155" y="60" width="90" height="70" rx="4" fill="none" stroke="#555" stroke-width="1.5"/>
-        <circle cx="185" cy="82" r="5" fill="none" stroke="#555" stroke-width="1.5"/>
-        <path d="M160 125 L185 103 L205 115 L225 95 L240 110" fill="none" stroke="#555" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="200" y="172" fill="#666" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">Preview not available</text>
+        <rect x="155" y="50" width="90" height="75" rx="4" fill="none" stroke="#555" stroke-width="1.5"/>
+        <circle cx="183" cy="72" r="5" fill="none" stroke="#555" stroke-width="1.5"/>
+        <path d="M160 120 L183 98 L203 110 L223 90 L240 105" fill="none" stroke="#555" stroke-width="1.5" stroke-linejoin="round"/>
+        <text x="200" y="148" fill="#666" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle">Preview not available</text>
     </svg>`
 );
 
