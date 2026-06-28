@@ -1,19 +1,19 @@
 {
-    "version": "1.9.5",
-    "notes": "## [1.9.5] - 2026-06-25  ### Added - **Test Coverage**: Created new comprehensive unit test suites for `FriendManagerTab`, `LobbyTab`, `PresetsTab`, `useProfileEnforcer`, and `useAutoRestore` hooks, successfully increasing overall statement test coverage to over 80%.  ### Fixed - **Security Vulnerability**: Updated `undici` to `7.28.0` in package-lock.json to resolve multiple CVEs in #315 (TLS validation bypass, cross-origin request routing, HTTP header injection, SameSite downgrade, and HTTP response queue poisoning). - **Security Vulnerability**: Updated `tar` to `0.4.46` in Cargo.lock to resolve PAX header desynchronization issue in #316. - **Security Vulnerability**: Updated `openssl` to `0.10.81` in Cargo.lock to resolve potential out-of-bounds write in #317. - **Security Vulnerability**: Configured NPM `overrides` to force `tmp` to `0.2.7` to resolve path traversal vulnerabilities. - **SonarQube Quality Refactoring**: Resolved code quality and accessibility issues including contrast ratio adjustments for log level badges, adding appropriate ARIA attributes/native button roles to list components, removing duplicate CSS classes, and simplifying regex patterns/cognitive complexity.  ### Changed - **Dependencies**: Updated `tauri` to `2.11.3` in #307, `tauri-build` to `2.6.3` in #308, `serde_json` to `1.0.150` in #301, and `sysinfo` to `0.39.3` in #302 in Cargo.lock. - **Dependencies**: Updated `lucide-react` to `1.14.0` in #292, `vitest` to `4.1.7` in #295, `@vitest/coverage-v8` to `4.1.7` in #296, `typescript` to `6.0.3` in #291, and `@types/node` to `25.7.0` in #294 in package.json. - **CI/CD**: Updated GitHub Actions workflows in #311 and SonarSource scanner action in #306. - **CI/CD**: Added new `ci.yml` workflow with TypeScript compile check, frontend tests, and Rust `cargo check`/`clippy` linting on every push and PR. - **CI/CD**: Added `test-and-lint` prerequisite job to `release.yml` to block broken builds from being released. - **TypeScript 6 Migration**: Migrated all test files from `global.fetch` to `globalThis.fetch` for TypeScript 6.0 compatibility in #291.  ",
-    "pub_date": "2026-06-25T18:19:56Z",
+    "version": "1.9.6",
+    "notes": "## [1.9.6] - 2026-06-28  ### Added - **Supplemental Skin Data**: Added a system to include skins missing from CommunityDragon via `src/data/supplemental-skins.json`, resolving issue #303. The first entry is Immortalized Legend Ahri (ID: 103086). Extend the JSON file to add more missing skins. - **Fallback Splash Placeholder**: When a splash image fails to load (404), a styled placeholder with \"Preview not available\" text is now shown instead of a broken image icon. - **Skin Search by Name**: The Direct Skin ID input now accepts skin names with autocomplete suggestions. Search by typing a skin name and select from the dropdown, or enter a numeric ID directly.  ### Changed - **Skin Name Overlay**: The skin name overlay now appears only on hover with a smooth slide-up animation, keeping the splash art fully visible by default.  ### Fixed - **Minimize to Tray**: The close button now correctly hides the window to the system tray instead of force-quitting the app when the \"Minimize to Tray\" setting is enabled. The app stays running in the background, allowing the Auto-Restore Profile enforcer to re-apply bio and settings on LCU reconnect.  ### Dependencies - Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json. - Updated `vite` to `8.1.0` in #404, `@tauri-apps/cli` to `2.11.3` in #407 in devDependencies. - Updated `sysinfo` to `0.39.5` in #405 in Cargo.lock.  ",
+    "pub_date": "2026-06-28T20:38:20Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.5/League.Profile.Tool_1.9.5_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.6/League.Profile.Tool_1.9.6_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.5/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.6/League.Profile.Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.5/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.6/League.Profile.Tool_aarch64.app.tar.gz"
         }
     }
 }
