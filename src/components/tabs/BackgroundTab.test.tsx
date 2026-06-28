@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+
+vi.mock('../../data/supplemental-skins.json', () => ({
+    default: {
+        "103": [{ id: 103086, name: "Immortalized Legend Ahri", isBase: false, splashPath: "/lol-game-data/assets/v1/champion-splashes/103/103086.jpg" }],
+        "999": [{ id: 999001, name: "Skins From Unloaded Champ", isBase: false, splashPath: "/lol-game-data/assets/v1/champion-splashes/999/999001.jpg" }]
+    }
+}));
+
 import BackgroundTab from './BackgroundTab';
 
 describe('BackgroundTab', () => {
     const mockChampSummary = [
         { id: 1, name: 'Aatrox', alias: 'Aatrox', squarePortraitPath: '/assets/1.png' },
-        { id: 103, name: 'Ahri', alias: 'Ahri', squarePortraitPath: '/assets/103.png' }
+        { id: 103, name: 'Ahri', alias: 'Ahri', squarePortraitPath: '/assets/103.png' },
+        { id: 999, name: 'Unloadable', alias: 'Unloadable', squarePortraitPath: '/assets/999.png' }
     ];
 
     const mockSkins = {
@@ -170,6 +179,82 @@ describe('BackgroundTab', () => {
         expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Justicar Aatrox'), 'success');
     });
 
+    it('should dismiss suggestions on outside click', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+
+        const input = screen.getByPlaceholderText(/name or ID/i);
+        fireEvent.change(input, { target: { value: 'Justicar' } });
+
+        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+
+        fireEvent.mouseDown(document.body);
+
+        expect(screen.queryByText(/Justicar Aatrox/)).toBeNull();
+    });
+
+    it('should show suggestions again on focus if matches exist', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+
+        const input = screen.getByPlaceholderText(/name or ID/i);
+        fireEvent.change(input, { target: { value: 'Justicar' } });
+
+        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+
+        // Dismiss by clicking outside
+        fireEvent.mouseDown(document.body);
+        expect(screen.queryByText(/Justicar Aatrox/)).toBeNull();
+
+        // Focus input again
+        fireEvent.focus(input);
+        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+    });
+
+    it('should disable APPLY with non-matching text input', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+
+        const input = screen.getByPlaceholderText(/name or ID/i);
+        fireEvent.change(input, { target: { value: 'zzzzz' } });
+
+        const applyBtn = screen.getByText('APPLY').closest('button')!;
+        expect(applyBtn.disabled).toBe(true);
+    });
+
+    it('should handle mouse hover on suggestion items', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+
+        const input = screen.getByPlaceholderText(/name or ID/i);
+        fireEvent.change(input, { target: { value: 'Justicar' } });
+
+        const suggestion = await waitFor(() => screen.getByText(/Justicar Aatrox/));
+        const btn = suggestion.closest('button')!;
+
+        fireEvent.mouseEnter(btn);
+        expect(btn.style.background).toBe('rgb(42, 42, 62)');
+
+        fireEvent.mouseLeave(btn);
+        expect(btn.style.background).toBe('none');
+    });
+
     it('should go back to champion list from skin list', async () => {
         const props = createProps();
         await act(async () => {
@@ -246,5 +331,19 @@ describe('BackgroundTab', () => {
         const previewImg = await waitFor(() => document.querySelector('.bg-preview-thumb') as HTMLImageElement);
         fireEvent.error(previewImg);
         expect(previewImg.src).toContain('data:image/svg+xml');
+    });
+
+    it('should find supplemental skins for unloaded champions via search', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+
+        const input = screen.getByPlaceholderText(/name or ID/i);
+        fireEvent.change(input, { target: { value: 'Skins From Unloaded' } });
+
+        await waitFor(() => expect(screen.getByText(/Skins From Unloaded Champ/)).toBeDefined());
     });
 });
