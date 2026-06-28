@@ -611,6 +611,14 @@ button.bg-skin-item:focus {
   padding: 6px 8px;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
   pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+button.bg-skin-item:hover .bg-skin-overlay {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .bg-skin-name {
