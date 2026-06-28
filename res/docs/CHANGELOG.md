@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Minimize to Tray**: The close button now correctly hides the window to the system tray instead of force-quitting the app when the "Minimize to Tray" setting is enabled. The app stays running in the background, allowing the Auto-Restore Profile enforcer to re-apply bio and settings on LCU reconnect.
+- **Missing Background Skins**: Added a supplemental skin data system to include skins missing from CommunityDragon, starting with Immortalized Legend Ahri (ID: 103086).
 
 ### Changed
 - **Dependencies**: Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json.
