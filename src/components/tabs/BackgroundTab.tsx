@@ -57,6 +57,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
     const [loadingSkins, setLoadingSkins] = useState(false);
     const [champsLoaded, setChampsLoaded] = useState(false);
     const [directId, setDirectId] = useState('');
+    const [directName, setDirectName] = useState('');
     const skinCacheRef = useRef<Map<number, SkinEntry[]>>(new Map());
     const skinGridRef = useRef<HTMLDivElement>(null);
 
@@ -208,21 +209,28 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                     <h3 className="card-title" style={{ margin: 0 }}>Direct Skin ID</h3>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
                         <input
-                            type="number"
+                            type="text"
                             id="direct-skin-id-input"
-                            placeholder="Enter specific skin ID (e.g. 147001)"
+                            placeholder="Skin ID (e.g. 147001)"
                             value={directId}
                             onChange={(e) => setDirectId(e.target.value)}
-                            style={{ width: '100%', padding: '10px' }}
+                            style={{ width: '40%', padding: '10px' }}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Skin name (optional)"
+                            value={directName}
+                            onChange={(e) => setDirectName(e.target.value)}
+                            style={{ flex: 1, padding: '10px' }}
                         />
                     </div>
                     <button
                         className="primary-btn"
                         onClick={() => {
                             const id = Number.parseInt(directId, 10);
-                            if (!Number.isNaN(id) && id > 0) applyBackground(id, `Skin ${id}`);
+                            if (!Number.isNaN(id) && id > 0) applyBackground(id, directName.trim() || `Skin ${id}`);
                         }}
                         disabled={!lcu || loading || !directId.trim()}
                         style={{ padding: '10px 25px' }}
