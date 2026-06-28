@@ -37,7 +37,7 @@ const FALLBACK_SPLASH = "data:image/svg+xml," + encodeURIComponent(
         <rect x="155" y="50" width="90" height="75" rx="4" fill="none" stroke="#555" stroke-width="1.5"/>
         <circle cx="183" cy="72" r="5" fill="none" stroke="#555" stroke-width="1.5"/>
         <path d="M160 120 L183 98 L203 110 L223 90 L240 105" fill="none" stroke="#555" stroke-width="1.5" stroke-linejoin="round"/>
-        <text x="200" y="148" fill="#666" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle">Preview not available</text>
+        <text x="200" y="148" fill="#999" font-family="system-ui, sans-serif" font-size="15" text-anchor="middle">Preview not available</text>
     </svg>`
 );
 
