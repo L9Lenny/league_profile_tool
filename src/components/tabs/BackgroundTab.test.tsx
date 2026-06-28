@@ -5,13 +5,20 @@ import BackgroundTab from './BackgroundTab';
 describe('BackgroundTab', () => {
     const mockChampSummary = [
         { id: 1, name: 'Aatrox', alias: 'Aatrox', squarePortraitPath: '/assets/1.png' },
-        { id: 2, name: 'Ahri', alias: 'Ahri', squarePortraitPath: '/assets/2.png' }
+        { id: 103, name: 'Ahri', alias: 'Ahri', squarePortraitPath: '/assets/103.png' }
     ];
 
     const mockSkins = {
         skins: [
             { id: 1000, name: 'Default Aatrox', isBase: true, splashPath: '/assets/1000.jpg' },
             { id: 1001, name: 'Justicar Aatrox', isBase: false, splashPath: '/assets/1001.jpg' }
+        ]
+    };
+
+    const mockAhriSkins = {
+        skins: [
+            { id: 103000, name: 'Default Ahri', isBase: true, splashPath: '/assets/103000.jpg' },
+            { id: 103001, name: 'Dynasty Ahri', isBase: false, splashPath: '/assets/103001.jpg' }
         ]
     };
 
@@ -36,6 +43,12 @@ describe('BackgroundTab', () => {
                 return Promise.resolve({
                     ok: true,
                     json: async () => mockSkins
+                } as Response);
+            }
+            if (url.includes('champions/103.json')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => mockAhriSkins
                 } as Response);
             }
             return Promise.reject(new Error('Unknown URL'));
@@ -168,5 +181,42 @@ describe('BackgroundTab', () => {
         });
 
         await waitFor(() => expect(props.showToast).toHaveBeenCalledWith('Failed to load champion list', 'error'));
+    });
+
+    it('should include supplemental skins from JSON data', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => {
+            const ahriBtn = screen.getByText('Ahri').closest('button')!;
+            fireEvent.click(ahriBtn);
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText('Dynasty Ahri')).toBeDefined();
+            expect(screen.getByText('Immortalized Legend Ahri')).toBeDefined();
+            expect(screen.getByText('ID: 103086')).toBeDefined();
+        });
+    });
+
+    it('should show placeholder when splash image fails to load', async () => {
+        const props = createProps();
+        await act(async () => {
+            render(<BackgroundTab {...props} />);
+        });
+
+        await waitFor(() => fireEvent.click(screen.getByText('Aatrox')));
+
+        const img = await waitFor(() => screen.getByAltText('Justicar Aatrox') as HTMLImageElement);
+        fireEvent.error(img);
+        expect(img.src).toContain('data:image/svg+xml');
+
+        // Select the skin to show preview strip
+        fireEvent.click(screen.getByText('Justicar Aatrox'));
+        const previewImg = await waitFor(() => document.querySelector('.bg-preview-thumb') as HTMLImageElement);
+        fireEvent.error(previewImg);
+        expect(previewImg.src).toContain('data:image/svg+xml');
     });
 });
