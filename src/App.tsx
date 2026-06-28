@@ -131,12 +131,17 @@ function App() {
       } catch (err: unknown) {
         addLog(`Shutdown bio application failed: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
-        await invoke("force_quit").catch(() => { });
+        if (minimizeToTray) {
+          await appWindow.hide().catch(() => { });
+          closingRef.current = false;
+        } else {
+          await invoke("force_quit").catch(() => { });
+        }
       }
     }).then((fn) => { unlisten = fn; });
 
     return () => { if (unlisten) unlisten(); };
-  }, [musicBio.enabled, lcu, applyIdleBio]);
+  }, [musicBio.enabled, lcu, applyIdleBio, minimizeToTray]);
 
   const toggleMinimizeToTray = async () => {
     try {
