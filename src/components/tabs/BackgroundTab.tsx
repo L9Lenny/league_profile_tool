@@ -31,6 +31,17 @@ function cdnUrl(path: string): string {
     return CDRAGON_BASE + path.replace('/lol-game-data/assets', '').toLowerCase();
 }
 
+const FALLBACK_SPLASH = "data:image/svg+xml," + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
+        <rect width="400" height="225" fill="#1a1a2e"/>
+        <text x="50%" y="50%" fill="#666" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">Preview not available</text>
+    </svg>`
+);
+
+const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = FALLBACK_SPLASH;
+};
+
 const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
     const [loading, setLoading] = useState(false);
     const [champions, setChampions] = useState<ChampionSummary[]>([]);
@@ -268,7 +279,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                                         onClick={() => setSelectedSkin(skin)}
                                         title={`${skin.name} (ID: ${skin.id})`}
                                     >
-                                        <img src={cdnUrl(skin.splashPath)} alt={skin.name} loading="lazy" />
+                                        <img src={cdnUrl(skin.splashPath)} alt={skin.name} loading="lazy" onError={handleImgError} />
                                         <div className="bg-skin-overlay">
                                             <div className="bg-skin-name">{skin.name}</div>
                                             <div className="bg-skin-id">ID: {skin.id}</div>
@@ -280,7 +291,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
 
                         {selectedSkin && (
                             <div className="bg-preview-strip fadeIn">
-                                <img src={cdnUrl(selectedSkin.splashPath)} className="bg-preview-thumb" alt="" />
+                                <img src={cdnUrl(selectedSkin.splashPath)} className="bg-preview-thumb" alt="" onError={handleImgError} />
                                 <div className="bg-preview-text">
                                     <span className="bg-preview-name">{selectedSkin.name}</span>
                                     <span className="bg-preview-meta">ID: {selectedSkin.id}</span>
