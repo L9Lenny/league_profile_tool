@@ -113,38 +113,43 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
     // Build skin search index after champions load
     useEffect(() => {
         if (!champsLoaded || allSkinsLoaded || champions.length === 0) return;
-        (async () => {
+
+        const fetchChampData = async (champ: ChampionSummary) => {
+            try {
+                const res = await fetch(`${CDRAGON_BASE}/v1/champions/${champ.id}.json`);
+                if (!res.ok) return null;
+                return { champ, data: await res.json() };
+            } catch { return null; }
+        };
+
+        const addChampToIndex = (champ: ChampionSummary, data: any, index: SkinSearchEntry[]) => {
+            const skinList: SkinEntry[] = (data.skins || []).map((s: any) => ({
+                id: s.id, name: s.name, isBase: s.isBase, splashPath: s.splashPath,
+            }));
+            const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(champ.id)];
+            if (extras) {
+                const existingIds = new Set(skinList.map(s => s.id));
+                for (const extra of extras) {
+                    if (!existingIds.has(extra.id)) skinList.push(extra);
+                }
+            }
+            skinCacheRef.current.set(champ.id, skinList);
+            for (const skin of skinList) {
+                index.push({ id: skin.id, name: skin.name, championName: champ.name });
+            }
+        };
+
+        const buildIndex = async () => {
             const index: SkinSearchEntry[] = [];
             const batchSize = 20;
             for (let i = 0; i < champions.length; i += batchSize) {
                 const batch = champions.slice(i, i + batchSize);
-                const results = await Promise.allSettled(
-                    batch.map(champ =>
-                        fetch(`${CDRAGON_BASE}/v1/champions/${champ.id}.json`)
-                            .then(r => r.ok ? r.json() : Promise.reject())
-                            .then(data => ({ champ, data }))
-                    )
-                );
+                const results = await Promise.allSettled(batch.map(champ => fetchChampData(champ)));
                 for (const result of results) {
-                    if (result.status !== 'fulfilled') continue;
-                    const { champ, data } = result.value;
-                    const skinList: SkinEntry[] = (data.skins || []).map((s: any) => ({
-                        id: s.id, name: s.name, isBase: s.isBase, splashPath: s.splashPath,
-                    }));
-                    const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(champ.id)];
-                    if (extras) {
-                        const existingIds = new Set(skinList.map(s => s.id));
-                        for (const extra of extras) {
-                            if (!existingIds.has(extra.id)) skinList.push(extra);
-                        }
-                    }
-                    skinCacheRef.current.set(champ.id, skinList);
-                    for (const skin of skinList) {
-                        index.push({ id: skin.id, name: skin.name, championName: champ.name });
-                    }
+                    if (result.status !== 'fulfilled' || !result.value) continue;
+                    addChampToIndex(result.value.champ, result.value.data, index);
                 }
             }
-            // Also seed supplemental skins for unknown champions
             for (const [champIdStr, extras] of Object.entries(supplementalSkins)) {
                 for (const skin of extras as SkinEntry[]) {
                     if (!index.some(s => s.id === skin.id)) {
@@ -154,7 +159,9 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             }
             allSkinsRef.current = index;
             setAllSkinsLoaded(true);
-        })();
+        };
+
+        buildIndex();
     }, [champsLoaded, allSkinsLoaded, champions]);
 
     // Fetch skins for a specific champion (lazy, cached)
