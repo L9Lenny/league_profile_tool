@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6] - 2026-06-28
+
+### Changed
+- **Dependencies**: Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json.
+- **Dependencies**: Updated `vite` to `8.1.0` in #404, `@tauri-apps/cli` to `2.11.3` in #407 in devDependencies.
+- **Dependencies**: Updated `sysinfo` to `0.39.5` in #405 in Cargo.lock.
+
 ## [1.9.5] - 2026-06-25
 
 ### Added
