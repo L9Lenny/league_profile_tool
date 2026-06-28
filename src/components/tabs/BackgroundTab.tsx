@@ -38,19 +38,14 @@ const FALLBACK_SPLASH = "data:image/svg+xml," + encodeURIComponent(
                 <stop offset="0%" stop-color="#0f0f23"/>
                 <stop offset="100%" stop-color="#1a1a2e"/>
             </linearGradient>
-            <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#c8aa6e" stop-opacity="0.15"/>
-                <stop offset="100%" stop-color="#c8aa6e" stop-opacity="0"/>
-            </linearGradient>
         </defs>
         <rect width="400" height="225" fill="url(#bg)"/>
-        <rect x="120" y="65" width="160" height="96" rx="8" fill="none" stroke="#c8aa6e" stroke-opacity="0.25" stroke-width="1.5"/>
-        <path d="M160 130 L180 110 L200 130 L230 100 L260 120" fill="none" stroke="#c8aa6e" stroke-opacity="0.12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="160" y1="90" x2="240" y2="130" stroke="#c8aa6e" stroke-opacity="0.2" stroke-width="1.5"/>
-        <circle cx="220" cy="93" r="3" fill="#c8aa6e" fill-opacity="0.2"/>
-        <rect x="150" y="78" width="100" height="2" rx="1" fill="#c8aa6e" fill-opacity="0.08" transform="rotate(-20 200 79)"/>
-        <rect x="150" y="78" width="100" height="2" rx="1" fill="#c8aa6e" fill-opacity="0.08" transform="rotate(20 200 79)"/>
-        <text x="200" y="192" fill="#c8aa6e" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle" letter-spacing="1.5" opacity="0.5">PREVIEW NOT AVAILABLE</text>
+        <rect x="140" y="60" width="120" height="80" rx="4" fill="none" stroke="#c8aa6e" stroke-opacity="0.2" stroke-width="1.5"/>
+        <circle cx="175" cy="85" r="6" fill="none" stroke="#c8aa6e" stroke-opacity="0.2" stroke-width="1.5"/>
+        <path d="M145 135 L175 110 L200 125 L225 95 L245 115" fill="none" stroke="#c8aa6e" stroke-opacity="0.15" stroke-width="1.5" stroke-linejoin="round"/>
+        <line x1="145" y1="65" x2="255" y2="135" stroke="#e74c3c" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="255" y1="65" x2="145" y2="135" stroke="#e74c3c" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="200" y="185" fill="#c8aa6e" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle" letter-spacing="1.5" opacity="0.5">PREVIEW NOT AVAILABLE</text>
     </svg>`
 );
 
