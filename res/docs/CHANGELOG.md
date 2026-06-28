@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.6] - 2026-06-28
 
 ### Added
-- **Supplemental Skin Data**: Added a system to include skins missing from CommunityDragon via `src/data/supplemental-skins.json`. The first entry is Immortalized Legend Ahri (ID: 103086). Extend the JSON file to add more missing skins.
+- **Supplemental Skin Data**: Added a system to include skins missing from CommunityDragon via `src/data/supplemental-skins.json`, resolving issue #303. The first entry is Immortalized Legend Ahri (ID: 103086). Extend the JSON file to add more missing skins.
 - **Fallback Splash Placeholder**: When a splash image fails to load (404), a styled placeholder with "Preview not available" text is now shown instead of a broken image icon.
-- **Custom Skin Name in Direct Skin ID**: Added an optional "Skin name" field next to the Direct Skin ID input. When provided, the custom name is used in toast notifications and logs instead of the generic "Skin {id}".
+- **Skin Search by Name**: The Direct Skin ID input now accepts skin names with autocomplete suggestions. Search by typing a skin name and select from the dropdown, or enter a numeric ID directly.
 
 ### Changed
 - **Skin Name Overlay**: The skin name overlay now appears only on hover with a smooth slide-up animation, keeping the splash art fully visible by default.

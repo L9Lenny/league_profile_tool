@@ -131,7 +131,9 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        const input = screen.getByPlaceholderText(/Skin ID/i);
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+
+        const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: '12345' } });
 
         const applyBtn = screen.getByText('APPLY');
@@ -143,25 +145,29 @@ describe('BackgroundTab', () => {
         expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Skin 12345'), 'success');
     });
 
-    it('should use custom skin name when provided', async () => {
+    it('should show skin suggestions and apply by name', async () => {
         const props = createProps();
         await act(async () => {
             render(<BackgroundTab {...props} />);
         });
 
-        const idInput = screen.getByPlaceholderText(/Skin ID/i);
-        fireEvent.change(idInput, { target: { value: '99999' } });
+        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
 
-        const nameInput = screen.getByPlaceholderText(/Skin name/i);
-        fireEvent.change(nameInput, { target: { value: 'Immortalized Legend Ahri' } });
+        const input = screen.getByPlaceholderText(/name or ID/i);
+        fireEvent.change(input, { target: { value: 'Justicar' } });
+
+        const suggestion = await waitFor(() => screen.getByText(/Justicar Aatrox/));
+        expect(suggestion).toBeDefined();
+
+        fireEvent.click(suggestion);
 
         const applyBtn = screen.getByText('APPLY');
         await act(async () => {
             fireEvent.click(applyBtn);
         });
 
-        expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 99999 }));
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Immortalized Legend Ahri'), 'success');
+        expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 1001 }));
+        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Justicar Aatrox'), 'success');
     });
 
     it('should go back to champion list from skin list', async () => {

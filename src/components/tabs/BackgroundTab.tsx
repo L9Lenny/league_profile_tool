@@ -25,6 +25,12 @@ interface SkinEntry {
     splashPath: string;
 }
 
+interface SkinSearchEntry {
+    id: number;
+    name: string;
+    championName: string;
+}
+
 const CDRAGON_BASE = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default';
 
 function cdnUrl(path: string): string {
@@ -56,10 +62,15 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
     const [loadingChamps, setLoadingChamps] = useState(false);
     const [loadingSkins, setLoadingSkins] = useState(false);
     const [champsLoaded, setChampsLoaded] = useState(false);
-    const [directId, setDirectId] = useState('');
-    const [directName, setDirectName] = useState('');
+    const [skinQuery, setSkinQuery] = useState('');
+    const [skinSuggestions, setSkinSuggestions] = useState<SkinSearchEntry[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [selectedDirectSkin, setSelectedDirectSkin] = useState<SkinSearchEntry | null>(null);
+    const [allSkinsLoaded, setAllSkinsLoaded] = useState(false);
     const skinCacheRef = useRef<Map<number, SkinEntry[]>>(new Map());
     const skinGridRef = useRef<HTMLDivElement>(null);
+    const allSkinsRef = useRef<SkinSearchEntry[]>([]);
+    const searchRef = useRef<HTMLDivElement>(null);
 
     // Fetch current background skin ID from LCU
     const fetchCurrentBackground = useCallback(async () => {
@@ -98,6 +109,53 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         if (!champsLoaded && !loadingChamps) fetchChampions();
         if (lcu) fetchCurrentBackground();
     }, [champsLoaded, loadingChamps, fetchChampions, lcu, fetchCurrentBackground]);
+
+    // Build skin search index after champions load
+    useEffect(() => {
+        if (!champsLoaded || allSkinsLoaded || champions.length === 0) return;
+        (async () => {
+            const index: SkinSearchEntry[] = [];
+            const batchSize = 20;
+            for (let i = 0; i < champions.length; i += batchSize) {
+                const batch = champions.slice(i, i + batchSize);
+                const results = await Promise.allSettled(
+                    batch.map(champ =>
+                        fetch(`${CDRAGON_BASE}/v1/champions/${champ.id}.json`)
+                            .then(r => r.ok ? r.json() : Promise.reject())
+                            .then(data => ({ champ, data }))
+                    )
+                );
+                for (const result of results) {
+                    if (result.status !== 'fulfilled') continue;
+                    const { champ, data } = result.value;
+                    const skinList: SkinEntry[] = (data.skins || []).map((s: any) => ({
+                        id: s.id, name: s.name, isBase: s.isBase, splashPath: s.splashPath,
+                    }));
+                    const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(champ.id)];
+                    if (extras) {
+                        const existingIds = new Set(skinList.map(s => s.id));
+                        for (const extra of extras) {
+                            if (!existingIds.has(extra.id)) skinList.push(extra);
+                        }
+                    }
+                    skinCacheRef.current.set(champ.id, skinList);
+                    for (const skin of skinList) {
+                        index.push({ id: skin.id, name: skin.name, championName: champ.name });
+                    }
+                }
+            }
+            // Also seed supplemental skins for unknown champions
+            for (const [champIdStr, extras] of Object.entries(supplementalSkins)) {
+                for (const skin of extras as SkinEntry[]) {
+                    if (!index.some(s => s.id === skin.id)) {
+                        index.push({ id: skin.id, name: skin.name, championName: `Champion ${champIdStr}` });
+                    }
+                }
+            }
+            allSkinsRef.current = index;
+            setAllSkinsLoaded(true);
+        })();
+    }, [champsLoaded, allSkinsLoaded, champions]);
 
     // Fetch skins for a specific champion (lazy, cached)
     const selectChampion = useCallback(async (champ: ChampionSummary) => {
@@ -156,6 +214,34 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         )
         : champions;
 
+    // Skin search suggestions
+    useEffect(() => {
+        if (!skinQuery.trim() || selectedDirectSkin) {
+            setSkinSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+        const q = skinQuery.toLowerCase();
+        const isNumeric = /^\d+$/.test(q);
+        const matches = allSkinsRef.current.filter(s => {
+            if (isNumeric) return String(s.id).startsWith(q);
+            return s.name.toLowerCase().includes(q);
+        }).slice(0, 12);
+        setSkinSuggestions(matches);
+        setShowSuggestions(matches.length > 0);
+    }, [skinQuery, selectedDirectSkin]);
+
+    // Close suggestions on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
     const applyBackground = async (skinId: number, skinName: string) => {
         if (!lcu) return;
         setLoading(true);
@@ -208,31 +294,66 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                     <Hash size={18} style={{ color: 'var(--hextech-gold)' }} />
                     <h3 className="card-title" style={{ margin: 0 }}>Direct Skin ID</h3>
                 </div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <div ref={searchRef} style={{ flex: 1, position: 'relative' }}>
                         <input
                             type="text"
-                            id="direct-skin-id-input"
-                            placeholder="Skin ID (e.g. 147001)"
-                            value={directId}
-                            onChange={(e) => setDirectId(e.target.value)}
-                            style={{ width: '40%', padding: '10px' }}
+                            placeholder="Search skin by name or ID..."
+                            value={selectedDirectSkin ? `${selectedDirectSkin.name} (${selectedDirectSkin.championName})` : skinQuery}
+                            onChange={(e) => {
+                                setSkinQuery(e.target.value);
+                                setSelectedDirectSkin(null);
+                            }}
+                            onFocus={() => {
+                                if (skinSuggestions.length > 0) setShowSuggestions(true);
+                            }}
+                            style={{ width: '100%', padding: '10px' }}
                         />
-                        <input
-                            type="text"
-                            placeholder="Skin name (optional)"
-                            value={directName}
-                            onChange={(e) => setDirectName(e.target.value)}
-                            style={{ flex: 1, padding: '10px' }}
-                        />
+                        {showSuggestions && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, right: 0,
+                                background: '#1e1e2f', border: '1px solid #333',
+                                borderRadius: '8px', zIndex: 100, maxHeight: '300px',
+                                overflowY: 'auto', marginTop: '4px',
+                            }}>
+                                {skinSuggestions.map(s => (
+                                    <button
+                                        key={s.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedDirectSkin(s);
+                                            setShowSuggestions(false);
+                                        }}
+                                        style={{
+                                            display: 'block', width: '100%', padding: '10px 12px',
+                                            textAlign: 'left', background: 'none', border: 'none',
+                                            borderBottom: '1px solid #2a2a3e', cursor: 'pointer',
+                                            color: '#ddd', fontFamily: 'inherit', fontSize: '0.85rem',
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#2a2a3e'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                                    >
+                                        <span style={{ color: '#c8aa6e' }}>{s.championName}</span>
+                                        {' — '}{s.name}
+                                        <span style={{ color: '#666', marginLeft: '8px', fontSize: '0.75rem' }}>
+                                            ID: {s.id}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <button
                         className="primary-btn"
                         onClick={() => {
-                            const id = Number.parseInt(directId, 10);
-                            if (!Number.isNaN(id) && id > 0) applyBackground(id, directName.trim() || `Skin ${id}`);
+                            if (selectedDirectSkin) {
+                                applyBackground(selectedDirectSkin.id, selectedDirectSkin.name);
+                            } else {
+                                const id = Number.parseInt(skinQuery, 10);
+                                if (!Number.isNaN(id) && id > 0) applyBackground(id, `Skin ${id}`);
+                            }
                         }}
-                        disabled={!lcu || loading || !directId.trim()}
+                        disabled={!lcu || loading || (!selectedDirectSkin && (!skinQuery.trim() || Number.isNaN(Number.parseInt(skinQuery, 10))))}
                         style={{ padding: '10px 25px' }}
                     >
                         APPLY
