@@ -1,7 +1,7 @@
 {
     "version": "1.9.6",
     "notes": "## [1.9.6] - 2026-06-28  ### Added - **Supplemental Skin Data**: Added a system to include skins missing from CommunityDragon via `src/data/supplemental-skins.json`, resolving issue #303. The first entry is Immortalized Legend Ahri (ID: 103086). Extend the JSON file to add more missing skins. - **Fallback Splash Placeholder**: When a splash image fails to load (404), a styled placeholder with \"Preview not available\" text is now shown instead of a broken image icon. - **Skin Search by Name**: The Direct Skin ID input now accepts skin names with autocomplete suggestions. Search by typing a skin name and select from the dropdown, or enter a numeric ID directly.  ### Changed - **Skin Name Overlay**: The skin name overlay now appears only on hover with a smooth slide-up animation, keeping the splash art fully visible by default.  ### Fixed - **Minimize to Tray**: The close button now correctly hides the window to the system tray instead of force-quitting the app when the \"Minimize to Tray\" setting is enabled. The app stays running in the background, allowing the Auto-Restore Profile enforcer to re-apply bio and settings on LCU reconnect.  ### Dependencies - Updated `lucide-react` to `1.21.0` in #406, `react-dom` to `19.2.7` in #408, `react` to `19.2.7` and `@types/react` to `20.2.4` in #403 in package.json. - Updated `vite` to `8.1.0` in #404, `@tauri-apps/cli` to `2.11.3` in #407 in devDependencies. - Updated `sysinfo` to `0.39.5` in #405 in Cargo.lock.  ",
-    "pub_date": "2026-06-28T20:38:20Z",
+    "pub_date": "2026-06-28T20:39:51Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
