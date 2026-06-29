@@ -24,6 +24,9 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
   <img src="https://img.shields.io/endpoint?url=https://downloadsbadge.duckdns.org/downloads&cacheSeconds=0&style=flat-square" />
 </a>
 
+[![Downloads](https://img.shields.io/endpoint?url=https://downloadsbadge.duckdns.org/downloads&style=flat-square)](https://github.com/L9Lenny/league_profile_tool/releases)  
+
+
 <a href="LICENSE">
   <img src="https://img.shields.io/github/license/L9Lenny/league_profile_tool?style=flat-square&color=9e6a03&cacheSeconds=0" alt="License"/>
 </a>
