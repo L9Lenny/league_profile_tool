@@ -20,9 +20,6 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
   <img src="https://img.shields.io/badge/Code%20Quality-SonarCloud-F3702A?style=flat-square&logo=sonarcloud&logoColor=white&cacheSeconds=0" alt="Code Quality"/>
 </a>
 
-<a href="https://github.com/L9Lenny/league_profile_tool/releases">
-  <img src="https://img.shields.io/endpoint?url=https://downloadsbadge.duckdns.org/downloads&cacheSeconds=0&style=flat-square" />
-</a>
 
 [![Downloads](https://img.shields.io/endpoint?url=https://downloadsbadge.duckdns.org/downloads&style=flat-square)](https://github.com/L9Lenny/league_profile_tool/releases)  
 
