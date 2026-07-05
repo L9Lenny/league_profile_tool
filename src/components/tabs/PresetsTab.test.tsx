@@ -32,7 +32,9 @@ describe('PresetsTab', () => {
             iconId: '500',
             backgroundId: '266000',
             tokens: '[1,2,3]',
-            title: 'Challenger'
+            title: 'Challenger',
+            bannerAccent: '3',
+            crestBorder: '5'
         }
     ];
 
@@ -40,6 +42,12 @@ describe('PresetsTab', () => {
         vi.clearAllMocks();
         localStorage.clear();
         vi.mocked(invoke).mockResolvedValue(JSON.stringify(mockPresets));
+        mockLcuRequest.mockImplementation((method: string, endpoint: string) => {
+            if (method === 'GET' && endpoint.includes('summary-player-data')) {
+                return Promise.resolve({ bannerAccent: '3', crestBorder: '5', prestigeCrestBorderLevel: 0 });
+            }
+            return Promise.resolve({});
+        });
     });
 
     it('should render profiles presets header and load items from Tauri disk storage', async () => {
@@ -116,8 +124,6 @@ describe('PresetsTab', () => {
     });
 
     it('should apply a chosen preset successfully to the League client via LCU endpoint triggers', async () => {
-        mockLcuRequest.mockResolvedValue({}); // success calls
-
         render(
             <PresetsTab 
                 lcu={mockLcu} 
@@ -146,7 +152,10 @@ describe('PresetsTab', () => {
             });
             expect(mockLcuRequest).toHaveBeenCalledWith('POST', '/lol-challenges/v1/update-player-preferences', {
                 challengeIds: [1, 2, 3],
-                title: 'Challenger'
+                title: 'Challenger',
+                bannerAccent: '3',
+                crestBorder: '5',
+                prestigeCrestBorderLevel: 0
             });
             expect(mockShowToast).toHaveBeenCalledWith('Preset "Classic Solo Queue" applied successfully!', 'success');
         });

@@ -39,7 +39,12 @@ describe('useProfileEnforcer', () => {
         localStorage.setItem(SAVED_TOKENS_KEY, '[1,2]');
         localStorage.setItem(SAVED_TITLE_KEY, 'Challenger');
 
-        mockLcuRequest.mockResolvedValue({});
+        mockLcuRequest.mockImplementation((method: string, endpoint: string) => {
+            if (method === 'GET' && endpoint.includes('summary-player-data')) {
+                return Promise.resolve({ bannerAccent: '3', crestBorder: '5', prestigeCrestBorderLevel: 0 });
+            }
+            return Promise.resolve({});
+        });
 
         renderHook(() => useProfileEnforcer(mockLcu, mockLcuRequest, mockAddLog));
 
@@ -61,7 +66,10 @@ describe('useProfileEnforcer', () => {
         });
         expect(mockLcuRequest).toHaveBeenCalledWith('POST', '/lol-challenges/v1/update-player-preferences', {
             challengeIds: [1, 2],
-            title: 'Challenger'
+            title: 'Challenger',
+            bannerAccent: '3',
+            crestBorder: '5',
+            prestigeCrestBorderLevel: 0
         });
     });
 

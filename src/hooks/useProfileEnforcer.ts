@@ -82,15 +82,32 @@ export function useProfileEnforcer(
                 runWithRetry("Status & Bio", () => lcuRequest("PUT", "/lol-chat/v1/me", statusBody));
             }
 
-            // 3. Tokens & Title
+            // 3. Tokens, Title
             const savedTokens = localStorage.getItem(SAVED_TOKENS_KEY);
             const savedTitle = localStorage.getItem(SAVED_TITLE_KEY);
+
             if (savedTokens || savedTitle !== null) {
-                const challengeIds = savedTokens ? JSON.parse(savedTokens) : undefined;
-                const prefBody: any = {};
-                if (challengeIds) prefBody.challengeIds = challengeIds;
-                if (savedTitle !== null) prefBody.title = savedTitle;
-                runWithRetry("Tokens & Title", () => lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody));
+                runWithRetry("Tokens & Regalia", async () => {
+                    const challengeIds = savedTokens ? JSON.parse(savedTokens) : undefined;
+                    const prefBody: any = {};
+                    if (challengeIds) prefBody.challengeIds = challengeIds;
+                    if (savedTitle !== null && savedTitle !== "-1") prefBody.title = savedTitle;
+
+                    // The update endpoint does a FULL REPLACE — merge current
+                    // preferences so we don't reset banner/crest/prestige.
+                    try {
+                        const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
+                        if (summary) {
+                            prefBody.bannerAccent = summary.bannerId ?? summary.preferences?.bannerId ?? summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
+                            prefBody.crestBorder = summary.crestId ?? summary.preferences?.crestId ?? summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
+                            prefBody.prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
+                        }
+                    } catch (err) {
+                        addLog(`Auto-Enforcer warning: Could not read current preferences to merge: ${err}`);
+                    }
+
+                    await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
+                });
             }
 
 
