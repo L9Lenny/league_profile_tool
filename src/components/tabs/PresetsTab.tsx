@@ -27,6 +27,8 @@ interface ProfilePreset {
     backgroundId: string | null;
     tokens: string | null;
     title?: string | null;
+    bannerAccent?: string | null;
+    crestBorder?: string | null;
 }
 
 /** Legacy key used before disk persistence — kept for migration */
@@ -186,7 +188,10 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
         }
     };
 
-    const applyPresetTokensAndTitle = async (tokens: string | null, title?: string | null): Promise<boolean> => {
+    const applyPresetTokensAndTitle = async (
+        tokens: string | null,
+        title?: string | null
+    ): Promise<boolean> => {
         const payload: any = {};
         
         if (tokens === null) {
@@ -200,11 +205,23 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
             }
         }
 
-        if (title !== null && title !== undefined) {
+        if (title !== null && title !== undefined && title !== "-1") {
             localStorage.setItem(SAVED_TITLE_KEY, title);
             payload.title = title;
         } else {
             localStorage.removeItem(SAVED_TITLE_KEY);
+        }
+        // The update endpoint does a FULL REPLACE — merge current preferences
+        // so we don't reset banner/crest/prestige.
+        try {
+            const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
+            if (summary) {
+                payload.bannerAccent = payload.bannerAccent ?? summary.bannerId ?? summary.preferences?.bannerId ?? summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
+                payload.crestBorder = payload.crestBorder ?? summary.crestId ?? summary.preferences?.crestId ?? summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
+                payload.prestigeCrestBorderLevel = payload.prestigeCrestBorderLevel ?? summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
+            }
+        } catch (err) {
+            addLog(`Warning: Could not read current preferences to merge in preset: ${err}`);
         }
 
         if (Object.keys(payload).length > 0) {

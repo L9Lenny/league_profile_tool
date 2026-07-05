@@ -5,6 +5,8 @@ export const SAVED_ICON_KEY         = "profile_saved_icon_v1";
 export const SAVED_BACKGROUND_KEY   = "profile_saved_background_v1";
 export const SAVED_TOKENS_KEY       = "profile_saved_tokens_v1";
 export const SAVED_TITLE_KEY        = "profile_saved_title_v1";
+export const SAVED_BANNER_ACCENT_KEY = "profile_saved_banner_accent_v1";
+export const SAVED_CREST_BORDER_KEY = "profile_saved_crest_border_v1";
 
 // Rank & Challenge Overrides
 export const SAVED_RANK_QUEUE_KEY   = "profile_saved_rank_queue_v1";

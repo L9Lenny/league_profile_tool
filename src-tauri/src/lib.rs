@@ -117,6 +117,9 @@ fn is_allowed_lcu_request(method: &str, endpoint: &str) -> bool {
     if method == "PUT" && endpoint.starts_with("/lol-summoner/v1/current-summoner/icon") {
         return true;
     }
+    if method == "GET" && endpoint.starts_with("/lol-regalia/v3/inventory/") {
+        return true;
+    }
 
     false
 }

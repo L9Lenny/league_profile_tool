@@ -32,7 +32,9 @@ describe('PresetsTab', () => {
             iconId: '500',
             backgroundId: '266000',
             tokens: '[1,2,3]',
-            title: 'Challenger'
+            title: 'Challenger',
+            bannerAccent: '3',
+            crestBorder: '5'
         }
     ];
 
@@ -40,6 +42,12 @@ describe('PresetsTab', () => {
         vi.clearAllMocks();
         localStorage.clear();
         vi.mocked(invoke).mockResolvedValue(JSON.stringify(mockPresets));
+        mockLcuRequest.mockImplementation((method: string, endpoint: string) => {
+            if (method === 'GET' && endpoint.includes('summary-player-data')) {
+                return Promise.resolve({ bannerAccent: '3', crestBorder: '5', prestigeCrestBorderLevel: 0 });
+            }
+            return Promise.resolve({});
+        });
     });
 
     it('should render profiles presets header and load items from Tauri disk storage', async () => {
@@ -116,8 +124,6 @@ describe('PresetsTab', () => {
     });
 
     it('should apply a chosen preset successfully to the League client via LCU endpoint triggers', async () => {
-        mockLcuRequest.mockResolvedValue({}); // success calls
-
         render(
             <PresetsTab 
                 lcu={mockLcu} 
@@ -146,9 +152,88 @@ describe('PresetsTab', () => {
             });
             expect(mockLcuRequest).toHaveBeenCalledWith('POST', '/lol-challenges/v1/update-player-preferences', {
                 challengeIds: [1, 2, 3],
-                title: 'Challenger'
+                title: 'Challenger',
+                bannerAccent: '3',
+                crestBorder: '5',
+                prestigeCrestBorderLevel: 0
             });
             expect(mockShowToast).toHaveBeenCalledWith('Preset "Classic Solo Queue" applied successfully!', 'success');
+        });
+    });
+
+    it('should not send title when preset title is -1', async () => {
+        const presetWithMinusOneTitle = [{
+            id: 'preset-2',
+            name: 'No Title Preset',
+            bio: null,
+            availability: null,
+            iconId: null,
+            backgroundId: null,
+            tokens: '[1]',
+            title: '-1',
+        }];
+        vi.mocked(invoke).mockResolvedValue(JSON.stringify(presetWithMinusOneTitle));
+
+        render(
+            <PresetsTab
+                lcu={mockLcu}
+                showToast={mockShowToast}
+                addLog={mockAddLog}
+                lcuRequest={mockLcuRequest}
+            />
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('No Title Preset')).toBeDefined();
+        });
+
+        const loadBtn = screen.getByText('LOAD');
+        await act(async () => {
+            fireEvent.click(loadBtn);
+        });
+
+        await waitFor(() => {
+            const updateCall = mockLcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === 'POST' && c[1].includes('update-player-preferences')
+            );
+            expect(updateCall).toBeDefined();
+            expect(updateCall![2].title).toBeUndefined();
+        });
+    });
+
+    it('should apply preset even when summary fetch fails', async () => {
+        mockLcuRequest.mockImplementation((method: string, endpoint: string) => {
+            if (method === 'GET' && endpoint.includes('summary-player-data')) {
+                return Promise.reject(new Error('Summary unavailable'));
+            }
+            return Promise.resolve({});
+        });
+
+        render(
+            <PresetsTab
+                lcu={mockLcu}
+                showToast={mockShowToast}
+                addLog={mockAddLog}
+                lcuRequest={mockLcuRequest}
+            />
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Classic Solo Queue')).toBeDefined();
+        });
+
+        const loadBtn = screen.getByText('LOAD');
+        await act(async () => {
+            fireEvent.click(loadBtn);
+        });
+
+        await waitFor(() => {
+            const updateCall = mockLcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === 'POST' && c[1].includes('update-player-preferences')
+            );
+            expect(updateCall).toBeDefined();
+            expect(updateCall![2].challengeIds).toEqual([1, 2, 3]);
+            expect(updateCall![2].title).toBe('Challenger');
         });
     });
 

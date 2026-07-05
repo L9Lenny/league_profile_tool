@@ -1465,8 +1465,6 @@ button.bg-skin-item:hover .bg-skin-overlay {
 }
 
 .tokens-banner-copy-btn {
-  position: absolute;
-  right: 12px;
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -1476,6 +1474,7 @@ button.bg-skin-item:hover .bg-skin-overlay {
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
+  flex-shrink: 0;
 }
 
 .tokens-banner-copy-btn:hover {
