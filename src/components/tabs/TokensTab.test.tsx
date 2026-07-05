@@ -206,7 +206,7 @@ describe('TokensTab', () => {
         const regaliaFetchCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
             (c) => typeof c[0] === 'string' && (c[0] as string).includes('regalia.json')
         );
-        expect(regaliaFetchCalls.length).toBe(0);
+        expect(regaliaFetchCalls).toHaveLength(0);
 
         const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
         expect(bannerSelect?.length).toBe(3); // No Banner + 2 cached
@@ -279,5 +279,149 @@ describe('TokensTab', () => {
         expect(applyCall).toBeDefined();
         expect(applyCall![2]).toHaveProperty('bannerAccent');
         expect(applyCall![2].bannerAccent).toBe('4');
+    });
+
+    it('should show REGALIA_BANNER ownership error on apply', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockImplementation((_method, endpoint) => {
+            if (endpoint.includes('summary-player-data')) return Promise.resolve({ bannerId: '99', crestId: '3', topChallenges: [{ id: 1 }] });
+            if (endpoint.includes('challenges/local-player')) return Promise.resolve([{ id: 1, name: 'Test', currentLevel: 'GOLD' }]);
+            if (endpoint.includes('titles')) return Promise.resolve([]);
+            if (endpoint.includes('current-summoner')) return Promise.resolve({ displayName: 'Test' });
+            if (endpoint.includes('update-player-preferences')) return Promise.reject(new Error('LCU Error: {"message": "Player does not own REGALIA_BANNER item 99"}'));
+            return Promise.resolve({});
+        });
+
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const applyBtn = screen.getByText('APPLY CHANGES');
+        await act(async () => {
+            fireEvent.click(applyBtn);
+        });
+
+        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Banner Accent'), 'error');
+    });
+
+    it('should show crest ownership error for non-REGALIA ownership errors', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockImplementation((_method, endpoint) => {
+            if (endpoint.includes('summary-player-data')) return Promise.resolve({ bannerId: '4', crestId: '99', topChallenges: [{ id: 1 }] });
+            if (endpoint.includes('challenges/local-player')) return Promise.resolve([{ id: 1, name: 'Test', currentLevel: 'GOLD' }]);
+            if (endpoint.includes('titles')) return Promise.resolve([]);
+            if (endpoint.includes('current-summoner')) return Promise.resolve({ displayName: 'Test' });
+            if (endpoint.includes('update-player-preferences')) return Promise.reject(new Error('LCU Error: {"message": "Player does not own some item"}'));
+            return Promise.resolve({});
+        });
+
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const applyBtn = screen.getByText('APPLY CHANGES');
+        await act(async () => {
+            fireEvent.click(applyBtn);
+        });
+
+        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Crest Border'), 'error');
+    });
+
+    it('should show generic LCU error message on apply failure', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockImplementation((method, endpoint) => {
+            if (endpoint.includes('summary-player-data')) return Promise.resolve({ bannerId: '4', crestId: '3', topChallenges: [{ id: 1 }] });
+            if (endpoint.includes('challenges/local-player')) return Promise.resolve([{ id: 1, name: 'Test', currentLevel: 'GOLD' }]);
+            if (endpoint.includes('titles')) return Promise.resolve([]);
+            if (endpoint.includes('current-summoner')) return Promise.resolve({ displayName: 'Test' });
+            if (method === 'POST' && endpoint.includes('update-player-preferences')) return Promise.reject(new Error('LCU Error: {"message": "Rate limit exceeded"}'));
+            return Promise.resolve({});
+        });
+
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const applyBtn = screen.getByText('APPLY CHANGES');
+        await act(async () => {
+            fireEvent.click(applyBtn);
+        });
+
+        expect(props.showToast).toHaveBeenCalledWith('Rate limit exceeded', 'error');
+    });
+
+    it('should not send -1 as title in apply payload when no title selected', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockImplementation((_method, endpoint) => {
+            if (endpoint.includes('summary-player-data')) return Promise.resolve({ bannerId: '4', crestId: '3', title: '-1', topChallenges: [{ id: 1 }] });
+            if (endpoint.includes('challenges/local-player')) return Promise.resolve([{ id: 1, name: 'Test', currentLevel: 'GOLD' }]);
+            if (endpoint.includes('titles')) return Promise.resolve([]);
+            if (endpoint.includes('current-summoner')) return Promise.resolve({ displayName: 'Test' });
+            return Promise.resolve({});
+        });
+
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const applyBtn = screen.getByText('APPLY CHANGES');
+        await act(async () => {
+            fireEvent.click(applyBtn);
+        });
+
+        const applyCall = props.lcuRequest.mock.calls.find(
+            (c: any[]) => c[0] === "POST"
+        );
+        expect(applyCall).toBeDefined();
+        expect(applyCall![2].title).toBe('');
+    });
+
+    it('should re-fetch regalia from CDragon when cache is expired', async () => {
+        const expiredData = { data: { '5': 'Stale Banner' }, ts: Date.now() - 25 * 60 * 60 * 1000 };
+        localStorage.setItem('cd_regalia_defs', JSON.stringify(expiredData));
+        mockFetch(mockRegalia);
+
+        const props = createProps();
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const regaliaCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+            (c) => typeof c[0] === 'string' && (c[0] as string).includes('regalia.json')
+        );
+        expect(regaliaCalls.length).toBeGreaterThanOrEqual(1);
+
+        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+        expect(bannerSelect?.options[1].text).toBe('Lunar Revel 2023 Banner');
+    });
+
+    it('should fall back gracefully when CDragon regalia fetch fails', async () => {
+        globalThis.fetch = vi.fn().mockResolvedValue({ ok: false } as Response);
+
+        const props = createProps();
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+        expect(bannerSelect?.length).toBe(1);
+        expect(bannerSelect?.options[0].text).toBe('No Banner');
+    });
+
+    it('should handle normalizeChallengeResponse with object input', async () => {
+        const props = createProps();
+        props.lcuRequest = vi.fn().mockImplementation((_method, endpoint) => {
+            if (endpoint.includes('summary-player-data')) return Promise.resolve({ bannerId: '4', crestId: '3', topChallenges: [{ id: 1 }] });
+            if (endpoint.includes('challenges/local-player')) return Promise.resolve({ '42': { id: 42, name: 'Object Token', currentLevel: 'DIAMOND' } });
+            if (endpoint.includes('titles')) return Promise.resolve([]);
+            if (endpoint.includes('current-summoner')) return Promise.resolve({ displayName: 'Test' });
+            return Promise.resolve({});
+        });
+
+        await act(async () => {
+            render(<TokensTab {...props} />);
+        });
+
+        expect(screen.getByText('Object Token')).toBeDefined();
     });
 });

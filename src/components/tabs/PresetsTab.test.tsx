@@ -161,6 +161,82 @@ describe('PresetsTab', () => {
         });
     });
 
+    it('should not send title when preset title is -1', async () => {
+        const presetWithMinusOneTitle = [{
+            id: 'preset-2',
+            name: 'No Title Preset',
+            bio: null,
+            availability: null,
+            iconId: null,
+            backgroundId: null,
+            tokens: '[1]',
+            title: '-1',
+        }];
+        vi.mocked(invoke).mockResolvedValue(JSON.stringify(presetWithMinusOneTitle));
+
+        render(
+            <PresetsTab
+                lcu={mockLcu}
+                showToast={mockShowToast}
+                addLog={mockAddLog}
+                lcuRequest={mockLcuRequest}
+            />
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('No Title Preset')).toBeDefined();
+        });
+
+        const loadBtn = screen.getByText('LOAD');
+        await act(async () => {
+            fireEvent.click(loadBtn);
+        });
+
+        await waitFor(() => {
+            const updateCall = mockLcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === 'POST' && c[1].includes('update-player-preferences')
+            );
+            expect(updateCall).toBeDefined();
+            expect(updateCall![2].title).toBeUndefined();
+        });
+    });
+
+    it('should apply preset even when summary fetch fails', async () => {
+        mockLcuRequest.mockImplementation((method: string, endpoint: string) => {
+            if (method === 'GET' && endpoint.includes('summary-player-data')) {
+                return Promise.reject(new Error('Summary unavailable'));
+            }
+            return Promise.resolve({});
+        });
+
+        render(
+            <PresetsTab
+                lcu={mockLcu}
+                showToast={mockShowToast}
+                addLog={mockAddLog}
+                lcuRequest={mockLcuRequest}
+            />
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Classic Solo Queue')).toBeDefined();
+        });
+
+        const loadBtn = screen.getByText('LOAD');
+        await act(async () => {
+            fireEvent.click(loadBtn);
+        });
+
+        await waitFor(() => {
+            const updateCall = mockLcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === 'POST' && c[1].includes('update-player-preferences')
+            );
+            expect(updateCall).toBeDefined();
+            expect(updateCall![2].challengeIds).toEqual([1, 2, 3]);
+            expect(updateCall![2].title).toBe('Challenger');
+        });
+    });
+
     it('should delete a selected preset', async () => {
         render(
             <PresetsTab 

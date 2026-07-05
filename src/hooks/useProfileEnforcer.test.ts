@@ -30,6 +30,38 @@ describe('useProfileEnforcer', () => {
         expect(mockLcuRequest).not.toHaveBeenCalled();
     });
 
+    it('should not send title -1 in auto-enforce payload', async () => {
+        localStorage.setItem(SAVED_AUTO_ENFORCE_KEY, 'true');
+        localStorage.setItem(SAVED_ICON_KEY, '100');
+        localStorage.setItem(SAVED_TOKENS_KEY, '[1]');
+        localStorage.setItem(SAVED_TITLE_KEY, '-1');
+
+        mockLcuRequest.mockImplementation((method: string, endpoint: string) => {
+            if (method === 'GET' && endpoint.includes('summary-player-data')) {
+                return Promise.resolve({ bannerId: '3', crestId: '5', prestigeCrestBorderLevel: 0 });
+            }
+            return Promise.resolve({});
+        });
+
+        renderHook(() => useProfileEnforcer(mockLcu, mockLcuRequest, mockAddLog));
+
+        act(() => {
+            vi.advanceTimersByTime(5000);
+        });
+
+        await act(async () => {
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        const updateCall = mockLcuRequest.mock.calls.find(
+            (c: any[]) => c[0] === 'POST' && c[1].includes('update-player-preferences')
+        );
+        expect(updateCall).toBeDefined();
+        expect(updateCall![2].title).toBeUndefined();
+        expect(updateCall![2].challengeIds).toEqual([1]);
+    });
+
     it('should run auto-enforce and call endpoints if keys are set and auto-enforce is active', async () => {
         localStorage.setItem(SAVED_AUTO_ENFORCE_KEY, 'true');
         localStorage.setItem(SAVED_ICON_KEY, '100');
