@@ -32,36 +32,29 @@ const safeExtractString = (val: any): string => {
     return String(val);
 };
 
+const getOwnershipMessage = (msg: string): string =>
+    msg.includes("REGALIA_BANNER")
+        ? "You do not own this Banner Accent level on your League account."
+        : "You do not own this Crest Border level on your League account.";
+
 const extractFriendlyError = (err: any): string => {
     const errStr = err instanceof Error ? err.message : String(err);
     if (!errStr.includes("LCU Error")) return errStr;
 
     try {
         const jsonStart = errStr.indexOf("{");
-        if (jsonStart !== -1) {
-            const jsonStr = errStr.substring(jsonStart);
-            const outerObj = JSON.parse(jsonStr);
-            if (outerObj.message) {
-                try {
-                    const innerObj = JSON.parse(outerObj.message);
-                    const msg = innerObj.message || outerObj.message;
-                    if (msg.includes("Player does not own")) {
-                        if (msg.includes("REGALIA_BANNER")) {
-                            return "You do not own this Banner Accent level on your League account.";
-                        }
-                        return "You do not own this Crest Border level on your League account.";
-                    }
-                    return msg;
-                } catch {
-                    if (outerObj.message.includes("Player does not own")) {
-                        if (outerObj.message.includes("REGALIA_BANNER")) {
-                            return "You do not own this Banner Accent level on your League account.";
-                        }
-                        return "You do not own this Crest Border level on your League account.";
-                    }
-                    return outerObj.message;
-                }
-            }
+        if (jsonStart === -1) return "Failed to update preferences";
+        const outerObj = JSON.parse(errStr.substring(jsonStart));
+        if (!outerObj.message) return "Failed to update preferences";
+
+        try {
+            const innerObj = JSON.parse(outerObj.message);
+            const msg = innerObj.message || outerObj.message;
+            return msg.includes("Player does not own") ? getOwnershipMessage(msg) : msg;
+        } catch {
+            return outerObj.message.includes("Player does not own")
+                ? getOwnershipMessage(outerObj.message)
+                : outerObj.message;
         }
     } catch (e) {
         console.debug("Failed to parse friendly LCU error:", e);
@@ -164,13 +157,76 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
         return {};
     };
 
+    const buildBannerList = (regaliaDefs: Record<string, string>): { id: string; name: string }[] => {
+        const banners = Object.entries(regaliaDefs).map(([id, name]) => ({ id, name }));
+        if (!banners.some(b => b.id === "1")) {
+            banners.unshift({ id: "1", name: "No Banner" });
+        }
+        banners.sort((a, b) => {
+            if (a.id === "1") return -1;
+            if (b.id === "1") return 1;
+            return a.name.localeCompare(b.name);
+        });
+        return banners;
+    };
+
+    const applyBannerFromSummary = (summaryRes: any) => {
+        const currentBanner = safeExtractString(summaryRes.bannerId ?? summaryRes.preferences?.bannerId ?? summaryRes.bannerAccent ?? summaryRes.preferences?.bannerAccent);
+        setSelectedBannerId(currentBanner === "-1" || !currentBanner ? "1" : currentBanner);
+    };
+
+    const processTitles = (titlesRes: any[], summaryRes: any) => {
+        if (!Array.isArray(titlesRes)) return;
+        setAvailableTitles(titlesRes);
+        const activeTitleId = safeExtractString(summaryRes.title ?? summaryRes.preferences?.title);
+        setSelectedTitleId(activeTitleId === "-1" ? "" : (activeTitleId || ""));
+        const matchedTitle = titlesRes.find(t => safeExtractString(t.id || t.itemId) === activeTitleId);
+        setTitleName(matchedTitle?.name || (activeTitleId === "-1" ? "" : activeTitleId) || "");
+    };
+
+    const parseChallengeEntries = (entries: any[], defs: any): TokenDef[] => {
+        const tokenList: TokenDef[] = [];
+        entries.forEach((ch: any) => {
+            if (!ch || typeof ch !== 'object') return;
+            const rawId = ch.id || ch.challengeId || ch._idFromKey;
+            const id = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
+            const level = ch.currentLevel || ch.level;
+            const cdDef = defs[id];
+            const name = cdDef?.name || ch.name;
+            if (id > 0 && level && level !== 'NONE' && name) {
+                tokenList.push({ id, name, level, description: cdDef?.description || ch.description || "" });
+            }
+        });
+        return tokenList;
+    };
+
+    const applySlotsFromSummary = (summaryRes: any) => {
+        if (summaryRes?.topChallenges && Array.isArray(summaryRes.topChallenges)) {
+            setSlots([
+                summaryRes.topChallenges[0]?.id ?? -1,
+                summaryRes.topChallenges[1]?.id ?? -1,
+                summaryRes.topChallenges[2]?.id ?? -1
+            ]);
+        }
+    };
+
+    const normalizeChallengeResponse = (challengesRes: any): any[] => {
+        if (Array.isArray(challengesRes)) return challengesRes;
+        if (typeof challengesRes === 'object') {
+            return Object.entries(challengesRes).map(([key, val]: [string, any]) => {
+                if (val && typeof val === 'object') return { ...val, _idFromKey: key };
+                return val;
+            });
+        }
+        return [];
+    };
+
     const fetchTokens = async () => {
         if (!lcu) return;
         setFetching(true);
         try {
             addLog("Syncing challenges from LCU...");
 
-            // Fetch challenges, CDragon definitions, active summary, summoner details, and titles in parallel
             const [challengesRes, defs, summaryRes, summonerRes, titlesRes] = await Promise.all([
                 lcuRequest("GET", "/lol-challenges/v1/challenges/local-player").catch(() => null),
                 loadCDDefinitions(),
@@ -179,51 +235,15 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 lcuRequest("GET", "/lol-challenges/v2/titles/local-player").catch(() => null),
             ]);
 
-            // Sync summoner details
-            if (summonerRes) {
-                setSummoner(summonerRes);
-            }
+            if (summonerRes) setSummoner(summonerRes);
 
-            // Resolve active title name and regalia themes from summary
             if (summaryRes) {
+                processTitles(titlesRes, summaryRes);
 
-
-                if (Array.isArray(titlesRes)) {
-                    setAvailableTitles(titlesRes);
-                    const activeTitleId = safeExtractString(summaryRes.title ?? summaryRes.preferences?.title);
-                    setSelectedTitleId(activeTitleId === "-1" ? "" : (activeTitleId || ""));
-                    const matchedTitle = titlesRes.find(t => safeExtractString(t.id || t.itemId) === activeTitleId);
-                    setTitleName(matchedTitle?.name || (activeTitleId === "-1" ? "" : activeTitleId) || "");
-                }
-
-                // Show all selectable banners from CDragon
                 const regaliaDefs = await loadRegaliaDefinitions();
-                let ownedBanners: { id: string; name: string }[] = Object.entries(regaliaDefs).map(([id, name]) => ({ id, name }));
-
-                // Always add banner "1" as "No Banner" default
-                if (!ownedBanners.some(b => b.id === "1")) {
-                    ownedBanners.unshift({ id: "1", name: "No Banner" });
-                }
-
-                ownedBanners.sort((a, b) => {
-                    if (a.id === "1") return -1;
-                    if (b.id === "1") return 1;
-                    return a.name.localeCompare(b.name);
-                });
-                setAvailableBanners(ownedBanners);
-
-                const currentBanner = safeExtractString(summaryRes.bannerId ?? summaryRes.preferences?.bannerId ?? summaryRes.bannerAccent ?? summaryRes.preferences?.bannerAccent);
-                const bannerId = currentBanner === "-1" || !currentBanner ? "1" : currentBanner;
-                setSelectedBannerId(bannerId);
-            }
-
-            // Apply current selection from summary
-            if (summaryRes?.topChallenges && Array.isArray(summaryRes.topChallenges)) {
-                setSlots([
-                    summaryRes.topChallenges[0]?.id ?? -1,
-                    summaryRes.topChallenges[1]?.id ?? -1,
-                    summaryRes.topChallenges[2]?.id ?? -1
-                ]);
+                setAvailableBanners(buildBannerList(regaliaDefs));
+                applyBannerFromSummary(summaryRes);
+                applySlotsFromSummary(summaryRes);
             }
 
             if (!challengesRes) {
@@ -232,41 +252,9 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                 return;
             }
 
-            const tokenList: TokenDef[] = [];
-            let entries: any[] = [];
-            if (Array.isArray(challengesRes)) {
-                entries = challengesRes;
-            } else if (typeof challengesRes === 'object') {
-                entries = Object.entries(challengesRes).map(([key, val]: [string, any]) => {
-                    if (val && typeof val === 'object') {
-                        return { ...val, _idFromKey: key };
-                    }
-                    return val;
-                });
-            }
-
-            entries.forEach((ch: any) => {
-                if (!ch || typeof ch !== 'object') return;
-
-                const rawId = ch.id || ch.challengeId || ch._idFromKey;
-                const id = typeof rawId === 'number' ? rawId : Number.parseInt(String(rawId), 10);
-                const level = ch.currentLevel || ch.level;
-                
-                const cdDef = defs[id];
-                const name = cdDef?.name || ch.name;
-
-                if (id > 0 && level && level !== 'NONE' && name) {
-                    tokenList.push({
-                        id,
-                        name,
-                        level,
-                        description: cdDef?.description || ch.description || ""
-                    });
-                }
-            });
-
-            const sortedTokens = [...tokenList].sort((a, b) => a.name.localeCompare(b.name));
-            setTokens(sortedTokens);
+            const entries = normalizeChallengeResponse(challengesRes);
+            const tokenList = parseChallengeEntries(entries, defs);
+            setTokens([...tokenList].sort((a, b) => a.name.localeCompare(b.name)));
             addLog(`Successfully parsed ${tokenList.length} tokens.`);
         } catch (err) {
             addLog(`Error syncing tokens: ${err}`);
