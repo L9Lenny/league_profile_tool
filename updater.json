@@ -1,19 +1,19 @@
 {
-    "version": "1.9.7",
-    "notes": "## [1.9.7] - 2026-07-05  ### Added - **Profile Banner Selector**: Added a \"Profile Banner\" dropdown in the Tokens tab using real banner names fetched from CDragon's `regalia.json`. Banner #1 is shown as \"No Banner\" (default).  ### Removed - **Crest Visual Rendering**: Removed the crest SVG border overlay on the summoner icon profile banner area. The crest value is still read from the LCU summary and passed through unchanged in the update payload.  ### Fixed - **Title \"-1\" Sentinel**: Prevented the LCU sentinel value `-1` (\"no title\") from being sent to the API in TokensTab, PresetsTab, and the auto-restore enforcer. - **Field Name Mapping**: Mapped summary response fields `bannerId`/`crestId` to the update endpoint's expected field names `bannerAccent`/`crestBorder`. The fallback chain reads from both old and new key names for compatibility.  ### Changed - **LCU Whitelist**: Added `GET /lol-regalia/v3/inventory/` prefix to the allowed LCU request whitelist in the Rust backend.  ",
-    "pub_date": "2026-07-05T14:06:49Z",
+    "version": "1.9.8",
+    "notes": "## [1.9.8] - 2026-07-05  ### Fixed - **GitHub Release Assets**: Changed `productName` from `\"League Profile Tool\"` (with spaces) to `\"League-Profile-Tool\"` (with hyphens) in `tauri.conf.json` so that the Tauri bundler produces filenames that match the paths expected by the CI release action. Previously, assets were built but silently skipped during upload, resulting in an empty release.  ### Changed - **Updater URLs**: Updated download URL patterns in the CI workflow to use the new hyphenated name, ensuring the auto-updater can locate the correct release assets.  ",
+    "pub_date": "2026-07-05T22:34:11Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.7/League.Profile.Tool_1.9.7_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.8/League-Profile-Tool_1.9.8_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.7/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.8/League-Profile-Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.7/League.Profile.Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.8/League-Profile-Tool_aarch64.app.tar.gz"
         }
     }
 }
