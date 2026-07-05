@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7] - 2026-07-05
+
+### Added
+- **Profile Banner Selector**: Added a "Profile Banner" dropdown in the Tokens tab using real banner names fetched from CDragon's `regalia.json`. Banner #1 is shown as "No Banner" (default).
+
+### Removed
+- **Crest Visual Rendering**: Removed the crest SVG border overlay on the summoner icon profile banner area. The crest value is still read from the LCU summary and passed through unchanged in the update payload.
+
+### Fixed
+- **Title "-1" Sentinel**: Prevented the LCU sentinel value `-1` ("no title") from being sent to the API in TokensTab, PresetsTab, and the auto-restore enforcer.
+- **Field Name Mapping**: Mapped summary response fields `bannerId`/`crestId` to the update endpoint's expected field names `bannerAccent`/`crestBorder`. The fallback chain reads from both old and new key names for compatibility.
+
+### Changed
+- **LCU Whitelist**: Added `GET /lol-regalia/v3/inventory/` prefix to the allowed LCU request whitelist in the Rust backend.
+
 ## [1.9.6] - 2026-06-28
 
 ### Added
