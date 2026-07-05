@@ -136,11 +136,11 @@ jobs:
           
           # Download Windows signature
           curl -L -o windows.sig \
-            "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_${VERSION}_x64-setup.exe.sig"
+            "https://github.com/${{ github.repository }}/releases/download/${TAG}/League-Profile-Tool_${VERSION}_x64-setup.exe.sig"
           
           # Download macOS signature (same for both architectures)
           curl -L -o macos.sig \
-            "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_aarch64.app.tar.gz.sig"
+            "https://github.com/${{ github.repository }}/releases/download/${TAG}/League-Profile-Tool_aarch64.app.tar.gz.sig"
 
       - name: Update updater.json with signatures
         run: |
@@ -166,15 +166,15 @@ jobs:
               "platforms": {
                   "windows-x86_64": {
                       "signature": "${WIN_SIG}",
-                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_${VERSION}_x64-setup.exe"
+                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League-Profile-Tool_${VERSION}_x64-setup.exe"
                   },
                   "darwin-x86_64": {
                       "signature": "${MAC_SIG}",
-                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_aarch64.app.tar.gz"
+                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League-Profile-Tool_aarch64.app.tar.gz"
                   },
                   "darwin-aarch64": {
                       "signature": "${MAC_SIG}",
-                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League.Profile.Tool_aarch64.app.tar.gz"
+                      "url": "https://github.com/${{ github.repository }}/releases/download/${TAG}/League-Profile-Tool_aarch64.app.tar.gz"
                   }
               }
           }

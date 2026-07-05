@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.8] - 2026-07-05
+
+### Fixed
+- **GitHub Release Assets**: Changed `productName` from `"League Profile Tool"` (with spaces) to `"League-Profile-Tool"` (with hyphens) in `tauri.conf.json` so that the Tauri bundler produces filenames that match the paths expected by the CI release action. Previously, assets were built but silently skipped during upload, resulting in an empty release.
+
+### Changed
+- **Updater URLs**: Updated download URL patterns in the CI workflow to use the new hyphenated name, ensuring the auto-updater can locate the correct release assets.
+
 ## [1.9.7] - 2026-07-05
 
 ### Added
