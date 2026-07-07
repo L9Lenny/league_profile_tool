@@ -8,68 +8,68 @@ import {
     SAVED_ICON_KEY,
     SAVED_BACKGROUND_KEY,
     SAVED_TOKENS_KEY,
-    SAVED_TITLE_KEY
+    SAVED_TITLE_KEY,
+    SAVED_RANK_QUEUE_KEY,
+    SAVED_RANK_TIER_KEY,
+    SAVED_RANK_DIV_KEY,
+    SAVED_CHALLENGE_CRYSTAL_KEY,
+    SAVED_CHALLENGE_POINTS_KEY
 } from '../storageKeys';
+
+/** Interval between enforcement cycles (ms). */
+const ENFORCE_INTERVAL_MS = 15_000;
 
 export function useProfileEnforcer(
     lcu: LcuInfo | null,
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>,
     addLog: (msg: string) => void
 ) {
-    const hasEnforcedThisSession = useRef(false);
     const sessionActive = useRef(false);
+    // Track whether the initial enforcement (with full logging) has run this session.
+    const hasLoggedInitial = useRef(false);
 
-    // Reset the enforcer state when the LCU disconnects
+    // Reset state when the LCU disconnects
     useEffect(() => {
         if (lcu) {
             sessionActive.current = true;
         } else {
-            hasEnforcedThisSession.current = false;
+            hasLoggedInitial.current = false;
             sessionActive.current = false;
         }
     }, [lcu]);
 
     useEffect(() => {
         if (!lcu) return;
-        if (hasEnforcedThisSession.current) return;
 
         const autoEnforce = localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true' || localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true';
         if (!autoEnforce) return;
 
-        const runWithRetry = async (
+        const runSilent = async (
             name: string,
             operation: () => Promise<unknown>,
-            intervalMs = 10000,
-            maxDurationMs = 60000
+            verbose: boolean
         ) => {
-            const startTime = Date.now();
-            let attempt = 1;
-            while (sessionActive.current) {
-                try {
-                    await operation();
-                    addLog(`Auto-Enforcer: Applied custom ${name}.`);
-                    return;
-                } catch (err) {
-                    const elapsed = Date.now() - startTime;
-                    if (elapsed >= maxDurationMs || !sessionActive.current) {
-                        addLog(`Auto-Enforcer error: Failed to apply ${name} after ${Math.round(elapsed / 1000)}s - ${err}`);
-                        return;
-                    }
-                    addLog(`Auto-Enforcer warning: Failed to apply ${name} (attempt ${attempt}) - ${err}. Retrying in ${intervalMs / 1000}s...`);
-                    attempt++;
-                    await new Promise(resolve => setTimeout(resolve, intervalMs));
-                }
+            try {
+                await operation();
+                if (verbose) addLog(`Auto-Enforcer: Applied custom ${name}.`);
+            } catch (err) {
+                if (verbose) addLog(`Auto-Enforcer error: Failed to apply ${name} - ${err}`);
             }
         };
 
         const enforceProfile = async () => {
-            addLog("LCU connected. Auto-Enforcer applying saved profile settings...");
-            hasEnforcedThisSession.current = true;
+            if (!sessionActive.current) return;
 
-            // 1. Icon
+            const isInitial = !hasLoggedInitial.current;
+            if (isInitial) {
+                addLog("LCU connected. Auto-Enforcer applying saved profile settings...");
+                hasLoggedInitial.current = true;
+            }
+
+            // 1. Icon (PFP)
             const savedIcon = localStorage.getItem(SAVED_ICON_KEY);
             if (savedIcon) {
-                runWithRetry("Icon", () => lcuRequest("PUT", "/lol-chat/v1/me", { icon: Number.parseInt(savedIcon, 10) }));
+                runSilent("Icon", () => lcuRequest("PUT", "/lol-chat/v1/me", { icon: Number.parseInt(savedIcon, 10) }), isInitial);
             }
 
             // 2. Status & Bio
@@ -79,7 +79,7 @@ export function useProfileEnforcer(
                 const statusBody: any = {};
                 if (savedStatus) statusBody.availability = savedStatus;
                 if (savedBio !== null) statusBody.statusMessage = savedBio;
-                runWithRetry("Status & Bio", () => lcuRequest("PUT", "/lol-chat/v1/me", statusBody));
+                runSilent("Status & Bio", () => lcuRequest("PUT", "/lol-chat/v1/me", statusBody), isInitial);
             }
 
             // 3. Tokens, Title
@@ -87,7 +87,7 @@ export function useProfileEnforcer(
             const savedTitle = localStorage.getItem(SAVED_TITLE_KEY);
 
             if (savedTokens || savedTitle !== null) {
-                runWithRetry("Tokens & Regalia", async () => {
+                runSilent("Tokens & Regalia", async () => {
                     const challengeIds = savedTokens ? JSON.parse(savedTokens) : undefined;
                     const prefBody: any = {};
                     if (challengeIds) prefBody.challengeIds = challengeIds;
@@ -103,18 +103,48 @@ export function useProfileEnforcer(
                             prefBody.prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
                         }
                     } catch (err) {
-                        addLog(`Auto-Enforcer warning: Could not read current preferences to merge: ${err}`);
+                        if (isInitial) addLog(`Auto-Enforcer warning: Could not read current preferences to merge: ${err}`);
                     }
 
                     await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
-                });
+                }, isInitial);
             }
 
+            // 4. Rank & Challenge overrides (via chat presence lol object)
+            const savedRankTier = localStorage.getItem(SAVED_RANK_TIER_KEY);
+            const savedRankDiv = localStorage.getItem(SAVED_RANK_DIV_KEY);
+            const savedRankQueue = localStorage.getItem(SAVED_RANK_QUEUE_KEY);
+            const savedCrystal = localStorage.getItem(SAVED_CHALLENGE_CRYSTAL_KEY);
+            const savedPoints = localStorage.getItem(SAVED_CHALLENGE_POINTS_KEY);
+
+            if (savedRankTier || savedRankDiv || savedRankQueue || savedCrystal || savedPoints) {
+                runSilent("Rank & Challenge Stats", async () => {
+                    // Read current lol object so we don't overwrite unrelated fields (e.g. backgroundSkinId)
+                    let baseLol: any = {};
+                    try {
+                        const chatRes: any = await lcuRequest("GET", "/lol-chat/v1/me");
+                        if (chatRes?.lol) {
+                            baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
+                        }
+                    } catch {
+                        // If we can't read current state, apply overrides on a fresh object
+                    }
+
+                    const updatedLol: any = { ...baseLol };
+                    if (savedRankTier) updatedLol.rankedLeagueTier = savedRankTier;
+                    if (savedRankDiv) updatedLol.rankedLeagueDivision = savedRankDiv;
+                    if (savedRankQueue) updatedLol.rankedLeagueQueue = savedRankQueue;
+                    if (savedCrystal) updatedLol.challengeCrystalLevel = savedCrystal;
+                    if (savedPoints) updatedLol.challengePoints = savedPoints;
+
+                    await lcuRequest("PUT", "/lol-chat/v1/me", { lol: updatedLol });
+                }, isInitial);
+            }
 
             // 5. Background
             const savedBackground = localStorage.getItem(SAVED_BACKGROUND_KEY);
             if (savedBackground) {
-                runWithRetry("Profile Background", async () => {
+                runSilent("Profile Background", async () => {
                     try {
                         // Try official method first
                         await lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile/", {
@@ -122,7 +152,7 @@ export function useProfileEnforcer(
                             value: Number.parseInt(savedBackground, 10)
                         });
                     } catch (err) {
-                        addLog(`Auto-Enforcer Background: Official update failed (${err}). Trying force chat fallback...`);
+                        if (isInitial) addLog(`Auto-Enforcer Background: Official update failed (${err}). Trying force chat fallback...`);
                         // Fallback to chat presence force method
                         const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as any;
                         let baseLol = {};
@@ -132,14 +162,23 @@ export function useProfileEnforcer(
                         const newLol = { ...baseLol, backgroundSkinId: savedBackground.toString() };
                         await lcuRequest("PUT", "/lol-chat/v1/me", { lol: newLol });
                     }
-                });
+                }, isInitial);
             }
 
-            addLog("Auto-Enforcer restoration flow completed.");
+            if (isInitial) {
+                addLog("Auto-Enforcer restoration flow completed.");
+            }
         };
 
-        // Give the LCU a few seconds to initialize and fetch from server before overwriting
-        const timer = setTimeout(enforceProfile, 5000);
-        return () => clearTimeout(timer);
+        // Initial enforcement after a short delay to let LCU initialize
+        const initialTimer = setTimeout(enforceProfile, 5000);
+
+        // Continuous polling to re-apply settings after game resets them
+        const interval = setInterval(enforceProfile, ENFORCE_INTERVAL_MS);
+
+        return () => {
+            clearTimeout(initialTimer);
+            clearInterval(interval);
+        };
     }, [lcu, lcuRequest, addLog]);
 }
