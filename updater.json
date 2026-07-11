@@ -1,19 +1,19 @@
 {
-    "version": "1.9.8",
-    "notes": "## [1.9.8] - 2026-07-05  ### Fixed - **GitHub Release Assets**: Changed `productName` from `\"League Profile Tool\"` (with spaces) to `\"League-Profile-Tool\"` (with hyphens) in `tauri.conf.json` so that the Tauri bundler produces filenames that match the paths expected by the CI release action. Previously, assets were built but silently skipped during upload, resulting in an empty release.  ### Changed - **Updater URLs**: Updated download URL patterns in the CI workflow to use the new hyphenated name, ensuring the auto-updater can locate the correct release assets.  ",
-    "pub_date": "2026-07-05T22:34:11Z",
+    "version": "1.9.9",
+    "notes": "## [1.9.9] - 2026-07-11  ### Fixed - **Profile Reset After Games (#429)**: The Auto-Enforcer now continuously polls every 15 seconds to re-apply profile picture, rank (tier/division/queue), challenge points, and crystal level after League resets them post-game. Previously, settings were only applied once per session. - **Rank & Challenge Stats Enforcment**: Added support for persisting rank overrides (`rankedLeagueTier`, `rankedLeagueDivision`, `rankedLeagueQueue`) and challenge stats (`challengeCrystalLevel`, `challengePoints`) via chat presence, merged with existing `lol` object fields to avoid overwriting unrelated data.  ### Changed - **Polling Instead of Retry**: Replaced the old retry-with-backoff mechanism (10s interval, 60s max) with a simpler 15s continuous polling loop, ensuring settings survive game-induced resets without log spam on subsequent cycles.  ",
+    "pub_date": "2026-07-11T14:32:53Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.8/League-Profile-Tool_1.9.8_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.9/League-Profile-Tool_1.9.9_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.8/League-Profile-Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.9/League-Profile-Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.8/League-Profile-Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.9.9/League-Profile-Tool_aarch64.app.tar.gz"
         }
     }
 }
