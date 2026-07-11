@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu, Trash2 } from 'lucide-react';
+import { RefreshCw, Cpu } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 
@@ -109,6 +109,27 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <span className="slider"></span>
                     </span>
                 </button>
+
+                <div className="settings-divider" />
+
+                {showResetConfirm ? (
+                    <div className="settings-row" style={{ cursor: 'default' }}>
+                        <div className="settings-info">
+                            <span className="settings-label" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Erase all saved data and disable auto-enforcer?</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="button" className="ghost-btn" style={{ color: '#ff6b6b' }} onClick={clearAllSettings}>Yes</button>
+                            <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>No</button>
+                        </div>
+                    </div>
+                ) : (
+                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)}>
+                        <div className="settings-info">
+                            <span className="settings-label" style={{ color: '#ff6b6b' }}>Clear All Saved Settings</span>
+                            <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer</p>
+                        </div>
+                    </button>
+                )}
             </div>
 
             {latestVersion && clientVersion !== latestVersion && (
@@ -138,18 +159,6 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         </p>
                     </div>
                 </div>
-            </div>
-
-            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255, 107, 107, 0.15)', display: 'flex', justifyContent: 'flex-end' }}>
-                {showResetConfirm ? (
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Reset all data?</span>
-                        <button type="button" className="ghost-btn" style={{ color: '#ff6b6b', fontSize: '0.7rem', padding: '2px 8px', height: 'auto' }} onClick={clearAllSettings}>Yes</button>
-                        <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 8px', height: 'auto' }} onClick={() => setShowResetConfirm(false)}>No</button>
-                    </div>
-                ) : (
-                    <button type="button" className="ghost-btn" style={{ color: '#ff6b6b', fontSize: '0.7rem', padding: '3px 10px', height: 'auto' }} onClick={() => setShowResetConfirm(true)}>Reset to defaults</button>
-                )}
             </div>
         </div>
     );
