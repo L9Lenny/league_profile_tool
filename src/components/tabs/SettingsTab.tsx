@@ -46,17 +46,23 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 if (chatRes?.lol) {
                     baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
                 }
-                const overrideFields = ["rankedLeagueTier", "rankedLeagueDivision", "rankedLeagueQueue", "challengeCrystalLevel", "challengePoints", "backgroundSkinId"];
-                let changed = false;
-                for (const field of overrideFields) {
-                    if (field in baseLol) {
-                        delete baseLol[field];
-                        changed = true;
-                    }
+                const overrideFields: Record<string, string> = {
+                    rankedLeagueTier: "",
+                    rankedLeagueDivision: "",
+                    rankedLeagueQueue: "",
+                    challengeCrystalLevel: "",
+                    challengePoints: "",
+                    backgroundSkinId: "",
+                };
+                for (const [field, empty] of Object.entries(overrideFields)) {
+                    baseLol[field] = empty;
                 }
-                if (changed) {
-                    lcuRequest("PUT", "/lol-chat/v1/me", { lol: baseLol });
-                }
+                lcuRequest("PUT", "/lol-chat/v1/me", { lol: baseLol });
+            }).catch(() => {});
+
+            lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
+                key: "backgroundSkinId",
+                value: 0,
             }).catch(() => {});
         }
 
