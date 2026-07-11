@@ -110,24 +110,25 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                     </span>
                 </button>
 
-                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,107,107,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {showResetConfirm ? (
-                        <>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Erase all saved data?</span>
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                                <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={clearAllSettings}>Yes</button>
-                                <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={() => setShowResetConfirm(false)}>No</button>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Reset saved data</span>
-                            <button type="button" className="ghost-btn" style={{ color: '#c0392b', padding: '4px 10px', height: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => setShowResetConfirm(true)}>
-                                <Trash2 size={14} /> Clear
-                            </button>
-                        </>
-                    )}
-                </div>
+                {showResetConfirm ? (
+                    <div className="settings-row" style={{ cursor: 'default', marginTop: '10px' }}>
+                        <div className="settings-info">
+                            <span className="settings-label" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Erase all saved data?</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                            <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={clearAllSettings}>Yes</button>
+                            <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={() => setShowResetConfirm(false)}>No</button>
+                        </div>
+                    </div>
+                ) : (
+                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)} style={{ marginTop: '10px' }}>
+                        <div className="settings-info">
+                            <span className="settings-label">Clear Saved Data</span>
+                            <p className="settings-desc">Reset all profile overrides, rank, tokens, titles &amp; auto-enforcer</p>
+                        </div>
+                        <Trash2 size={18} style={{ color: '#ff6b6b', flexShrink: 0 }} />
+                    </button>
+                )}
             </div>
 
             {latestVersion && clientVersion !== latestVersion && (
