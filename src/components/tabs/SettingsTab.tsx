@@ -55,6 +55,35 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         enforcer: "Auto-Enforcer & localStorage",
     };
 
+    const resetChatPresence = () => {
+        if (!lcuRequest) return;
+        lcuRequest("GET", "/lol-chat/v1/me").then((chatRes: any) => {
+            let baseLol: any = {};
+            if (chatRes?.lol) {
+                baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
+            }
+            const chatBody: any = {};
+            if (resetChecks.rank) {
+                baseLol.rankedLeagueTier = "";
+                baseLol.rankedLeagueDivision = "";
+                baseLol.rankedLeagueQueue = "";
+            }
+            if (resetChecks.challenge) {
+                baseLol.challengeCrystalLevel = "";
+                baseLol.challengePoints = "";
+            }
+            if (resetChecks.background) {
+                baseLol.backgroundSkinId = "";
+            }
+            if (resetChecks.status) {
+                chatBody.availability = "chat";
+                chatBody.statusMessage = "";
+            }
+            chatBody.lol = baseLol;
+            lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
+        }).catch(() => {});
+    };
+
     const clearAllSettings = () => {
         const savedIconVal = resetChecks.icon ? localStorage.getItem(SAVED_ICON_KEY) : null;
 
@@ -63,60 +92,39 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             setAutoEnforce(false);
         }
 
-        if (lcuRequest) {
-            const hasChatFields = resetChecks.rank || resetChecks.challenge || resetChecks.background || resetChecks.status;
-            if (hasChatFields) {
-                lcuRequest("GET", "/lol-chat/v1/me").then((chatRes: any) => {
-                    let baseLol: any = {};
-                    if (chatRes?.lol) {
-                        baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
-                    }
-                    const chatBody: any = {};
-                    if (resetChecks.rank) {
-                        baseLol.rankedLeagueTier = "";
-                        baseLol.rankedLeagueDivision = "";
-                        baseLol.rankedLeagueQueue = "";
-                    }
-                    if (resetChecks.challenge) {
-                        baseLol.challengeCrystalLevel = "";
-                        baseLol.challengePoints = "";
-                    }
-                    if (resetChecks.background) {
-                        baseLol.backgroundSkinId = "";
-                    }
-                    if (resetChecks.status) {
-                        chatBody.availability = "chat";
-                        chatBody.statusMessage = "";
-                    }
-                    chatBody.lol = baseLol;
-                    lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
-                }).catch(() => {});
-            }
+        if (!lcuRequest) {
+            addLog("Saved settings cleared.");
+            showToast?.("Saved settings cleared!", "success");
+            setShowResetConfirm(false);
+            return;
+        }
 
-            if (resetChecks.background) {
-                lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
-                    key: "backgroundSkinId",
-                    value: 0,
-                }).catch(() => {});
-            }
+        const hasChatFields = resetChecks.rank || resetChecks.challenge || resetChecks.background || resetChecks.status;
+        if (hasChatFields) resetChatPresence();
 
-            if (resetChecks.tokens) {
-                lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
-                    challengeIds: [],
-                    title: "",
-                    bannerAccent: "",
-                    crestBorder: "",
-                    prestigeCrestBorderLevel: 0,
-                }).catch(() => {});
-            }
+        if (resetChecks.background) {
+            lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
+                key: "backgroundSkinId",
+                value: 0,
+            }).catch(() => {});
+        }
 
-            if (resetChecks.icon) {
-                const iconId = savedIconVal ? parseInt(savedIconVal, 10) : 0;
-                if (!isNaN(iconId)) {
-                    lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", {
-                        profileIconId: iconId,
-                    }).catch(() => {});
-                }
+        if (resetChecks.tokens) {
+            lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
+                challengeIds: [],
+                title: "",
+                bannerAccent: "",
+                crestBorder: "",
+                prestigeCrestBorderLevel: 0,
+            }).catch(() => {});
+        }
+
+        if (resetChecks.icon) {
+            const iconId = savedIconVal ? Number.parseInt(savedIconVal, 10) : 0;
+            if (!Number.isNaN(iconId)) {
+                lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", {
+                    profileIconId: iconId,
+                }).catch(() => {});
             }
         }
 
