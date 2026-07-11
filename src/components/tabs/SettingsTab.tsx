@@ -121,13 +121,15 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)} style={{ marginTop: '10px' }}>
+                    <div className="settings-row" style={{ marginTop: '10px', cursor: 'default' }}>
                         <div className="settings-info">
                             <span className="settings-label">Clear Saved Data</span>
                             <p className="settings-desc">Reset all profile overrides, rank, tokens, titles &amp; auto-enforcer</p>
                         </div>
-                        <Trash2 size={18} style={{ color: '#ff6b6b', flexShrink: 0 }} />
-                    </button>
+                        <button type="button" onClick={() => setShowResetConfirm(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', borderRadius: '4px' }}>
+                            <Trash2 size={18} style={{ color: '#ff6b6b', display: 'block' }} />
+                        </button>
+                    </div>
                 )}
             </div>
 
