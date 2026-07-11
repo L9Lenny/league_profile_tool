@@ -140,28 +140,17 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            {showResetConfirm ? (
-                <div className="card" style={{ marginTop: '16px' }}>
-                    <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'default' }}>
-                        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '0 0 12px 0' }}>
-                            Erase all saved profile data and disable the auto-enforcer?
-                        </p>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <button type="button" className="flat-btn danger-btn" onClick={clearAllSettings}><Trash2 size={14} /> Yes, Clear</button>
-                            <button type="button" className="flat-btn" onClick={() => setShowResetConfirm(false)}>Cancel</button>
-                        </div>
+            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255, 107, 107, 0.15)', display: 'flex', justifyContent: 'flex-end' }}>
+                {showResetConfirm ? (
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Reset all data?</span>
+                        <button type="button" className="ghost-btn" style={{ color: '#ff6b6b', fontSize: '0.7rem', padding: '2px 8px', height: 'auto' }} onClick={clearAllSettings}>Yes</button>
+                        <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 8px', height: 'auto' }} onClick={() => setShowResetConfirm(false)}>No</button>
                     </div>
-                </div>
-            ) : (
-                <div className="card" style={{ marginTop: '16px' }}>
-                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)}>
-                        <div className="settings-info">
-                            <span className="settings-label" style={{ color: '#ff6b6b' }}>Clear All Saved Settings</span>
-                            <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
-                        </div>
-                    </button>
-                </div>
-            )}
+                ) : (
+                    <button type="button" className="ghost-btn" style={{ color: '#ff6b6b', fontSize: '0.7rem', padding: '3px 10px', height: 'auto' }} onClick={() => setShowResetConfirm(true)}>Reset to defaults</button>
+                )}
+            </div>
         </div>
     );
 };
