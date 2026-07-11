@@ -941,10 +941,36 @@ input:checked+.slider:before {
   background: rgba(200, 155, 60, 0.03);
 }
 
+.flat-btn.danger-btn {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.05);
+}
+
 .flat-btn.danger-btn:hover {
   border-color: #ff6b6b;
   color: #ffb3b3; /* Increased contrast on hover */
   background: rgba(255, 107, 107, 0.05);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #1a1e24;
+  border: 1px solid #2a2e36;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .log-actions-group {
