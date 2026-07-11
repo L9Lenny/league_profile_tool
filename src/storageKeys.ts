@@ -18,3 +18,22 @@ export const SAVED_CHALLENGE_POINTS_KEY  = "profile_saved_challenge_points_v1";
 // Settings
 export const SAVED_ENFORCE_OFFLINE_KEY = "profile_enforce_offline_v1"; // Legacy (will be mapped to auto enforce)
 export const SAVED_AUTO_ENFORCE_KEY = "profile_auto_enforce_v1";
+
+/** All persistent keys, used for the Clear All Settings feature. */
+export const ALL_SAVED_KEYS: string[] = [
+    SAVED_AVAILABILITY_KEY,
+    SAVED_BIO_KEY,
+    SAVED_ICON_KEY,
+    SAVED_BACKGROUND_KEY,
+    SAVED_TOKENS_KEY,
+    SAVED_TITLE_KEY,
+    SAVED_BANNER_ACCENT_KEY,
+    SAVED_CREST_BORDER_KEY,
+    SAVED_RANK_QUEUE_KEY,
+    SAVED_RANK_TIER_KEY,
+    SAVED_RANK_DIV_KEY,
+    SAVED_CHALLENGE_CRYSTAL_KEY,
+    SAVED_CHALLENGE_POINTS_KEY,
+    SAVED_ENFORCE_OFFLINE_KEY,
+    SAVED_AUTO_ENFORCE_KEY,
+];

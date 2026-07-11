@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu } from 'lucide-react';
+import { RefreshCw, Cpu, Trash2 } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
-import { SAVED_AUTO_ENFORCE_KEY } from '../../storageKeys';
+import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 
 interface SettingsTabProps {
     isAutostartEnabled: boolean;
@@ -23,7 +23,21 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     const toggleAutoEnforce = (checked: boolean) => {
         setAutoEnforce(checked);
         localStorage.setItem(SAVED_AUTO_ENFORCE_KEY, checked.toString());
-        addLog(`Auto-Enforcer ${checked ? 'enabled' : 'disabled'}.`);
+        if (checked) {
+            addLog(`Auto-Enforcer enabled.`);
+        } else {
+            localStorage.removeItem(SAVED_ENFORCE_OFFLINE_KEY);
+            addLog(`Auto-Enforcer disabled.`);
+        }
+    };
+
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+    const clearAllSettings = () => {
+        ALL_SAVED_KEYS.forEach(key => localStorage.removeItem(key));
+        setAutoEnforce(false);
+        setShowResetConfirm(false);
+        addLog("All saved settings have been cleared.");
     };
 
     return (
@@ -99,6 +113,30 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         </p>
                     </div>
                 </div>
+            </div>
+
+            <div className="card" style={{ marginTop: '16px', borderColor: '#ff6b6b' }}>
+                <h3 className="card-title" style={{ color: '#ff6b6b' }}>Reset</h3>
+                {showResetConfirm ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                            This will erase all saved profile overrides (icon, background, rank, tokens, title, etc.)
+                            and disable the auto-enforcer. This action cannot be undone.
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button type="button" className="flat-btn danger-btn" onClick={clearAllSettings} style={{ gap: '6px', color: '#ffb3b3', borderColor: '#ff6b6b' }}>
+                                <Trash2 size={16} /> Yes, Clear Everything
+                            </button>
+                            <button type="button" className="flat-btn" onClick={() => setShowResetConfirm(false)}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button type="button" className="flat-btn danger-btn" onClick={() => setShowResetConfirm(true)} style={{ width: '100%', justifyContent: 'center', gap: '6px' }}>
+                        <Trash2 size={16} /> Clear All Settings
+                    </button>
+                )}
             </div>
         </div>
     );
