@@ -147,7 +147,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                             Erase all saved profile data and disable the auto-enforcer?
                         </p>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <button type="button" className="ghost-btn" onClick={clearAllSettings}>Clear Everything</button>
+                            <button type="button" className="ghost-btn" style={{ color: '#ff6b6b' }} onClick={clearAllSettings}>Clear Everything</button>
                             <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>Cancel</button>
                         </div>
                     </div>
