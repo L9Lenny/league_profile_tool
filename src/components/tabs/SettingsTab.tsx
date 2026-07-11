@@ -64,6 +64,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 key: "backgroundSkinId",
                 value: 0,
             }).catch(() => {});
+
+            lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
+                challengeIds: [],
+                title: "",
+                bannerAccent: "",
+                crestBorder: "",
+                prestigeCrestBorderLevel: 0,
+            }).catch(() => {});
         }
 
         addLog("All saved settings have been cleared.");
