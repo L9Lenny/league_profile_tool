@@ -126,7 +126,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                             <span className="settings-label">Clear Saved Data</span>
                             <p className="settings-desc">Reset all profile overrides, rank, tokens, titles &amp; auto-enforcer</p>
                         </div>
-                        <Trash2 size={18} style={{ color: '#ff6b6b', flexShrink: 0 }} />
+                        <Trash2 size={18} style={{ color: '#ff6b6b', flexShrink: 0, marginLeft: '16px' }} />
                     </button>
                 )}
             </div>
