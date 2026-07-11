@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Clear All Settings UX (#434, #436)**: The entire reset now makes a single `PUT /lol-chat/v1/me` call combining `availability`, `statusMessage`, and `lol` fields, and also calls the official background and challenge preferences endpoints to fully reset profile customizations.
 - **Challenge Preferences Reset (#434, #436)**: "Clear All Settings" now sends an empty payload to `POST /lol-challenges/v1/update-player-preferences` to clear equipped tokens, title, banner accent, and crest border.
+- **Dependencies**: Updated tauri (2.11.3→2.11.5), sysinfo (0.39.5→0.39.6), vitest (4.1.7→4.1.9), @types/node (25.9.1→26.0.1), @tauri-apps/api (2.11.0→2.11.1), @tauri-apps/cli (2.11.3→2.11.4), tauri-action (0→1), actions/setup-node (4→6), actions/github-script (7→8) ([#422](https://github.com/L9Lenny/league_profile_tool/pull/422), [#423](https://github.com/L9Lenny/league_profile_tool/pull/423), [#424](https://github.com/L9Lenny/league_profile_tool/pull/424), [#425](https://github.com/L9Lenny/league_profile_tool/pull/425), [#426](https://github.com/L9Lenny/league_profile_tool/pull/426), [#427](https://github.com/L9Lenny/league_profile_tool/pull/427), [#431](https://github.com/L9Lenny/league_profile_tool/pull/431), [#433](https://github.com/L9Lenny/league_profile_tool/pull/433)).
 
 ## [1.9.9] - 2026-07-11
 
