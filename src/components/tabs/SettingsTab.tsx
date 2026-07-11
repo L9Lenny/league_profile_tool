@@ -11,6 +11,7 @@ interface SettingsTabProps {
     latestVersion: string;
     clientVersion: string;
     addLog: (msg: string) => void;
+    showToast?: (text: string, type: string) => void;
     lcuRequest?: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
 }
 
@@ -18,7 +19,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     isAutostartEnabled, setIsAutostartEnabled,
     minimizeToTray, toggleMinimizeToTray,
     latestVersion, clientVersion, addLog,
-    lcuRequest
+    showToast, lcuRequest
 }) => {
     const [autoEnforce, setAutoEnforce] = useState(() => localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true');
 
@@ -33,13 +34,12 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         }
     };
 
-    const [resetState, setResetState] = useState<'idle' | 'confirm' | 'done'>('idle');
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     const clearAllSettings = () => {
         ALL_SAVED_KEYS.forEach(key => localStorage.removeItem(key));
         setAutoEnforce(false);
 
-        // Remove rank/challenge/background overrides from LCU chat presence
         if (lcuRequest) {
             lcuRequest("GET", "/lol-chat/v1/me").then((chatRes: any) => {
                 let baseLol: any = {};
@@ -61,8 +61,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         }
 
         addLog("All saved settings have been cleared.");
-        setResetState('done');
-        setTimeout(() => setResetState('idle'), 3000);
+        showToast?.("All saved settings cleared!", "success");
+        setShowResetConfirm(false);
     };
 
     return (
@@ -141,21 +141,18 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
 
             <div className="card" style={{ marginTop: '16px' }}>
-                <h3 className="card-title">Data Management</h3>
-                {resetState === 'done' ? (
-                    <p style={{ fontSize: '0.85rem', color: '#46c878', margin: 0 }}>All saved settings cleared.</p>
-                ) : resetState === 'confirm' ? (
+                {showResetConfirm ? (
                     <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'default' }}>
                         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '0 0 12px 0' }}>
                             Erase all saved profile data and disable the auto-enforcer?
                         </p>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button type="button" className="ghost-btn" onClick={clearAllSettings}>Clear Everything</button>
-                            <button type="button" className="ghost-btn" onClick={() => setResetState('idle')}>Cancel</button>
+                            <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>Cancel</button>
                         </div>
                     </div>
                 ) : (
-                    <button type="button" className="settings-row" onClick={() => setResetState('confirm')}>
+                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)}>
                         <div className="settings-info">
                             <span className="settings-label">Clear All Saved Settings</span>
                             <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
