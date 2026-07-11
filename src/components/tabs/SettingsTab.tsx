@@ -140,14 +140,12 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '16px' }}>
-                <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)}>
-                    <div className="settings-info">
-                        <span className="settings-label">Clear All Saved Settings</span>
-                        <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
-                    </div>
-                </button>
-            </div>
+            <button type="button" className="settings-row" style={{ marginTop: '16px' }} onClick={() => setShowResetConfirm(true)}>
+                <div className="settings-info">
+                    <span className="settings-label">Clear All Saved Settings</span>
+                    <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
+                </div>
+            </button>
 
             {showResetConfirm && (
                 <div className="modal-overlay" onClick={() => setShowResetConfirm(false)}>
