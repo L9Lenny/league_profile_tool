@@ -139,17 +139,18 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         </p>
                     </div>
                 </div>
-                <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                    {showResetConfirm ? (
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                            Erase all saved data?{' '}
-                            <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto', minWidth: '50px' }} onClick={clearAllSettings}>Clear</button>
-                            <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto', minWidth: '50px' }} onClick={() => setShowResetConfirm(false)}>Cancel</button>
-                        </span>
-                    ) : (
-                        <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '3px 12px', height: 'auto' }} onClick={() => setShowResetConfirm(true)}>Clear All Saved Settings</button>
-                    )}
-                </div>
+            </div>
+
+            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                {showResetConfirm ? (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                        Erase all saved data?{' '}
+                        <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto', minWidth: '50px' }} onClick={clearAllSettings}>Clear</button>
+                        <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto', minWidth: '50px' }} onClick={() => setShowResetConfirm(false)}>Cancel</button>
+                    </span>
+                ) : (
+                    <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '3px 12px', height: 'auto' }} onClick={() => setShowResetConfirm(true)}>Clear All Saved Settings</button>
+                )}
             </div>
         </div>
     );
