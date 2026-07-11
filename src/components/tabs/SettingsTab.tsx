@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu } from 'lucide-react';
+import { RefreshCw, Cpu, Trash2 } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 
@@ -140,12 +140,12 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            <button type="button" className="settings-row" style={{ marginTop: '16px' }} onClick={() => setShowResetConfirm(true)}>
-                <div className="settings-info">
-                    <span className="settings-label">Clear All Saved Settings</span>
-                    <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
-                </div>
-            </button>
+            <div className="card" style={{ marginTop: '16px', borderColor: '#ff6b6b' }}>
+                <h3 className="card-title" style={{ color: '#ff6b6b' }}>Reset</h3>
+                <button type="button" className="flat-btn danger-btn" onClick={() => setShowResetConfirm(true)} style={{ width: '100%', justifyContent: 'center', gap: '6px' }}>
+                    <Trash2 size={16} /> Clear All Settings
+                </button>
+            </div>
 
             {showResetConfirm && (
                 <div className="modal-overlay" onClick={() => setShowResetConfirm(false)}>
