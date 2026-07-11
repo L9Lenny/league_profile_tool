@@ -118,7 +118,8 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
             if (cdRes.ok) {
                 const cdData = await cdRes.json();
                 const record: Record<number, { name: string, description: string }> = {};
-                cdData.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
+                const entries = Array.isArray(cdData) ? cdData : Object.values(cdData);
+                entries.forEach((def: any) => record[def.id] = { name: def.name, description: def.description });
                 setChallengeDefs(record);
                 try { localStorage.setItem(CD_CACHE_KEY, JSON.stringify({ data: record, ts: Date.now() })); } catch { /* quota */ }
                 return record;

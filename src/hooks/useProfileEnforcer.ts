@@ -95,17 +95,20 @@ export function useProfileEnforcer(
 
                     // The update endpoint does a FULL REPLACE — merge current
                     // preferences so we don't reset banner/crest/prestige.
+                    let mergeOk = false;
                     try {
                         const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
                         if (summary) {
                             prefBody.bannerAccent = summary.bannerId ?? summary.preferences?.bannerId ?? summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
                             prefBody.crestBorder = summary.crestId ?? summary.preferences?.crestId ?? summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
                             prefBody.prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
+                            mergeOk = true;
                         }
                     } catch (err) {
                         if (isInitial) addLog(`Auto-Enforcer warning: Could not read current preferences to merge: ${err}`);
                     }
 
+                    if (!mergeOk && !savedTokens && savedTitle === null) return;
                     await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
                 }, isInitial);
             }
