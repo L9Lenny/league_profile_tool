@@ -8,18 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.10.0] - 2026-07-11
 
 ### Added
-- **Selective Clear All Settings (#434)**: Replaced the simple "Yes/No" confirm with a checkbox-based panel that lets users pick exactly what to reset: rank overrides, challenge overrides, background skin, tokens/title/banner/crest, profile icon, status & bio, and auto-enforcer & localStorage.
+- **Selective Clear All Settings (#434, #436)**: Replaced the simple "Yes/No" confirm with a checkbox-based panel that lets users pick exactly what to reset: rank overrides, challenge overrides, background skin, tokens/title/banner/crest, profile icon, status & bio, and auto-enforcer & localStorage.
 - **Profile Icon Reset**: "Clear All Settings" now resets the summoner icon via the official LCU endpoint when the "Profile icon" option is selected, restoring the previously saved icon or defaulting to icon 0.
 - **Status & Bio Reset**: "Clear All Settings" now resets availability to `"chat"` and clears the status message.
 
 ### Fixed
-- **LCU Override Fields Not Clearing (#434)**: Fixed a bug where `delete`-ing fields from the chat presence `lol` object did not actually clear them in the League Client. Fields are now explicitly set to empty strings (`""`), which the LCU respects.
-- **CDragon Crash on Invalid Data (#434)**: Added `Array.isArray` guard in the Tokens tab to prevent a crash when CDragon returns a non-array response.
-- **Auto-Enforcer OR Logic (#434)**: Toggling auto-enforce OFF now also clears the legacy `SAVED_ENFORCE_OFFLINE_KEY`, and the enforcer skips the enforce cycle when the LCU summary merge fails.
+- **LCU Override Fields Not Clearing (#434, #436)**: Fixed a bug where `delete`-ing fields from the chat presence `lol` object did not actually clear them in the League Client. Fields are now explicitly set to empty strings (`""`), which the LCU respects.
+- **CDragon Crash on Invalid Data (#434, #436)**: Added `Array.isArray` guard in the Tokens tab to prevent a crash when CDragon returns a non-array response.
+- **Auto-Enforcer OR Logic (#434, #436)**: Toggling auto-enforce OFF now also clears the legacy `SAVED_ENFORCE_OFFLINE_KEY`, and the enforcer skips the enforce cycle when the LCU summary merge fails.
+- **Background Contrast Issue (#436)**: Increased contrast for danger button hover state from `#ffb3b3` to `#ffd6d6`.
 
 ### Changed
-- **Clear All Settings UX**: The entire reset now makes a single `PUT /lol-chat/v1/me` call combining `availability`, `statusMessage`, and `lol` fields, and also calls the official background and challenge preferences endpoints to fully reset profile customizations.
-- **Challenge Preferences Reset**: "Clear All Settings" now sends an empty payload to `POST /lol-challenges/v1/update-player-preferences` to clear equipped tokens, title, banner accent, and crest border.
+- **Clear All Settings UX (#434, #436)**: The entire reset now makes a single `PUT /lol-chat/v1/me` call combining `availability`, `statusMessage`, and `lol` fields, and also calls the official background and challenge preferences endpoints to fully reset profile customizations.
+- **Challenge Preferences Reset (#434, #436)**: "Clear All Settings" now sends an empty payload to `POST /lol-challenges/v1/update-player-preferences` to clear equipped tokens, title, banner accent, and crest border.
+
+## [1.9.9] - 2026-07-11
+
+### Fixed
+- **Profile Reset After Games (#429)**: The Auto-Enforcer now continuously polls every 15 seconds to re-apply profile picture, rank (tier/division/queue), challenge points, and crystal level after League resets them post-game. Previously, settings were only applied once per session.
+- **Rank & Challenge Stats Enforcment (#429)**: Added support for persisting rank overrides (`rankedLeagueTier`, `rankedLeagueDivision`, `rankedLeagueQueue`) and challenge stats (`challengeCrystalLevel`, `challengePoints`) via chat presence, merged with existing `lol` object fields to avoid overwriting unrelated data.
+
+### Changed
+- **Polling Instead of Retry (#429)**: Replaced the old retry-with-backoff mechanism (10s interval, 60s max) with a simpler 15s continuous polling loop, ensuring settings survive game-induced resets without log spam on subsequent cycles.
 
 ## [1.9.8] - 2026-07-05
 

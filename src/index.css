@@ -944,13 +944,13 @@ input:checked+.slider:before {
 .flat-btn.danger-btn {
   border-color: #ff6b6b;
   color: #ff6b6b;
-  background: rgba(255, 107, 107, 0.05);
+  background: rgba(255, 107, 107, 0.15);
 }
 
 .flat-btn.danger-btn:hover {
   border-color: #ff6b6b;
   color: #ffd6d6;
-  background: rgba(255, 107, 107, 0.05);
+  background: rgba(255, 107, 107, 0.2);
 }
 
 .modal-overlay {
