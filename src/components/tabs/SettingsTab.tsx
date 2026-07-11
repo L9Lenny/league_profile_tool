@@ -35,9 +35,9 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
 
     const clearAllSettings = () => {
         ALL_SAVED_KEYS.forEach(key => localStorage.removeItem(key));
-        setAutoEnforce(false);
+        addLog("All saved settings have been cleared. Reloading...");
         setShowResetConfirm(false);
-        addLog("All saved settings have been cleared.");
+        setTimeout(() => window.location.reload(), 500);
     };
 
     return (
