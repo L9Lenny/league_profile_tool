@@ -113,23 +113,21 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 {showResetConfirm ? (
                     <div className="settings-row" style={{ cursor: 'default', marginTop: '10px' }}>
                         <div className="settings-info">
-                            <span className="settings-label" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Erase all saved data?</span>
+                            <span className="settings-label" style={{ color: 'var(--text-secondary)' }}>Erase all saved data?</span>
                         </div>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                            <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={clearAllSettings}>Yes</button>
-                            <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={() => setShowResetConfirm(false)}>No</button>
+                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                            <button type="button" className="ghost-btn" style={{ color: '#c0392b' }} onClick={clearAllSettings}>Yes</button>
+                            <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>No</button>
                         </div>
                     </div>
                 ) : (
-                    <div className="settings-row" style={{ marginTop: '10px', cursor: 'default' }}>
+                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)} style={{ marginTop: '10px' }}>
                         <div className="settings-info">
                             <span className="settings-label">Clear Saved Data</span>
                             <p className="settings-desc">Reset all profile overrides, rank, tokens, titles &amp; auto-enforcer</p>
                         </div>
-                        <button type="button" onClick={() => setShowResetConfirm(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', borderRadius: '4px' }}>
-                            <Trash2 size={18} style={{ color: '#ff6b6b', display: 'block' }} />
-                        </button>
-                    </div>
+                        <Trash2 size={18} style={{ color: '#ff6b6b', flexShrink: 0 }} />
+                    </button>
                 )}
             </div>
 
