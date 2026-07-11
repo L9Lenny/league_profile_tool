@@ -115,12 +115,12 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
                 {showResetConfirm ? (
                     <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Erase all saved data?</span>
-                        <button type="button" className="ghost-btn" style={{ color: '#ff6b6b' }} onClick={clearAllSettings}>Clear</button>
-                        <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>Cancel</button>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Erase all saved data?</span>
+                        <button type="button" className="primary-btn" style={{ background: '#c0392b', color: '#fff', padding: '8px 20px', fontSize: '0.75rem' }} onClick={clearAllSettings}>Yes</button>
+                        <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>No</button>
                     </div>
                 ) : (
-                    <button type="button" className="ghost-btn" style={{ color: '#ff6b6b' }} onClick={() => setShowResetConfirm(true)}>Clear All Saved Settings</button>
+                    <button type="button" className="primary-btn" style={{ background: '#c0392b', color: '#fff', padding: '10px 24px', fontSize: '0.8rem' }} onClick={() => setShowResetConfirm(true)}>Clear All Saved Settings</button>
                 )}
             </div>
 
