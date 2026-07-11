@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu } from 'lucide-react';
+import { RefreshCw, Cpu, Trash2 } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 
@@ -110,6 +110,24 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                     </span>
                 </button>
 
+                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,107,107,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {showResetConfirm ? (
+                        <>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Erase all saved data?</span>
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                                <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={clearAllSettings}>Yes</button>
+                                <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto' }} onClick={() => setShowResetConfirm(false)}>No</button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Reset saved data</span>
+                            <button type="button" className="ghost-btn" style={{ color: '#c0392b', padding: '4px 10px', height: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => setShowResetConfirm(true)}>
+                                <Trash2 size={14} /> Clear
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
 
             {latestVersion && clientVersion !== latestVersion && (
@@ -141,17 +159,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            <div style={{ marginTop: '16px', textAlign: 'center' }}>
-                {showResetConfirm ? (
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                        Erase all saved data?{' '}
-                        <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '2px 10px', height: 'auto', minWidth: '50px' }} onClick={clearAllSettings}>Clear</button>
-                        <button type="button" className="ghost-btn" style={{ fontSize: '0.7rem', padding: '2px 10px', height: 'auto', minWidth: '50px' }} onClick={() => setShowResetConfirm(false)}>Cancel</button>
-                    </span>
-                ) : (
-                    <button type="button" className="ghost-btn" style={{ color: '#c0392b', fontSize: '0.7rem', padding: '3px 12px', height: 'auto' }} onClick={() => setShowResetConfirm(true)}>Clear All Saved Settings</button>
-                )}
-            </div>
+
         </div>
     );
 };
