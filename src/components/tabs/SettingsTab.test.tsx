@@ -76,4 +76,51 @@ describe('SettingsTab', () => {
         expect(localStorage.getItem('profile_auto_enforce_v1')).toBe('false');
         expect(mockProps.addLog).toHaveBeenCalledWith('Auto-Enforcer disabled.');
     });
+
+    it('should show checkbox panel when Clear Saved Data is clicked', () => {
+        render(<SettingsTab {...mockProps} />);
+        fireEvent.click(screen.getByText('Clear Saved Data'));
+        expect(screen.getByText('What to clear?')).toBeDefined();
+        expect(screen.getByText('Clear Selected')).toBeDefined();
+        expect(screen.getByText('Cancel')).toBeDefined();
+    });
+
+    it('should render all reset options', () => {
+        render(<SettingsTab {...mockProps} />);
+        fireEvent.click(screen.getByText('Clear Saved Data'));
+        expect(screen.getByText('Rank overrides')).toBeDefined();
+        expect(screen.getByText('Challenge overrides')).toBeDefined();
+        expect(screen.getByText('Background skin')).toBeDefined();
+        expect(screen.getByText('Tokens, Title, Banner & Crest')).toBeDefined();
+        expect(screen.getByText('Profile icon')).toBeDefined();
+        expect(screen.getByText('Status & Bio')).toBeDefined();
+        expect(screen.getByText('Auto-Enforcer & localStorage')).toBeDefined();
+    });
+
+    it('should hide checkbox panel on Cancel', () => {
+        render(<SettingsTab {...mockProps} />);
+        fireEvent.click(screen.getByText('Clear Saved Data'));
+        fireEvent.click(screen.getByText('Cancel'));
+        expect(screen.queryByText('What to clear?')).toBeNull();
+    });
+
+    it('should call lcuRequest when Clear Selected is clicked with default options', () => {
+        localStorage.setItem('profile_saved_icon_v1', '42');
+        const lcuReq = vi.fn(() => Promise.resolve({ lol: {} }));
+        render(<SettingsTab {...mockProps} lcuRequest={lcuReq} showToast={vi.fn()} />);
+        fireEvent.click(screen.getByText('Clear Saved Data'));
+        fireEvent.click(screen.getByText('Clear Selected'));
+        expect(localStorage.getItem('profile_auto_enforce_v1')).toBeNull();
+        expect(lcuReq).toHaveBeenCalledWith('GET', '/lol-chat/v1/me');
+    });
+
+    it('should not call lcuRequest when all options are unchecked', () => {
+        const lcuReq = vi.fn(() => Promise.resolve({ lol: {} }));
+        render(<SettingsTab {...mockProps} lcuRequest={lcuReq} showToast={vi.fn()} />);
+        fireEvent.click(screen.getByText('Clear Saved Data'));
+        const checkboxes = screen.getAllByRole('checkbox');
+        checkboxes.forEach(cb => fireEvent.click(cb));
+        fireEvent.click(screen.getByText('Clear Selected'));
+        expect(lcuReq).not.toHaveBeenCalled();
+    });
 });
