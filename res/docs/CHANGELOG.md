@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.9] - 2026-07-11
+
+### Fixed
+- **Profile Reset After Games (#429)**: The Auto-Enforcer now continuously polls every 15 seconds to re-apply profile picture, rank (tier/division/queue), challenge points, and crystal level after League resets them post-game. Previously, settings were only applied once per session.
+- **Rank & Challenge Stats Enforcment**: Added support for persisting rank overrides (`rankedLeagueTier`, `rankedLeagueDivision`, `rankedLeagueQueue`) and challenge stats (`challengeCrystalLevel`, `challengePoints`) via chat presence, merged with existing `lol` object fields to avoid overwriting unrelated data.
+
+### Changed
+- **Polling Instead of Retry**: Replaced the old retry-with-backoff mechanism (10s interval, 60s max) with a simpler 15s continuous polling loop, ensuring settings survive game-induced resets without log spam on subsequent cycles.
+
 ## [1.9.8] - 2026-07-05
 
 ### Fixed
