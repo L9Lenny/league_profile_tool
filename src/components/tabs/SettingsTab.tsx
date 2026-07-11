@@ -140,25 +140,26 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '16px', borderColor: '#ff6b6b' }}>
-                <h3 className="card-title" style={{ color: '#ff6b6b' }}>Reset</h3>
-                <button type="button" className="flat-btn danger-btn" onClick={() => setShowResetConfirm(true)} style={{ width: '100%', justifyContent: 'center', gap: '6px' }}>
-                    <Trash2 size={16} /> Clear All Settings
-                </button>
-            </div>
-
-            {showResetConfirm && (
-                <div className="modal-overlay" onClick={() => setShowResetConfirm(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <h3 className="card-title" style={{ marginBottom: '12px' }}>Clear All Saved Settings</h3>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 20px 0', lineHeight: '1.5' }}>
-                            This will erase all saved profile overrides, rank data, tokens, titles, and disable the auto-enforcer. <strong>This action cannot be undone.</strong>
+            {showResetConfirm ? (
+                <div className="card" style={{ marginTop: '16px' }}>
+                    <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'default' }}>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '0 0 12px 0' }}>
+                            Erase all saved profile data and disable the auto-enforcer?
                         </p>
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                            <button type="button" className="ghost-btn" onClick={() => setShowResetConfirm(false)}>Cancel</button>
-                            <button type="button" className="flat-btn danger-btn" onClick={clearAllSettings}>Clear Everything</button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="button" className="flat-btn danger-btn" onClick={clearAllSettings}><Trash2 size={14} /> Yes, Clear</button>
+                            <button type="button" className="flat-btn" onClick={() => setShowResetConfirm(false)}>Cancel</button>
                         </div>
                     </div>
+                </div>
+            ) : (
+                <div className="card" style={{ marginTop: '16px' }}>
+                    <button type="button" className="settings-row" onClick={() => setShowResetConfirm(true)}>
+                        <div className="settings-info">
+                            <span className="settings-label" style={{ color: '#ff6b6b' }}>Clear All Saved Settings</span>
+                            <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
+                        </div>
+                    </button>
                 </div>
             )}
         </div>
