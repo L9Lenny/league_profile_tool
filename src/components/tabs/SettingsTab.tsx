@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu, Trash2 } from 'lucide-react';
+import { RefreshCw, Cpu } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 
@@ -140,52 +140,27 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            <div style={{ marginTop: '20px', padding: '16px 20px', background: resetState === 'done' ? 'rgba(70, 200, 120, 0.06)' : 'rgba(255, 70, 70, 0.04)', border: `1px solid ${resetState === 'done' ? 'rgba(70, 200, 120, 0.2)' : 'rgba(255, 70, 70, 0.12)'}`, borderRadius: '8px', transition: 'all 0.3s ease' }}>
+            <div className="card" style={{ marginTop: '16px' }}>
+                <h3 className="card-title">Data Management</h3>
                 {resetState === 'done' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(70, 200, 120, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#46c878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#46c878' }}>All settings cleared</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Switch tabs to refresh — or restart the app for a full reset.</div>
+                    <p style={{ fontSize: '0.85rem', color: '#46c878', margin: 0 }}>All saved settings cleared.</p>
+                ) : resetState === 'confirm' ? (
+                    <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', cursor: 'default' }}>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '0 0 12px 0' }}>
+                            Erase all saved profile data and disable the auto-enforcer?
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="button" className="ghost-btn" onClick={clearAllSettings}>Clear Everything</button>
+                            <button type="button" className="ghost-btn" onClick={() => setResetState('idle')}>Cancel</button>
                         </div>
                     </div>
                 ) : (
-                    <>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: resetState === 'confirm' ? '12px' : 0 }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(255, 70, 70, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <Trash2 size={16} style={{ color: '#ff6b6b' }} />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>Clear All Saved Data</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</div>
-                            </div>
-                            {resetState === 'idle' && (
-                                <button type="button" onClick={() => setResetState('confirm')}
-                                    style={{ padding: '6px 14px', borderRadius: '4px', border: '1px solid rgba(255, 70, 70, 0.25)', background: 'transparent', color: '#ff6b6b', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                                    CLEAR ALL
-                                </button>
-                            )}
+                    <button type="button" className="settings-row" onClick={() => setResetState('confirm')}>
+                        <div className="settings-info">
+                            <span className="settings-label">Clear All Saved Settings</span>
+                            <p className="settings-desc">Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</p>
                         </div>
-                        {resetState === 'confirm' && (
-                            <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255, 70, 70, 0.1)' }}>
-                                <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '0 0 10px 0', lineHeight: 1.5 }}>
-                                    This will erase all saved profile overrides and disable the auto-enforcer. This action cannot be undone.
-                                </p>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button type="button" onClick={clearAllSettings}
-                                        style={{ padding: '6px 14px', borderRadius: '4px', border: 'none', background: '#ff6b6b', color: '#fff', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>
-                                        Clear Everything
-                                    </button>
-                                    <button type="button" onClick={() => setResetState('idle')}
-                                        style={{ padding: '6px 14px', borderRadius: '4px', border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.72rem', cursor: 'pointer' }}>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </>
+                    </button>
                 )}
             </div>
         </div>
