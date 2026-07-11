@@ -115,27 +115,38 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '16px', borderColor: '#ff6b6b' }}>
-                <h3 className="card-title" style={{ color: '#ff6b6b' }}>Reset</h3>
-                {showResetConfirm ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                            This will erase all saved profile overrides (icon, background, rank, tokens, title, etc.)
-                            and disable the auto-enforcer. This action cannot be undone.
+            <div style={{ marginTop: '20px', padding: '16px 20px', background: 'rgba(255, 70, 70, 0.04)', border: '1px solid rgba(255, 70, 70, 0.12)', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: showResetConfirm ? '12px' : 0 }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(255, 70, 70, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Trash2 size={16} style={{ color: '#ff6b6b' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>Clear All Saved Data</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Profile overrides, rank, tokens, titles &amp; auto-enforcer settings</div>
+                    </div>
+                    {!showResetConfirm && (
+                        <button type="button" onClick={() => setShowResetConfirm(true)}
+                            style={{ padding: '6px 14px', borderRadius: '4px', border: '1px solid rgba(255, 70, 70, 0.25)', background: 'transparent', color: '#ff6b6b', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                            CLEAR ALL
+                        </button>
+                    )}
+                </div>
+                {showResetConfirm && (
+                    <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255, 70, 70, 0.1)' }}>
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '0 0 10px 0', lineHeight: 1.5 }}>
+                            This will erase all saved profile overrides and disable the auto-enforcer. This action cannot be undone.
                         </p>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button type="button" className="flat-btn danger-btn" onClick={clearAllSettings} style={{ gap: '6px', color: '#ffb3b3', borderColor: '#ff6b6b' }}>
-                                <Trash2 size={16} /> Yes, Clear Everything
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="button" onClick={clearAllSettings}
+                                style={{ padding: '6px 14px', borderRadius: '4px', border: 'none', background: '#ff6b6b', color: '#fff', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>
+                                Clear Everything
                             </button>
-                            <button type="button" className="flat-btn" onClick={() => setShowResetConfirm(false)}>
+                            <button type="button" onClick={() => setShowResetConfirm(false)}
+                                style={{ padding: '6px 14px', borderRadius: '4px', border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.72rem', cursor: 'pointer' }}>
                                 Cancel
                             </button>
                         </div>
                     </div>
-                ) : (
-                    <button type="button" className="flat-btn danger-btn" onClick={() => setShowResetConfirm(true)} style={{ width: '100%', justifyContent: 'center', gap: '6px' }}>
-                        <Trash2 size={16} /> Clear All Settings
-                    </button>
                 )}
             </div>
         </div>
