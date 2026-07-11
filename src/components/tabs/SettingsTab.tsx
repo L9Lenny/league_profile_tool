@@ -57,7 +57,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 for (const [field, empty] of Object.entries(overrideFields)) {
                     baseLol[field] = empty;
                 }
-                lcuRequest("PUT", "/lol-chat/v1/me", { lol: baseLol });
+                lcuRequest("PUT", "/lol-chat/v1/me", {
+                    availability: "chat",
+                    statusMessage: "",
+                    lol: baseLol,
+                });
             }).catch(() => {});
 
             lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
