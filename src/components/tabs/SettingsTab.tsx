@@ -11,12 +11,14 @@ interface SettingsTabProps {
     latestVersion: string;
     clientVersion: string;
     addLog: (msg: string) => void;
+    lcuRequest?: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
 }
 
 const SettingsTab: React.FC<SettingsTabProps> = ({
     isAutostartEnabled, setIsAutostartEnabled,
     minimizeToTray, toggleMinimizeToTray,
-    latestVersion, clientVersion, addLog
+    latestVersion, clientVersion, addLog,
+    lcuRequest
 }) => {
     const [autoEnforce, setAutoEnforce] = useState(() => localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true');
 
@@ -36,6 +38,28 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     const clearAllSettings = () => {
         ALL_SAVED_KEYS.forEach(key => localStorage.removeItem(key));
         setAutoEnforce(false);
+
+        // Remove rank/challenge/background overrides from LCU chat presence
+        if (lcuRequest) {
+            lcuRequest("GET", "/lol-chat/v1/me").then((chatRes: any) => {
+                let baseLol: any = {};
+                if (chatRes?.lol) {
+                    baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
+                }
+                const overrideFields = ["rankedLeagueTier", "rankedLeagueDivision", "rankedLeagueQueue", "challengeCrystalLevel", "challengePoints", "backgroundSkinId"];
+                let changed = false;
+                for (const field of overrideFields) {
+                    if (field in baseLol) {
+                        delete baseLol[field];
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    lcuRequest("PUT", "/lol-chat/v1/me", { lol: baseLol });
+                }
+            }).catch(() => {});
+        }
+
         addLog("All saved settings have been cleared.");
         setResetState('done');
         setTimeout(() => setResetState('idle'), 3000);

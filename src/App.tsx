@@ -238,7 +238,7 @@ function App() {
           {activeTab === 'lobby' && <LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
           {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
-          {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} />}
+          {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} lcuRequest={lcuRequest} />}
         </main>
 
         <footer className="status-bar">
