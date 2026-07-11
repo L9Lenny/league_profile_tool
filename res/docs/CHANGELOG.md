@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Selective Clear All Settings (#434, #436)**: Replaced the simple "Yes/No" confirm with a checkbox-based panel that lets users pick exactly what to reset: rank overrides, challenge overrides, background skin, tokens/title/banner/crest, profile icon, status & bio, and auto-enforcer & localStorage.
-- **Profile Icon Reset**: "Clear All Settings" now resets the summoner icon via the official LCU endpoint when the "Profile icon" option is selected, restoring the previously saved icon or defaulting to icon 0.
-- **Status & Bio Reset**: "Clear All Settings" now resets availability to `"chat"` and clears the status message.
+
 
 ### Fixed
 - **LCU Override Fields Not Clearing (#434, #436)**: Fixed a bug where `delete`-ing fields from the chat presence `lol` object did not actually clear them in the League Client. Fields are now explicitly set to empty strings (`""`), which the LCU respects.
