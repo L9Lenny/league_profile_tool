@@ -180,7 +180,7 @@ function App() {
               <span className="nav-title">LP TOOL</span>
             </>
           )}
-          <button 
+          <button type="button" 
             className="nav-toggle-btn" 
             onClick={() => setIsCollapsed(!isCollapsed)}
             title={isCollapsed ? "Expand Menu" : "Collapse Menu"}

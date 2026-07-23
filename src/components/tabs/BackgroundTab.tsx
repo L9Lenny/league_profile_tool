@@ -350,7 +350,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                             </div>
                         )}
                     </div>
-                    <button
+                    <button type="button"
                         className="primary-btn"
                         onClick={() => {
                             if (selectedDirectSkin) {
@@ -391,7 +391,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                 {selectedChampion ? (
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                            <button
+                            <button type="button"
                                 className="ghost-btn"
                                 onClick={() => { setSelectedChampion(null); setSkins([]); setSelectedSkin(null); }}
                             >
@@ -438,7 +438,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                             </div>
                         )}
 
-                        <button
+                        <button type="button"
                             className="primary-btn"
                             id="apply-background-btn"
                             onClick={() => selectedSkin && applyBackground(selectedSkin.id, selectedSkin.name)}

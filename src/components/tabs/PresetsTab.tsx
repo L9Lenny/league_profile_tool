@@ -284,7 +284,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
                         onKeyDown={(e) => e.key === 'Enter' && handleSaveCurrentAsPreset()}
                         style={{ flex: 1 }}
                     />
-                    <button
+                    <button type="button"
                         className="primary-btn"
                         onClick={handleSaveCurrentAsPreset}
                         disabled={saving || !newPresetName.trim()}
@@ -407,7 +407,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
                                                 )}
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button
+                                                <button type="button"
                                                     className="primary-btn"
                                                     onClick={() => handleLoadPreset(preset)}
                                                     style={{ padding: '6px 14px', fontSize: '0.75rem', display: 'flex', gap: '5px', alignItems: 'center' }}
@@ -416,7 +416,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
                                                 >
                                                     <CheckCircle2 size={13} /> LOAD
                                                 </button>
-                                                <button
+                                                <button type="button"
                                                     onClick={() => handleDeletePreset(preset.id)}
                                                     style={{ padding: '6px', background: 'rgba(220, 53, 69, 0.2)', color: '#ff6b6b', border: '1px solid rgba(220, 53, 69, 0.4)', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                                     title="Delete preset"

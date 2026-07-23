@@ -83,7 +83,7 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/Search by champion name/i);
         fireEvent.change(input, { target: { value: 'Ahri' } });
@@ -140,7 +140,7 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: '12345' } });
@@ -160,7 +160,7 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Justicar' } });
@@ -185,12 +185,12 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Justicar' } });
 
-        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+        await screen.findByText(/Justicar Aatrox/);
 
         fireEvent.mouseDown(document.body);
 
@@ -203,12 +203,12 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Justicar' } });
 
-        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+        await screen.findByText(/Justicar Aatrox/);
 
         // Dismiss by clicking outside
         fireEvent.mouseDown(document.body);
@@ -216,7 +216,7 @@ describe('BackgroundTab', () => {
 
         // Focus input again
         fireEvent.focus(input);
-        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+        await screen.findByText(/Justicar Aatrox/);
     });
 
     it('should disable APPLY with non-matching text input', async () => {
@@ -225,7 +225,7 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'zzzzz' } });
@@ -240,7 +240,7 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Justicar' } });
@@ -283,7 +283,7 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('ID 555')).toBeDefined());
+        await screen.findByText('ID 555');
     });
 
     it('should show error toast if champion fetch fails', async () => {
@@ -341,11 +341,11 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Skins From Unloaded' } });
 
-        await waitFor(() => expect(screen.getByText(/Skins From Unloaded Champ/)).toBeDefined());
+        await screen.findByText(/Skins From Unloaded Champ/);
     });
 });

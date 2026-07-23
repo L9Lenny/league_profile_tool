@@ -949,8 +949,8 @@ input:checked+.slider:before {
 
 .flat-btn.danger-btn:hover {
   border-color: #ff6b6b;
-  color: #ffd6d6;
-  background: rgba(255, 107, 107, 0.2);
+  color: #ffffff;
+  background: rgba(255, 107, 107, 0.3);
 }
 
 .modal-overlay {

@@ -98,7 +98,7 @@ describe('App', () => {
 
     it('should toggle sidebar collapse state', async () => {
         render(<App />);
-        await waitFor(() => expect(screen.getByText('Home')).toBeDefined());
+        await screen.findByText('Home');
 
         const toggleBtn = screen.getByTitle(/Collapse Menu/i);
         fireEvent.click(toggleBtn);
@@ -121,7 +121,7 @@ describe('App', () => {
         vi.mocked(core.invoke).mockResolvedValue(true);
         render(<App />);
 
-        await waitFor(() => expect(screen.getByText('Home')).toBeDefined());
+        await screen.findByText('Home');
 
         // Switch to settings
         await act(async () => {

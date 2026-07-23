@@ -111,7 +111,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        <button className={`refresh-icon-btn ${fetching ? 'loading' : ''}`} onClick={fetchFriends}>
+                        <button type="button" className={`refresh-icon-btn ${fetching ? 'loading' : ''}`} onClick={fetchFriends}>
                             <RefreshCw size={18} />
                         </button>
                     </div>
@@ -128,7 +128,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                     border: '1px solid rgba(255,255,255,0.05)'
                 }}>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <button 
+                        <button type="button" 
                             className="secondary-btn" 
                             style={{ padding: '6px 12px', fontSize: '0.7rem', background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer' }}
                             onClick={() => setSelected(new Set(selected.size === filteredFriends.length ? [] : filteredFriends.map(f => f.id)))}
@@ -140,7 +140,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                         </span>
                     </div>
                     
-                    <button 
+                    <button type="button" 
                         className="primary-btn"
                         style={{ 
                             background: selected.size > 0 ? '#ff4e50' : 'rgba(255,255,255,0.05)', 
@@ -182,7 +182,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                         const isSelected = selected.has(friend.id);
 
                         return (
-                            <button 
+                            <button type="button" 
                                 key={friend.id}
                                 className={`feature-card ${isSelected ? 'active' : ''}`}
                                 onClick={() => toggleSelect(friend.id)}

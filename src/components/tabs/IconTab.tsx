@@ -135,7 +135,7 @@ const IconTab: React.FC<IconTabProps> = ({
                     ))}
                 </div>
 
-                <button
+                <button type="button"
                     className="primary-btn"
                     style={{ width: '100%', marginTop: '12px' }}
                     onClick={applyIcon}

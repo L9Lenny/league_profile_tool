@@ -166,7 +166,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
             {/* View Title / Back Button - Minimalist */}
             <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {view === 'category-detail' && (
-                    <button className="ghost-btn" onClick={() => setView('categories')} style={{ padding: '5px 10px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <button type="button" className="ghost-btn" onClick={() => setView('categories')} style={{ padding: '5px 10px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
                         <ArrowLeft size={14} /> BACK
                     </button>
                 )}

@@ -276,7 +276,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
         <div className="tab-content fadeIn">
             {/* Flat KPI statistics row */}
             <div className="log-stats-row">
-                <button 
+                <button type="button" 
                     className={`log-stat-card ${levelFilter === 'all' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('all')}
                 >
@@ -286,7 +286,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                     </div>
                     <div className="log-stat-value">{counts.total}</div>
                 </button>
-                <button 
+                <button type="button" 
                     className={`log-stat-card stat-error ${levelFilter === 'error' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('error')}
                 >
@@ -297,7 +297,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                     </div>
                     <div className="log-stat-value text-error">{counts.error}</div>
                 </button>
-                <button 
+                <button type="button" 
                     className={`log-stat-card stat-success ${levelFilter === 'success' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('success')}
                 >
@@ -307,7 +307,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                     </div>
                     <div className="log-stat-value text-success">{counts.success}</div>
                 </button>
-                <button 
+                <button type="button" 
                     className={`log-stat-card stat-info ${levelFilter === 'info' ? 'active' : ''}`}
                     onClick={() => setLevelFilter('info')}
                 >
@@ -331,7 +331,7 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
                             className="log-search-input"
                         />
                         {searchTerm && (
-                            <button 
+                            <button type="button" 
                                 className="log-search-clear"
                                 onClick={() => setSearchTerm('')}
                                 title="Clear search"

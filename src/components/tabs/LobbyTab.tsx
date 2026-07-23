@@ -121,7 +121,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                        <button 
+                        <button type="button" 
                             className="primary-btn" 
                             onClick={selectAll} 
                             disabled={!lcu || loading || friends.length === 0}
@@ -129,7 +129,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                         >
                             SELECT ALL
                         </button>
-                        <button 
+                        <button type="button" 
                             className={`refresh-icon-btn ${isRefreshingFriends ? 'loading' : ''}`}
                             onClick={refreshFriends}
                             disabled={!lcu || isRefreshingFriends}
@@ -158,7 +158,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
                             {friends.map(friend => (
-                                <button 
+                                <button type="button" 
                                     key={friend.summonerId}
                                     onClick={() => toggleFriend(friend.summonerId)}
                                     style={{ 
@@ -197,7 +197,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                 </div>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <button 
+                    <button type="button" 
                         className="primary-btn" 
                         onClick={handleInviteSelected} 
                         disabled={!lcu || loading || selectedIds.length === 0}
@@ -205,7 +205,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
                     >
                         INVITE SELECTED ({selectedIds.length})
                     </button>
-                    <button 
+                    <button type="button" 
                         className="primary-btn" 
                         onClick={handleInviteAllAvailable} 
                         disabled={!lcu || loading || friends.length === 0}

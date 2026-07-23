@@ -143,7 +143,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                         <Shield size={20} color="var(--hextech-gold)" />
                         <h3 className="card-title" style={{ margin: 0 }}>Rank &amp; Stats Overrides</h3>
                     </div>
-                    <button 
+                    <button type="button" 
                         className={`refresh-icon-btn ${fetching ? 'loading' : ''}`}
                         onClick={fetchCurrentData}
                         disabled={!lcu || fetching}
@@ -161,7 +161,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                     <legend style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Queue Type</legend>
                     <div className="rank-queue-toggles">
                         {QUEUES.map(q => (
-                            <button
+                            <button type="button"
                                 key={q.value}
                                 className={`rank-queue-btn ${queueType === q.value ? 'active' : ''}`}
                                 onClick={() => setQueueType(q.value)}
@@ -181,7 +181,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                             const isActive = soloTier === t;
                             const color = TIER_COLORS[t] || "#ffffff";
                             return (
-                                <button
+                                <button type="button"
                                     key={t}
                                     className={`tier-btn ${isActive ? 'active' : ''}`}
                                     style={isActive ? { color, borderColor: color, boxShadow: `0 0 15px ${color}40, inset 0 0 8px ${color}20` } : {}}
@@ -202,7 +202,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                         <legend style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Division</legend>
                         <div className="division-grid">
                             {DIVISIONS.map(d => (
-                                <button
+                                <button type="button"
                                     key={d}
                                     className={`division-btn ${soloDiv === d ? 'active' : ''}`}
                                     onClick={() => setSoloDiv(d)}
@@ -265,7 +265,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                 </div>
 
                 <div className="card">
-                    <button 
+                    <button type="button" 
                         className="primary-btn" 
                         style={{ width: '100%', padding: '16px', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '1px' }} 
                         onClick={applyChanges} 
