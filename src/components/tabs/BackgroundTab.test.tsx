@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 vi.mock('../../data/supplemental-skins.json', () => ({
     default: {
@@ -66,9 +66,7 @@ describe('BackgroundTab', () => {
 
     it('should render and load champions', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         expect(screen.getByText('Profile Background')).toBeDefined();
         await waitFor(() => {
@@ -79,9 +77,7 @@ describe('BackgroundTab', () => {
 
     it('should filter champions by search', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
@@ -94,14 +90,10 @@ describe('BackgroundTab', () => {
 
     it('should load skins when a champion is selected', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
-        await waitFor(() => {
-            const aatroxBtn = screen.getByText('Aatrox').closest('button')!;
-            fireEvent.click(aatroxBtn);
-        });
+        const aatroxTxt = await screen.findByText('Aatrox');
+        fireEvent.click(aatroxTxt.closest('button')!);
 
         await waitFor(() => {
             expect(screen.getByText('Justicar Aatrox')).toBeDefined();
@@ -111,9 +103,7 @@ describe('BackgroundTab', () => {
 
     it('should apply background when a skin is selected and clicked', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         // Select Champ
         const aatroxBtn1 = await screen.findByText('Aatrox');
@@ -126,19 +116,17 @@ describe('BackgroundTab', () => {
 
         // Click Apply
         const applyBtn = screen.getByText(/APPLY — Justicar Aatrox/i);
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 1001 }));
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Justicar Aatrox'), 'success');
+        await waitFor(() => {
+            expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 1001 }));
+            expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Justicar Aatrox'), 'success');
+        });
     });
 
     it('should handle direct skin ID input', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
@@ -146,44 +134,40 @@ describe('BackgroundTab', () => {
         fireEvent.change(input, { target: { value: '12345' } });
 
         const applyBtn = screen.getByText('APPLY');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 12345 }));
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Skin 12345'), 'success');
+        await waitFor(() => {
+            expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 12345 }));
+            expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Skin 12345'), 'success');
+        });
     });
 
     it('should show skin suggestions and apply by name', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Justicar' } });
 
-        const suggestion = await waitFor(() => screen.getByText(/Justicar Aatrox/));
+        const suggestion = await screen.findByText(/Justicar Aatrox/);
         expect(suggestion).toBeDefined();
 
         fireEvent.click(suggestion);
 
         const applyBtn = screen.getByText('APPLY');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 1001 }));
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Justicar Aatrox'), 'success');
+        await waitFor(() => {
+            expect(props.lcuRequest).toHaveBeenCalledWith('POST', expect.anything(), expect.objectContaining({ value: 1001 }));
+            expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Justicar Aatrox'), 'success');
+        });
     });
 
     it('should dismiss suggestions on outside click', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
@@ -199,9 +183,7 @@ describe('BackgroundTab', () => {
 
     it('should show suggestions again on focus if matches exist', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
@@ -221,9 +203,7 @@ describe('BackgroundTab', () => {
 
     it('should disable APPLY with non-matching text input', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
@@ -236,16 +216,14 @@ describe('BackgroundTab', () => {
 
     it('should handle mouse hover on suggestion items', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Justicar' } });
 
-        const suggestion = await waitFor(() => screen.getByText(/Justicar Aatrox/));
+        const suggestion = await screen.findByText(/Justicar Aatrox/);
         const btn = suggestion.closest('button')!;
 
         fireEvent.mouseEnter(btn);
@@ -257,9 +235,7 @@ describe('BackgroundTab', () => {
 
     it('should go back to champion list from skin list', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         const aatroxBtn2 = await screen.findByText('Aatrox');
         fireEvent.click(aatroxBtn2);
@@ -279,34 +255,26 @@ describe('BackgroundTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
-        await screen.findByText('ID 555');
+        expect(await screen.findByText('ID 555')).toBeDefined();
     });
 
     it('should show error toast if champion fetch fails', async () => {
         globalThis.fetch = vi.fn().mockResolvedValue({ ok: false });
         const props = createProps();
         
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await waitFor(() => expect(props.showToast).toHaveBeenCalledWith('Failed to load champion list', 'error'));
     });
 
     it('should include supplemental skins from JSON data', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
-        await waitFor(() => {
-            const ahriBtn = screen.getByText('Ahri').closest('button')!;
-            fireEvent.click(ahriBtn);
-        });
+        const ahriTxt = await screen.findByText('Ahri');
+        fireEvent.click(ahriTxt.closest('button')!);
 
         await waitFor(() => {
             expect(screen.getByText('Dynasty Ahri')).toBeDefined();
@@ -317,9 +285,7 @@ describe('BackgroundTab', () => {
 
     it('should show placeholder when splash image fails to load', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         const aatroxBtn = await screen.findByText('Aatrox');
         fireEvent.click(aatroxBtn);
@@ -337,15 +303,13 @@ describe('BackgroundTab', () => {
 
     it('should find supplemental skins for unloaded champions via search', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<BackgroundTab {...props} />);
-        });
+        render(<BackgroundTab {...props} />);
 
         await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
         fireEvent.change(input, { target: { value: 'Skins From Unloaded' } });
 
-        await screen.findByText(/Skins From Unloaded Champ/);
+        expect(await screen.findByText(/Skins From Unloaded Champ/)).toBeDefined();
     });
 });

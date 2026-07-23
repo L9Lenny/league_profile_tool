@@ -92,7 +92,7 @@ describe('RankTab', () => {
     });
 
     it('should disable apply button when LCU is missing', async () => {
-        const props = createMockProps();
+        const props = createMockProps() as any;
         props.lcu = null;
 
         render(<RankTab {...props} />);
