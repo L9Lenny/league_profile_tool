@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FriendManagerTab from './FriendManagerTab';
 
 describe('FriendManagerTab', () => {
@@ -80,14 +80,10 @@ describe('FriendManagerTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText(/Friend One/)).toBeDefined();
-        });
+        await screen.findByText(/Friend One/);
 
         const searchInput = screen.getByPlaceholderText('Search friends...');
-        await act(async () => {
-            fireEvent.change(searchInput, { target: { value: 'Custom' } });
-        });
+        fireEvent.change(searchInput, { target: { value: 'Custom' } });
 
         expect(screen.queryByText(/Friend One/)).toBeNull();
         expect(screen.getByText(/Friend Two/)).toBeDefined();
@@ -103,21 +99,15 @@ describe('FriendManagerTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText(/Friend One/)).toBeDefined();
-        });
+        await screen.findByText(/Friend One/);
 
         const selectAllBtn = screen.getByText('SELECT ALL VISIBLE');
-        await act(async () => {
-            fireEvent.click(selectAllBtn);
-        });
+        fireEvent.click(selectAllBtn);
 
         expect(screen.getByText('Selected:')).toBeDefined();
         expect(screen.getByText('2')).toBeDefined();
 
-        await act(async () => {
-            fireEvent.click(screen.getByText('DESELECT ALL'));
-        });
+        fireEvent.click(screen.getByText('DESELECT ALL'));
         expect(screen.getByText('0')).toBeDefined();
     });
 
@@ -137,21 +127,14 @@ describe('FriendManagerTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText(/Friend One/)).toBeDefined();
-        });
-
-        const friendBtn = screen.getByText(/Friend One/).closest('button');
+        const friend1 = await screen.findByText(/Friend One/);
+        const friendBtn = friend1.closest('button');
         if (!friendBtn) throw new Error('Friend selection item not found');
         
-        await act(async () => {
-            fireEvent.click(friendBtn);
-        });
+        fireEvent.click(friendBtn);
 
         const deleteBtn = screen.getByText(/DELETE SELECTED/);
-        await act(async () => {
-            fireEvent.click(deleteBtn);
-        });
+        fireEvent.click(deleteBtn);
 
         expect(window.confirm).toHaveBeenCalled();
         await waitFor(() => {

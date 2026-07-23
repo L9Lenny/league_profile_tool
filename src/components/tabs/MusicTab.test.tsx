@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import MusicTab from './MusicTab';
 import { defaultMusicBioSettings } from '../../hooks/useMusicSync';
 
@@ -52,15 +52,15 @@ describe('MusicTab', () => {
         fireEvent.click(guideBtn);
 
         const connectBtn = screen.getByText('Test Setup');
-        await act(async () => {
-            fireEvent.click(connectBtn);
-        });
+        fireEvent.click(connectBtn);
 
-        expect(fetch).toHaveBeenCalled();
-        expect(mockProps.showToast).toHaveBeenCalledWith("Last.fm connected", "success");
+        await waitFor(() => {
+            expect(fetch).toHaveBeenCalled();
+            expect(mockProps.showToast).toHaveBeenCalledWith("Last.fm connected", "success");
+        });
     });
 
-    it('should handle normalization in input', async () => {
+    it('should handle normalization in input', () => {
         render(<MusicTab {...mockProps} />);
         const userInput = screen.getByLabelText(/Username/i);
         fireEvent.change(userInput, { target: { value: 'https://www.last.fm/user/tester' } });
@@ -76,12 +76,12 @@ describe('MusicTab', () => {
         render(<MusicTab {...mockProps} musicBio={musicBio} />);
 
         const disableBtn = screen.getByText('DISABLE');
-        await act(async () => {
-            fireEvent.click(disableBtn);
-        });
+        fireEvent.click(disableBtn);
 
-        expect(mockProps.applyIdleBio).toHaveBeenCalled();
-        expect(mockProps.setMusicBio).toHaveBeenCalled();
+        await waitFor(() => {
+            expect(mockProps.applyIdleBio).toHaveBeenCalled();
+            expect(mockProps.setMusicBio).toHaveBeenCalled();
+        });
     });
 
     it('should handle normalization edge cases', () => {
@@ -108,11 +108,11 @@ describe('MusicTab', () => {
         fireEvent.click(guideBtn);
 
         const connectBtn = screen.getByText('Test Setup');
-        await act(async () => {
-            fireEvent.click(connectBtn);
-        });
+        fireEvent.click(connectBtn);
 
-        expect(mockProps.showToast).toHaveBeenCalledWith("Last.fm validation failed", "error");
+        await waitFor(() => {
+            expect(mockProps.showToast).toHaveBeenCalledWith("Last.fm validation failed", "error");
+        });
     });
 
     it('should handle interval changes', () => {

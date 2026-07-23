@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import IconTab from './IconTab';
 
 // Mock Tauri invoke
@@ -47,26 +47,24 @@ describe('IconTab', () => {
         const iconBtn = screen.getByText('Icon One').closest('button');
         if (!iconBtn) throw new Error('Icon button not found');
 
-        await act(async () => {
-            fireEvent.click(iconBtn);
-        });
+        fireEvent.click(iconBtn);
 
         const applyBtn = screen.getByText('APPLY ICON');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
-            method: 'PUT',
-            endpoint: '/lol-summoner/v1/current-summoner/icon',
-            body: { profileIconId: 1 }
-        }));
-        expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
-            method: 'PUT',
-            endpoint: '/lol-chat/v1/me',
-            body: { icon: 1 }
-        }));
-        expect(mockProps.showToast).toHaveBeenCalledWith('Icon Applied!', 'success');
+        await waitFor(() => {
+            expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
+                method: 'PUT',
+                endpoint: '/lol-summoner/v1/current-summoner/icon',
+                body: { profileIconId: 1 }
+            }));
+            expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
+                method: 'PUT',
+                endpoint: '/lol-chat/v1/me',
+                body: { icon: 1 }
+            }));
+            expect(mockProps.showToast).toHaveBeenCalledWith('Icon Applied!', 'success');
+        });
     });
 
     it('should handle fallback to force method when official icon update fails', async () => {
@@ -81,22 +79,20 @@ describe('IconTab', () => {
         const iconBtn = screen.getByText('Icon One').closest('button');
         if (!iconBtn) throw new Error('Icon button not found');
 
-        await act(async () => {
-            fireEvent.click(iconBtn);
-        });
+        fireEvent.click(iconBtn);
 
         const applyBtn = screen.getByText('APPLY ICON');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(mockProps.addLog).toHaveBeenCalledWith('Official icon update failed (likely unowned). Trying Force method...');
-        expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
-            method: 'PUT',
-            endpoint: '/lol-chat/v1/me',
-            body: { icon: 1 }
-        }));
-        expect(mockProps.showToast).toHaveBeenCalledWith('Icon Applied!', 'success');
+        await waitFor(() => {
+            expect(mockProps.addLog).toHaveBeenCalledWith('Official icon update failed (likely unowned). Trying Force method...');
+            expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
+                method: 'PUT',
+                endpoint: '/lol-chat/v1/me',
+                body: { icon: 1 }
+            }));
+            expect(mockProps.showToast).toHaveBeenCalledWith('Icon Applied!', 'success');
+        });
     });
 
     it('should show toast error when all icon update methods fail', async () => {
@@ -106,30 +102,26 @@ describe('IconTab', () => {
         const iconBtn = screen.getByText('Icon One').closest('button');
         if (!iconBtn) throw new Error('Icon button not found');
 
-        await act(async () => {
-            fireEvent.click(iconBtn);
-        });
+        fireEvent.click(iconBtn);
 
         const applyBtn = screen.getByText('APPLY ICON');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(mockProps.showToast).toHaveBeenCalledWith('Failed to apply icon', 'error');
+        await waitFor(() => {
+            expect(mockProps.showToast).toHaveBeenCalledWith('Failed to apply icon', 'error');
+        });
     });
 
     it('should show empty state when no icons match', () => {
         const emptyProps = { ...mockProps, visibleIcons: [], iconSearchTerm: 'nothing' };
         render(<IconTab {...emptyProps} />);
-        // It doesn't actually show an "empty state" message in the code currently, 
-        // it just renders an empty grid. 
-        // Let's just check if icons are NOT there.
         expect(screen.queryByText('Icon One')).toBeNull();
     });
 
     it('should show warning if LCU not connected (disabled button)', () => {
-        render(<IconTab {...mockProps} lcu={null} />);
+        const disabledProps = { ...mockProps, lcu: null as any };
+        render(<IconTab {...disabledProps} />);
         const applyBtn = screen.getByText('APPLY ICON');
-        expect(applyBtn).toHaveProperty('disabled', true);
+        expect((applyBtn as HTMLButtonElement).disabled).toBe(true);
     });
 });

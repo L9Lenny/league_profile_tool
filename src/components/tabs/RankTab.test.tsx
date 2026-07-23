@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RankTab from './RankTab';
 
 describe('RankTab', () => {
@@ -33,55 +33,42 @@ describe('RankTab', () => {
 
     it('should render rank and customization panels and sync from LCU on mount', async () => {
         const props = createMockProps();
-        await act(async () => {
-            render(<RankTab {...props} />);
-        });
+        render(<RankTab {...props} />);
 
-        expect(screen.getByText('Rank & Stats Overrides')).toBeDefined();
-        
-        // Wait for sync to pre-populate elements
+        expect(await screen.findByText('Rank & Stats Overrides')).toBeDefined();
         expect(props.lcuRequest).toHaveBeenCalledWith("GET", "/lol-chat/v1/me");
     });
 
     it('should update rank preview when selection changes', async () => {
         const props = createMockProps();
-        await act(async () => {
-            render(<RankTab {...props} />);
-        });
+        render(<RankTab {...props} />);
 
-        const goldBtn = screen.getAllByText('GOLD')[0];
-        await act(async () => {
-            fireEvent.click(goldBtn);
-        });
+        const goldBtn = await screen.findAllByText('GOLD');
+        fireEvent.click(goldBtn[0]);
 
-        // The preview section should now show GOLD
         const goldElements = screen.getAllByText(/GOLD/);
         expect(goldElements.length).toBeGreaterThan(0);
     });
 
     it('should call lcuRequest with correct parameters on apply', async () => {
         const props = createMockProps();
-        await act(async () => {
-            render(<RankTab {...props} />);
+        render(<RankTab {...props} />);
+
+        const applyBtn = await screen.findByText('APPLY RANK OVERRIDES');
+        fireEvent.click(applyBtn);
+
+        await waitFor(() => {
+            expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.objectContaining({
+                lol: expect.objectContaining({
+                    rankedLeagueTier: "CHALLENGER",
+                    rankedLeagueDivision: "I",
+                    rankedLeagueQueue: "RANKED_SOLO_5x5",
+                    challengeCrystalLevel: "CHALLENGER",
+                    challengePoints: "1200"
+                })
+            }));
+            expect(props.showToast).toHaveBeenCalledWith("Rank Overrides Applied!", "success");
         });
-
-        const applyBtn = screen.getByText('APPLY RANK OVERRIDES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
-
-        // Verify PUT /lol-chat/v1/me
-        expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.objectContaining({
-            lol: expect.objectContaining({
-                rankedLeagueTier: "CHALLENGER",
-                rankedLeagueDivision: "I",
-                rankedLeagueQueue: "RANKED_SOLO_5x5",
-                challengeCrystalLevel: "CHALLENGER",
-                challengePoints: "1200"
-            })
-        }));
-
-        expect(props.showToast).toHaveBeenCalledWith("Rank Overrides Applied!", "success");
     });
 
     it('should handle apply errors gracefully', async () => {
@@ -93,26 +80,23 @@ describe('RankTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<RankTab {...props} />);
-        });
+        render(<RankTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY RANK OVERRIDES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY RANK OVERRIDES');
+        fireEvent.click(applyBtn);
 
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining("Customization failed: Network Error"), "error");
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Customization application failed: Network Error"));
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining("Customization failed: Network Error"), "error");
+            expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Customization application failed: Network Error"));
+        });
     });
 
     it('should disable apply button when LCU is missing', async () => {
         const props = createMockProps();
-        await act(async () => {
-            render(<RankTab {...props} lcu={null} />);
-        });
+        props.lcu = null;
 
-        const applyBtn = screen.getByText('APPLY RANK OVERRIDES') as HTMLButtonElement;
-        expect(applyBtn.disabled).toBe(true);
+        render(<RankTab {...props} />);
+        const applyBtn = screen.getByText('APPLY RANK OVERRIDES');
+        expect((applyBtn as HTMLButtonElement).disabled).toBe(true);
     });
 });

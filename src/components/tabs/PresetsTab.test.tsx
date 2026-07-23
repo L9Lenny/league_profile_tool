@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PresetsTab from './PresetsTab';
 import {
     SAVED_AVAILABILITY_KEY,
@@ -103,19 +103,13 @@ describe('PresetsTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Classic Solo Queue')).toBeDefined();
-        });
+        await screen.findByText('Classic Solo Queue');
 
         const nameInput = screen.getByPlaceholderText(/edgy setup/i);
-        await act(async () => {
-            fireEvent.change(nameInput, { target: { value: 'My Custom Preset' } });
-        });
+        fireEvent.change(nameInput, { target: { value: 'My Custom Preset' } });
 
         const saveBtn = screen.getByText('SAVE PRESET');
-        await act(async () => {
-            fireEvent.click(saveBtn);
-        });
+        fireEvent.click(saveBtn);
 
         await waitFor(() => {
             expect(invoke).toHaveBeenCalledWith('save_presets', expect.any(Object));
@@ -133,14 +127,10 @@ describe('PresetsTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Classic Solo Queue')).toBeDefined();
-        });
+        await screen.findByText('Classic Solo Queue');
 
         const loadBtn = screen.getByText('LOAD');
-        await act(async () => {
-            fireEvent.click(loadBtn);
-        });
+        fireEvent.click(loadBtn);
 
         await waitFor(() => {
             expect(invoke).toHaveBeenCalledWith('update_bio', { port: '1234', token: 'secret', newBio: 'Tryharding' });
@@ -183,14 +173,10 @@ describe('PresetsTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('No Title Preset')).toBeDefined();
-        });
+        await screen.findByText('No Title Preset');
 
         const loadBtn = screen.getByText('LOAD');
-        await act(async () => {
-            fireEvent.click(loadBtn);
-        });
+        fireEvent.click(loadBtn);
 
         await waitFor(() => {
             const updateCall = mockLcuRequest.mock.calls.find(
@@ -218,14 +204,10 @@ describe('PresetsTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Classic Solo Queue')).toBeDefined();
-        });
+        await screen.findByText('Classic Solo Queue');
 
         const loadBtn = screen.getByText('LOAD');
-        await act(async () => {
-            fireEvent.click(loadBtn);
-        });
+        fireEvent.click(loadBtn);
 
         await waitFor(() => {
             const updateCall = mockLcuRequest.mock.calls.find(
@@ -247,14 +229,10 @@ describe('PresetsTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Classic Solo Queue')).toBeDefined();
-        });
+        await screen.findByText('Classic Solo Queue');
 
         const deleteBtn = screen.getByTitle('Delete preset');
-        await act(async () => {
-            fireEvent.click(deleteBtn);
-        });
+        fireEvent.click(deleteBtn);
 
         await waitFor(() => {
             expect(invoke).toHaveBeenCalledWith('save_presets', { data: '[]' });

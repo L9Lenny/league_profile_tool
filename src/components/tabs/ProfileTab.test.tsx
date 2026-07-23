@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ProfileTab from './ProfileTab';
 import { invoke } from "@tauri-apps/api/core";
 
@@ -28,60 +28,55 @@ describe('ProfileTab', () => {
 
     it('should render profile bio card', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-        expect(screen.getByText('Profile Bio & Status')).toBeDefined();
+        render(<ProfileTab {...props} />);
+        expect(await screen.findByText('Profile Bio & Status')).toBeDefined();
     });
 
     it('should handle bio update and persist to localStorage', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-        const textarea = screen.getByLabelText('New Status Message');
+        render(<ProfileTab {...props} />);
+
+        const textarea = await screen.findByLabelText('New Status Message');
         fireEvent.change(textarea, { target: { value: 'New Bio' } });
 
         const applyBtn = screen.getByText('APPLY BIO');
+        fireEvent.click(applyBtn);
 
-        await act(async () => {
-            fireEvent.click(applyBtn);
+        await waitFor(() => {
+            expect(invoke).toHaveBeenCalledWith("update_bio", expect.anything());
+            expect(localStorage.getItem('profile_saved_bio_v1')).toBe('New Bio');
         });
-
-        expect(invoke).toHaveBeenCalledWith("update_bio", expect.anything());
-        expect(localStorage.getItem('profile_saved_bio_v1')).toBe('New Bio');
     });
 
     it('should update availability', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
-        const select = screen.getByLabelText('Chat Availability');
+        render(<ProfileTab {...props} />);
+
+        const select = await screen.findByLabelText('Chat Availability');
         fireEvent.change(select, { target: { value: 'mobile' } });
 
         const applyBtn = screen.getByText('APPLY');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        fireEvent.click(applyBtn);
 
-        expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.anything());
+        await waitFor(() => {
+            expect(props.lcuRequest).toHaveBeenCalledWith("PUT", "/lol-chat/v1/me", expect.anything());
+        });
     });
 
     it('should handle bio update failure', async () => {
         const props = createProps();
         vi.mocked(invoke).mockRejectedValueOnce(new Error("Fail"));
-        await act(async () => {
-            render(<ProfileTab {...props} />);
+        render(<ProfileTab {...props} />);
+
+        const textarea = await screen.findByLabelText('New Status Message');
+        fireEvent.change(textarea, { target: { value: 'test' } });
+
+        const applyBtn = screen.getByText('APPLY BIO');
+        fireEvent.click(applyBtn);
+
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith("Failed to update bio", "error");
         });
-
-        fireEvent.change(screen.getByLabelText('New Status Message'), { target: { value: 'test' } });
-
-        await act(async () => {
-            fireEvent.click(screen.getByText('APPLY BIO'));
-        });
-
-        expect(props.showToast).toHaveBeenCalledWith("Failed to update bio", "error");
     });
 
     it('should handle availability update failure', async () => {
@@ -90,15 +85,14 @@ describe('ProfileTab', () => {
             .mockResolvedValueOnce({ availability: 'chat', statusMessage: 'my bio' }) // initial fetch
             .mockRejectedValueOnce(new Error("Fail")); // apply call
 
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
+        render(<ProfileTab {...props} />);
 
-        await act(async () => {
-            fireEvent.click(screen.getByText('APPLY'));
-        });
+        const applyBtn = await screen.findByText('APPLY');
+        fireEvent.click(applyBtn);
 
-        expect(props.showToast).toHaveBeenCalledWith("Failed to update status", "error");
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith("Failed to update status", "error");
+        });
     });
 
     it('should show warning when LCU is missing', () => {
@@ -112,10 +106,8 @@ describe('ProfileTab', () => {
         const props = createProps();
         props.lcuRequest = vi.fn().mockResolvedValue({ availability: 'dnd', statusMessage: 'bio' });
 
-        await act(async () => {
-            render(<ProfileTab {...props} />);
-        });
+        render(<ProfileTab {...props} />);
 
-        expect(screen.getByText('DND')).toBeDefined();
+        expect(await screen.findByText('DND')).toBeDefined();
     });
 });

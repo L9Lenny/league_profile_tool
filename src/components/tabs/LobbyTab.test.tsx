@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import LobbyTab from './LobbyTab';
 
 describe('LobbyTab', () => {
@@ -57,7 +57,6 @@ describe('LobbyTab', () => {
     });
 
     it('should handle toggle select items and invite selected players', async () => {
-        // Mock check current lobby endpoint fails to trigger lobby creation, then mock invitations post
         mockLcuRequest
             .mockResolvedValueOnce(mockFriends) // initial fetch
             .mockRejectedValueOnce(new Error('Lobby not found')) // check lobby
@@ -73,21 +72,14 @@ describe('LobbyTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Lobby Friend 1#TAG')).toBeDefined();
-        });
-
-        const friendBtn = screen.getByText('Lobby Friend 1#TAG').closest('button');
+        const friend1 = await screen.findByText('Lobby Friend 1#TAG');
+        const friendBtn = friend1.closest('button');
         if (!friendBtn) throw new Error('Lobby Friend 1 item not found');
 
-        await act(async () => {
-            fireEvent.click(friendBtn);
-        });
+        fireEvent.click(friendBtn);
 
         const inviteSelectedBtn = screen.getByText(/INVITE SELECTED/);
-        await act(async () => {
-            fireEvent.click(inviteSelectedBtn);
-        });
+        fireEvent.click(inviteSelectedBtn);
 
         await waitFor(() => {
             expect(mockLcuRequest).toHaveBeenCalledWith('POST', '/lol-lobby/v2/lobby', { queueId: 430 });
@@ -111,14 +103,10 @@ describe('LobbyTab', () => {
             />
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Lobby Friend 1#TAG')).toBeDefined();
-        });
+        await screen.findByText('Lobby Friend 1#TAG');
 
         const inviteAllBtn = screen.getByText(/INVITE ALL AVAILABLE/);
-        await act(async () => {
-            fireEvent.click(inviteAllBtn);
-        });
+        fireEvent.click(inviteAllBtn);
 
         await waitFor(() => {
             expect(mockLcuRequest).toHaveBeenCalledWith('POST', '/lol-lobby/v2/lobby/invitations', [

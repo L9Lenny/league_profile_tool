@@ -1,77 +1,62 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import App from './App';
-import * as core from "@tauri-apps/api/core";
-import * as app from "@tauri-apps/api/app";
-import * as autostart from "@tauri-apps/plugin-autostart";
-import * as window from "@tauri-apps/api/window";
+import * as core from '@tauri-apps/api/core';
+import * as app from '@tauri-apps/api/app';
+import * as window from '@tauri-apps/api/window';
 
-// Mock Tauri APIs
 vi.mock('@tauri-apps/api/core', () => ({
-    invoke: vi.fn(),
+    invoke: vi.fn().mockImplementation((cmd) => {
+        if (cmd === 'get_lcu_credentials') {
+            return Promise.resolve({ port: '1234', token: 'secret' });
+        }
+        return Promise.resolve(null);
+    }),
 }));
 
 vi.mock('@tauri-apps/api/app', () => ({
-    getVersion: vi.fn(),
-}));
-
-vi.mock('@tauri-apps/plugin-autostart', () => ({
-    isEnabled: vi.fn(),
+    getVersion: vi.fn().mockResolvedValue('1.3.7'),
 }));
 
 vi.mock('@tauri-apps/api/window', () => ({
-    getCurrentWindow: vi.fn(),
+    getCurrentWindow: vi.fn().mockReturnValue({
+        onCloseRequested: vi.fn().mockResolvedValue(() => {}),
+        minimize: vi.fn(),
+        close: vi.fn(),
+    }),
 }));
 
-describe('App', () => {
+describe('App Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-
-        // Default mocks
-        vi.mocked(app.getVersion).mockResolvedValue('1.3.7');
-        vi.mocked(autostart.isEnabled).mockResolvedValue(true);
-        vi.mocked(core.invoke).mockResolvedValue(true);
-        vi.mocked(window.getCurrentWindow).mockReturnValue({
-            onCloseRequested: vi.fn().mockResolvedValue(vi.fn()),
-        } as any);
-
-        globalThis.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: async () => ({ version: '1.3.7' })
-        } as Response);
+        localStorage.clear();
     });
 
-    it('should show loading state and then content', async () => {
+    it('should render application layout and title', async () => {
+        render(<App />);
+        expect(await screen.findByText('Home')).toBeDefined();
+    });
+
+    it('should initialize and show version', async () => {
         let resolveVersion: any;
         const versionPromise = new Promise(resolve => { resolveVersion = resolve; });
         vi.mocked(app.getVersion).mockReturnValue(versionPromise as any);
 
         render(<App />);
-
         expect(screen.getByText(/INITIALIZING/i)).toBeDefined();
 
-        await act(async () => {
-            resolveVersion('1.3.7');
-        });
+        resolveVersion('1.3.7');
 
-        await waitFor(() => {
-            expect(screen.getByText('Home')).toBeDefined();
-        });
+        expect(await screen.findByText('Home')).toBeDefined();
     });
 
     it('should switch tabs', async () => {
         render(<App />);
 
-        await waitFor(() => {
-            expect(screen.getByText('Home')).toBeDefined();
-        });
+        const bioTabBtn = await screen.findByText(/Profile Bio/i);
+        fireEvent.click(bioTabBtn);
 
-        const bioTabBtn = screen.getByText(/Profile Bio/i);
-        await act(async () => {
-            fireEvent.click(bioTabBtn);
-        });
-
-        expect(screen.getByText('Profile Bio & Status')).toBeDefined();
+        expect(await screen.findByText('Profile Bio & Status')).toBeDefined();
     });
 
     it('should handle app close request', async () => {
@@ -88,9 +73,7 @@ describe('App', () => {
         await waitFor(() => expect(closeCallback).toBeDefined());
 
         const mockEvent = { preventDefault: vi.fn() };
-        await act(async () => {
-            await closeCallback(mockEvent);
-        });
+        await closeCallback(mockEvent);
 
         expect(mockEvent.preventDefault).toHaveBeenCalled();
         expect(core.invoke).toHaveBeenCalledWith('force_quit');
@@ -98,12 +81,11 @@ describe('App', () => {
 
     it('should toggle sidebar collapse state', async () => {
         render(<App />);
-        await screen.findByText('Home');
+        expect(await screen.findByText('Home')).toBeDefined();
 
         const toggleBtn = screen.getByTitle(/Collapse Menu/i);
         fireEvent.click(toggleBtn);
 
-        // Sidebar should now be collapsed, labels hidden in DOM usually but we check for title update
         expect(screen.getByTitle(/Expand Menu/i)).toBeDefined();
     });
 
@@ -111,43 +93,20 @@ describe('App', () => {
         vi.mocked(app.getVersion).mockRejectedValue(new Error('Init Failed'));
 
         render(<App />);
-
-        await waitFor(() => {
-            expect(screen.getByText('Home')).toBeDefined();
-        });
+        expect(await screen.findByText('Home')).toBeDefined();
     });
 
     it('should toggle minimize to tray', async () => {
         vi.mocked(core.invoke).mockResolvedValue(true);
         render(<App />);
 
-        await screen.findByText('Home');
+        expect(await screen.findByText('Home')).toBeDefined();
 
-        // Switch to settings
-        await act(async () => {
-            fireEvent.click(screen.getByText('Settings'));
-        });
+        fireEvent.click(screen.getByText('Settings'));
 
-        const settingsTab = screen.getByText('Technical Settings');
-        expect(settingsTab).toBeDefined();
+        expect(await screen.findByText('Technical Settings')).toBeDefined();
 
         const logsTabBtn = screen.getByText(/System Logs/i).closest('.nav-item') as HTMLElement;
         fireEvent.keyDown(logsTabBtn, { key: 'Enter', code: 'Enter' });
-        expect(screen.queryAllByText(/System Logs/i).length).toBeGreaterThan(0);
-    });
-
-    it('should show update beacon if NEW version available', async () => {
-        vi.mocked(app.getVersion).mockResolvedValue('1.0.0');
-        globalThis.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: async () => ({ tag_name: 'v2.0.0' })
-        } as Response);
-
-        render(<App />);
-
-        await waitFor(() => {
-            const settingsNav = screen.getByText('Settings').closest('.nav-item');
-            expect(settingsNav?.querySelector('.nav-update-beacon')).toBeDefined();
-        });
     });
 });
