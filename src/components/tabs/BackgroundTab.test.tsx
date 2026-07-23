@@ -116,13 +116,13 @@ describe('BackgroundTab', () => {
         });
 
         // Select Champ
-        await waitFor(() => fireEvent.click(screen.getByText('Aatrox')));
+        const aatroxBtn1 = await screen.findByText('Aatrox');
+        fireEvent.click(aatroxBtn1);
         
         // Select Skin
-        await waitFor(() => {
-            const skinBtn = screen.getByText('Justicar Aatrox').closest('button')!;
-            fireEvent.click(skinBtn);
-        });
+        const justicarTxt1 = await screen.findByText('Justicar Aatrox');
+        const skinBtn = justicarTxt1.closest('button')!;
+        fireEvent.click(skinBtn);
 
         // Click Apply
         const applyBtn = screen.getByText(/APPLY — Justicar Aatrox/i);
@@ -261,8 +261,9 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => fireEvent.click(screen.getByText('Aatrox')));
-        await waitFor(() => expect(screen.getByTitle(/Justicar Aatrox/i)).toBeDefined());
+        const aatroxBtn2 = await screen.findByText('Aatrox');
+        fireEvent.click(aatroxBtn2);
+        expect(await screen.findByTitle(/Justicar Aatrox/i)).toBeDefined();
 
         fireEvent.click(screen.getByText('← BACK'));
         expect(screen.getByText('Aatrox')).toBeDefined();
@@ -320,9 +321,10 @@ describe('BackgroundTab', () => {
             render(<BackgroundTab {...props} />);
         });
 
-        await waitFor(() => fireEvent.click(screen.getByText('Aatrox')));
+        const aatroxBtn = await screen.findByText('Aatrox');
+        fireEvent.click(aatroxBtn);
 
-        const img = await waitFor(() => screen.getByAltText('Justicar Aatrox') as HTMLImageElement);
+        const img = (await screen.findByAltText('Justicar Aatrox')) as HTMLImageElement;
         fireEvent.error(img);
         expect(img.src).toContain('data:image/svg+xml');
 

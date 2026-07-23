@@ -103,7 +103,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                         rows={3}
                     />
                 </div>
-                <button className="primary-btn" onClick={handleUpdateBio} disabled={!lcu || loading || !bio.trim()} style={{ width: '100%', marginTop: '12px' }}>APPLY BIO</button>
+                <button type="button" className="primary-btn" onClick={handleUpdateBio} disabled={!lcu || loading || !bio.trim()} style={{ width: '100%', marginTop: '12px' }}>APPLY BIO</button>
 
                 {lcu && (
                     <div style={{ marginTop: '16px' }}>
@@ -125,7 +125,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                                     <option key={state.value} value={state.value}>{state.label}</option>
                                 ))}
                             </select>
-                            <button className="primary-btn availability-apply" onClick={() => applyAvailability()} disabled={!lcu || loading} style={{ flex: 1 }}>
+                            <button type="button" className="primary-btn availability-apply" onClick={() => applyAvailability()} disabled={!lcu || loading} style={{ flex: 1 }}>
                                 APPLY
                             </button>
                         </div>

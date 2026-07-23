@@ -445,6 +445,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             <span className="tokens-banner-tagline">#{summoner.tagLine}</span>
                                         )}
                                         <button 
+                                            type="button"
                                             className="tokens-banner-copy-btn" 
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -478,6 +479,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             
                                             return (
                                                 <button 
+                                                    type="button"
                                                     key={i} 
                                                     onClick={() => handleSelectSlot(i)}
                                                     className={`tokens-banner-slot ${isSelected ? 'selected' : ''} ${hasToken ? glowClass : ''}`}
@@ -594,6 +596,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
 
                             <div className="tokens-actions-row">
                                 <button 
+                                    type="button"
                                     className="primary-btn" 
                                     onClick={handleApply} 
                                     disabled={!lcu || loading} 
@@ -602,6 +605,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                     {loading ? 'SYNCING...' : 'APPLY CHANGES'}
                                 </button>
                                 <button 
+                                    type="button"
                                     onClick={clearAll}
                                     disabled={!lcu || loading}
                                     className="tokens-clear-btn"
@@ -623,6 +627,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                         <Award size={18} color="var(--hextech-gold)" />
                         <h3 className="card-title" style={{ margin: 0, fontSize: '0.9rem', letterSpacing: '0.5px' }}>Unlocked Tokens</h3>
                         <button 
+                            type="button"
                             className={`refresh-icon-btn ${fetching ? 'loading' : ''}`}
                             onClick={fetchTokens}
                             disabled={!lcu || fetching}
