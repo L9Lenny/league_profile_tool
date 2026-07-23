@@ -176,7 +176,7 @@ function App() {
         <div className="nav-header">
           {!isCollapsed && (
             <>
-              <ShieldCheck className="nav-logo" size={24} />
+              <img src="/app-icon.png" alt="App Icon" className="nav-logo" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'contain' }} />
               <span className="nav-title">LP TOOL</span>
             </>
           )}
