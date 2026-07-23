@@ -1,19 +1,19 @@
 {
-    "version": "1.10.0",
-    "notes": "## [1.10.0] - 2026-07-11  ### Added - **Selective Clear All Settings (#434, #436)**: Replaced the simple \"Yes/No\" confirm with a checkbox-based panel that lets users pick exactly what to reset: rank overrides, challenge overrides, background skin, tokens/title/banner/crest, profile icon, status & bio, and auto-enforcer & localStorage.   ### Fixed - **LCU Override Fields Not Clearing (#434, #436)**: Fixed a bug where `delete`-ing fields from the chat presence `lol` object did not actually clear them in the League Client. Fields are now explicitly set to empty strings (`\"\"`), which the LCU respects. - **CDragon Crash on Invalid Data (#434, #436)**: Added `Array.isArray` guard in the Tokens tab to prevent a crash when CDragon returns a non-array response. - **Auto-Enforcer OR Logic (#434, #436)**: Toggling auto-enforce OFF now also clears the legacy `SAVED_ENFORCE_OFFLINE_KEY`, and the enforcer skips the enforce cycle when the LCU summary merge fails. - **Background Contrast Issue (#436)**: Increased contrast for danger button hover state from `#ffb3b3` to `#ffd6d6`.  ### Changed - **Clear All Settings UX (#434, #436)**: The entire reset now makes a single `PUT /lol-chat/v1/me` call combining `availability`, `statusMessage`, and `lol` fields, and also calls the official background and challenge preferences endpoints to fully reset profile customizations. - **Challenge Preferences Reset (#434, #436)**: \"Clear All Settings\" now sends an empty payload to `POST /lol-challenges/v1/update-player-preferences` to clear equipped tokens, title, banner accent, and crest border. - **Dependencies**: Updated tauri (2.11.3→2.11.5), sysinfo (0.39.5→0.39.6), vitest (4.1.7→4.1.9), @types/node (25.9.1→26.0.1), @tauri-apps/api (2.11.0→2.11.1), @tauri-apps/cli (2.11.3→2.11.4), tauri-action (0→1), actions/setup-node (4→6), actions/github-script (7→8) ([#422](https://github.com/L9Lenny/league_profile_tool/pull/422), [#423](https://github.com/L9Lenny/league_profile_tool/pull/423), [#424](https://github.com/L9Lenny/league_profile_tool/pull/424), [#425](https://github.com/L9Lenny/league_profile_tool/pull/425), [#426](https://github.com/L9Lenny/league_profile_tool/pull/426), [#427](https://github.com/L9Lenny/league_profile_tool/pull/427), [#431](https://github.com/L9Lenny/league_profile_tool/pull/431), [#433](https://github.com/L9Lenny/league_profile_tool/pull/433)).  ",
-    "pub_date": "2026-07-11T18:48:18Z",
+    "version": "1.10.1",
+    "notes": "## [1.10.1] - 2026-07-23  ### Added - **Custom Application Icon (#265)**: Added custom Draven Spinning Axe app icon design for Windows executable (`.exe`), macOS app bundle (`.icns`), Linux/favicons, and application navigation header logo.  ### Fixed - **Cargo Configuration Warning**: Removed deprecated `http.http2` config setting from `.cargo/config.toml`. - **Tauri v2 Config Validation**: Removed invalid `icon` property from `app.windows[0]` in `tauri.conf.json`.  ",
+    "pub_date": "2026-07-23T17:59:49Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.10.0/League-Profile-Tool_1.10.0_x64-setup.exe"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.10.1/League-Profile-Tool_1.10.1_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.10.0/League-Profile-Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.10.1/League-Profile-Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.10.0/League-Profile-Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.10.1/League-Profile-Tool_aarch64.app.tar.gz"
         }
     }
 }
