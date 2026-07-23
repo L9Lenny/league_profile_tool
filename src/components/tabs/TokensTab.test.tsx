@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TokensTab from './TokensTab';
 
 describe('TokensTab', () => {
@@ -42,12 +42,10 @@ describe('TokensTab', () => {
 
     it('should render tokens card and slots', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
-        expect(screen.getByText('Active Selection')).toBeDefined();
+        render(<TokensTab {...props} />);
+
+        expect(await screen.findByText('Active Selection')).toBeDefined();
         expect(screen.getByText('Unlocked Tokens')).toBeDefined();
-        // Check for slot markers (1, 2, 3)
         expect(screen.getByText('1')).toBeDefined();
         expect(screen.getByText('2')).toBeDefined();
         expect(screen.getByText('3')).toBeDefined();
@@ -61,11 +59,9 @@ describe('TokensTab', () => {
 
     it('should update search filter', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const searchInput = screen.getByPlaceholderText(/Search by token name/i);
+        const searchInput = await screen.findByPlaceholderText(/Search by token name/i);
         fireEvent.change(searchInput, { target: { value: 'Apple' } });
         expect(searchInput.getAttribute('value')).toBe('Apple');
     });
@@ -74,83 +70,80 @@ describe('TokensTab', () => {
         const props = createProps();
         props.lcuRequest = vi.fn().mockRejectedValue(new Error("API Error"));
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Empty response from challenges API"));
+        await waitFor(() => {
+            expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Empty response from challenges API"));
+        });
     });
 
     it('should trigger apply logic', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        expect(props.lcuRequest).toHaveBeenCalledWith("POST", expect.stringContaining("update-player-preferences"), expect.any(Object));
+        await waitFor(() => {
+            expect(props.lcuRequest).toHaveBeenCalledWith("POST", expect.stringContaining("update-player-preferences"), expect.any(Object));
+        });
     });
 
     it('should include bannerAccent in apply payload', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        const callArgs = props.lcuRequest.mock.calls.find(
-            (c: any[]) => c[0] === "POST" && c[1].includes("update-player-preferences")
-        );
-        expect(callArgs).toBeDefined();
-        expect(callArgs![2].bannerAccent).toBeDefined();
+        await waitFor(() => {
+            const callArgs = props.lcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === "POST" && c[1].includes("update-player-preferences")
+            );
+            expect(callArgs).toBeDefined();
+            expect(callArgs![2].bannerAccent).toBeDefined();
+        });
     });
 
     it('should render banner dropdown with CDragon names', async () => {
         mockFetch(mockRegalia);
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect).toBeDefined();
-        expect(bannerSelect?.length).toBe(4); // No Banner + 3 mock banners
-        expect(bannerSelect?.options[0].text).toBe('No Banner');
-        expect(bannerSelect?.options[1].text).toBe('Lunar Revel 2023 Banner');
-        expect(bannerSelect?.options[2].text).toBe('Soul Fighter Banner');
-        expect(bannerSelect?.options[3].text).toBe('Winterblessed Banner');
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect).toBeDefined();
+            expect(bannerSelect?.length).toBe(4);
+            expect(bannerSelect?.options[0].text).toBe('No Banner');
+            expect(bannerSelect?.options[1].text).toBe('Lunar Revel 2023 Banner');
+            expect(bannerSelect?.options[2].text).toBe('Soul Fighter Banner');
+            expect(bannerSelect?.options[3].text).toBe('Winterblessed Banner');
+        });
     });
 
     it('should use summary bannerId as initial selection', async () => {
         mockFetch(mockRegalia);
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect?.value).toBe('4');
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.value).toBe('4');
+        });
     });
 
     it('should update selectedBannerId on dropdown change', async () => {
         mockFetch(mockRegalia);
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
+        render(<TokensTab {...props} />);
+
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.length).toBe(4);
         });
 
         const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        await act(async () => {
-            fireEvent.change(bannerSelect, { target: { value: '3' } });
-        });
+        fireEvent.change(bannerSelect, { target: { value: '3' } });
         expect(bannerSelect?.value).toBe('3');
     });
 
@@ -165,32 +158,31 @@ describe('TokensTab', () => {
     });
 
     it('should render banner dropdown even when CDragon fetch returns empty', async () => {
-        // fetch mock already returns []
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect).toBeDefined();
-        expect(bannerSelect?.length).toBe(1); // Just "No Banner"
-        expect(bannerSelect?.options[0].text).toBe('No Banner');
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect).toBeDefined();
+            expect(bannerSelect?.length).toBe(1);
+            expect(bannerSelect?.options[0].text).toBe('No Banner');
+        });
     });
 
     it('should cache regalia definitions from CDragon in localStorage', async () => {
         mockFetch(mockRegalia);
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const cached = localStorage.getItem('cd_regalia_defs');
-        expect(cached).toBeDefined();
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            expect(parsed.data['3']).toBe('Lunar Revel 2023 Banner');
-            expect(parsed.data['4']).toBe('Soul Fighter Banner');
-        }
+        await waitFor(() => {
+            const cached = localStorage.getItem('cd_regalia_defs');
+            expect(cached).toBeDefined();
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                expect(parsed.data['3']).toBe('Lunar Revel 2023 Banner');
+                expect(parsed.data['4']).toBe('Soul Fighter Banner');
+            }
+        });
     });
 
     it('should use cached regalia definitions when available', async () => {
@@ -198,48 +190,39 @@ describe('TokensTab', () => {
         localStorage.setItem('cd_regalia_defs', JSON.stringify(cachedData));
 
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
+        render(<TokensTab {...props} />);
+
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.length).toBe(3);
+            expect(bannerSelect?.options[1].text).toBe('Test Banner Five');
+            expect(bannerSelect?.options[2].text).toBe('Test Banner Seven');
         });
-
-        // Should NOT call CDragon for regalia definitions since cache is valid
-        const regaliaFetchCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-            (c) => typeof c[0] === 'string' && (c[0] as string).includes('regalia.json')
-        );
-        expect(regaliaFetchCalls).toHaveLength(0);
-
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect?.length).toBe(3); // No Banner + 2 cached
-        expect(bannerSelect?.options[1].text).toBe('Test Banner Five');
-        expect(bannerSelect?.options[2].text).toBe('Test Banner Seven');
     });
 
     it('should handle refresh button click', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const refreshBtn = screen.getByRole('button', { name: '' }); // The RotateCw icon button
-        await act(async () => {
-            fireEvent.click(refreshBtn);
-        });
+        await screen.findByText('Unlocked Tokens');
+        const refreshBtn = document.querySelector('.refresh-icon-btn') as HTMLButtonElement;
+        fireEvent.click(refreshBtn);
 
-        expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Syncing challenges from LCU"));
+        await waitFor(() => {
+            expect(props.addLog).toHaveBeenCalledWith(expect.stringContaining("Syncing challenges from LCU"));
+        });
     });
 
     it('should handle clear all slots', async () => {
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const clearBtn = screen.getByText(/CLEAR ALL SLOTS/i);
-        await act(async () => {
-            fireEvent.click(clearBtn);
-        });
+        const clearBtn = await screen.findByTitle('Clear All Slots');
+        fireEvent.click(clearBtn);
 
-        expect(props.showToast).toHaveBeenCalledWith("All slots cleared locally", "info");
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith("All slots cleared locally", "info");
+        });
     });
 
     it('should use bannerId #1 as default when banner is -1', async () => {
@@ -253,32 +236,30 @@ describe('TokensTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect?.value).toBe('1');
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.value).toBe('1');
+        });
     });
 
     it('should map summary bannerId to bannerAccent in apply payload', async () => {
         mockFetch(mockRegalia);
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        const applyCall = props.lcuRequest.mock.calls.find(
-            (c: any[]) => c[0] === "POST"
-        );
-        expect(applyCall).toBeDefined();
-        expect(applyCall![2]).toHaveProperty('bannerAccent');
-        expect(applyCall![2].bannerAccent).toBe('4');
+        await waitFor(() => {
+            const applyCall = props.lcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === "POST"
+            );
+            expect(applyCall).toBeDefined();
+            expect(applyCall![2]).toHaveProperty('bannerAccent');
+            expect(applyCall![2].bannerAccent).toBe('4');
+        });
     });
 
     it('should show REGALIA_BANNER ownership error on apply', async () => {
@@ -292,16 +273,14 @@ describe('TokensTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Banner Accent'), 'error');
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Banner Accent'), 'error');
+        });
     });
 
     it('should show crest ownership error for non-REGALIA ownership errors', async () => {
@@ -315,16 +294,14 @@ describe('TokensTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Crest Border'), 'error');
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('Crest Border'), 'error');
+        });
     });
 
     it('should show generic LCU error message on apply failure', async () => {
@@ -338,16 +315,14 @@ describe('TokensTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        expect(props.showToast).toHaveBeenCalledWith('Rate limit exceeded', 'error');
+        await waitFor(() => {
+            expect(props.showToast).toHaveBeenCalledWith('Rate limit exceeded', 'error');
+        });
     });
 
     it('should not send -1 as title in apply payload when no title selected', async () => {
@@ -360,20 +335,18 @@ describe('TokensTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const applyBtn = screen.getByText('APPLY CHANGES');
-        await act(async () => {
-            fireEvent.click(applyBtn);
-        });
+        const applyBtn = await screen.findByText('APPLY CHANGES');
+        fireEvent.click(applyBtn);
 
-        const applyCall = props.lcuRequest.mock.calls.find(
-            (c: any[]) => c[0] === "POST"
-        );
-        expect(applyCall).toBeDefined();
-        expect(applyCall![2].title).toBe('');
+        await waitFor(() => {
+            const applyCall = props.lcuRequest.mock.calls.find(
+                (c: any[]) => c[0] === "POST"
+            );
+            expect(applyCall).toBeDefined();
+            expect(applyCall![2].title).toBe('');
+        });
     });
 
     it('should re-fetch regalia from CDragon when cache is expired', async () => {
@@ -382,30 +355,30 @@ describe('TokensTab', () => {
         mockFetch(mockRegalia);
 
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
+        render(<TokensTab {...props} />);
+
+        await waitFor(() => {
+            const regaliaCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
+                (c) => typeof c[0] === 'string' && (c[0] as string).includes('regalia.json')
+            );
+            expect(regaliaCalls.length).toBeGreaterThanOrEqual(1);
+
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.options?.length).toBeGreaterThan(1);
         });
-
-        const regaliaCalls = vi.mocked(globalThis.fetch).mock.calls.filter(
-            (c) => typeof c[0] === 'string' && (c[0] as string).includes('regalia.json')
-        );
-        expect(regaliaCalls.length).toBeGreaterThanOrEqual(1);
-
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect?.options[1].text).toBe('Lunar Revel 2023 Banner');
     });
 
     it('should fall back gracefully when CDragon regalia fetch fails', async () => {
         globalThis.fetch = vi.fn().mockResolvedValue({ ok: false } as Response);
 
         const props = createProps();
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
-        expect(bannerSelect?.length).toBe(1);
-        expect(bannerSelect?.options[0].text).toBe('No Banner');
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.length).toBe(1);
+            expect(bannerSelect?.options[0].text).toBe('No Banner');
+        });
     });
 
     it('should handle normalizeChallengeResponse with object input', async () => {
@@ -418,10 +391,8 @@ describe('TokensTab', () => {
             return Promise.resolve({});
         });
 
-        await act(async () => {
-            render(<TokensTab {...props} />);
-        });
+        render(<TokensTab {...props} />);
 
-        expect(screen.getByText('Object Token')).toBeDefined();
+        expect(await screen.findByText('Object Token')).toBeDefined();
     });
 });

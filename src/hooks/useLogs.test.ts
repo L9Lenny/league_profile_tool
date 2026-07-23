@@ -66,9 +66,7 @@ describe('useLogs', () => {
         vi.mocked(save).mockResolvedValue('C:/logs.txt');
         vi.mocked(invoke).mockResolvedValue('C:/logs.txt');
 
-        await act(async () => {
-            await result.current.exportLogs(mockShowToast);
-        });
+        await result.current.exportLogs(mockShowToast);
 
         expect(save).toHaveBeenCalled();
         expect(invoke).toHaveBeenCalledWith('save_logs_to_path', expect.anything());
@@ -79,9 +77,7 @@ describe('useLogs', () => {
         const mockShowToast = vi.fn();
         const { result } = renderHook(() => useLogs());
 
-        await act(async () => {
-            await result.current.exportLogs(mockShowToast);
-        });
+        await result.current.exportLogs(mockShowToast);
 
         expect(mockShowToast).toHaveBeenCalledWith("No logs to export", "error");
     });
@@ -94,9 +90,7 @@ describe('useLogs', () => {
         act(() => { result.current.addLog('Log'); });
         vi.mocked(save).mockResolvedValue(null);
 
-        await act(async () => {
-            await result.current.exportLogs(mockShowToast);
-        });
+        await result.current.exportLogs(mockShowToast);
 
         expect(mockShowToast).not.toHaveBeenCalled();
     });
