@@ -31,11 +31,11 @@ describe('useLogs', () => {
     it('should limit logs to 50 entries', () => {
         const { result } = renderHook(() => useLogs());
 
-        act(() => {
-            for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 60; i++) {
+            act(() => {
                 result.current.addLog(`Message ${i}`);
-            }
-        });
+            });
+        }
 
         expect(result.current.logs).toHaveLength(50);
         expect(result.current.logs[0].msg).toBe('Message 59');
