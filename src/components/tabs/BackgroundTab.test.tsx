@@ -185,13 +185,12 @@ describe('BackgroundTab', () => {
         const props = createProps();
         render(<BackgroundTab {...props} />);
 
-        await waitFor(() => expect(screen.getByText('Aatrox')).toBeDefined());
+        await screen.findByText('Aatrox');
 
         const input = screen.getByPlaceholderText(/name or ID/i);
-        await waitFor(() => {
-            fireEvent.change(input, { target: { value: 'Justicar' } });
-            expect(screen.getByText(/Justicar Aatrox/)).toBeDefined();
-        });
+        fireEvent.change(input, { target: { value: 'Justicar' } });
+
+        expect(await screen.findByText(/Justicar Aatrox/)).toBeDefined();
 
         // Dismiss by clicking outside
         fireEvent.mouseDown(document.body);
@@ -199,7 +198,7 @@ describe('BackgroundTab', () => {
 
         // Focus input again
         fireEvent.focus(input);
-        await waitFor(() => expect(screen.getByText(/Justicar Aatrox/)).toBeDefined());
+        expect(await screen.findByText(/Justicar Aatrox/)).toBeDefined();
     });
 
     it('should disable APPLY with non-matching text input', async () => {
