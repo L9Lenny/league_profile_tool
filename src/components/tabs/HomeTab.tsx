@@ -65,7 +65,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
             };
             fetchSummoner();
         }
-    }, [lcu]);
+    }, [lcu, lcuRequest]);
 
     const categories: Category[] = [
         {

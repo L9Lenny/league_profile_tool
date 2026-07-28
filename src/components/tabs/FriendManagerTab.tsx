@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Users, Trash2, Search, RefreshCw, CheckSquare, Square, AlertCircle } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
@@ -27,7 +27,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
     const [fetching, setFetching] = useState(false);
     const [progress, setProgress] = useState({ current: 0, total: 0 });
 
-    const fetchFriends = async () => {
+    const fetchFriends = useCallback(async () => {
         if (!lcu) return;
         setFetching(true);
         try {
@@ -48,11 +48,11 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
         } finally {
             setFetching(false);
         }
-    };
+    }, [lcu, lcuRequest, addLog]);
 
     useEffect(() => {
         if (lcu) fetchFriends();
-    }, [lcu]);
+    }, [lcu, fetchFriends]);
 
     const filteredFriends = useMemo(() => {
         return friends.filter(f => 
