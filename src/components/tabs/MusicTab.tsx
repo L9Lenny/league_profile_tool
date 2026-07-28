@@ -59,7 +59,11 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
     };
 
     const disableMusicSync = async () => {
-        await applyIdleBio();
+        try {
+            await applyIdleBio();
+        } catch (err) {
+            addLog(`Failed to restore idle bio on disable: ${err}`);
+        }
         setMusicBio(prev => ({ ...prev, enabled: false }));
         showToast("Music sync disabled", "success");
     };
