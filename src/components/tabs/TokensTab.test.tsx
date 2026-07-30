@@ -249,6 +249,11 @@ describe('TokensTab', () => {
         const props = createProps();
         render(<TokensTab {...props} />);
 
+        await waitFor(() => {
+            const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
+            expect(bannerSelect?.value).toBe('4');
+        });
+
         const applyBtn = await screen.findByText('APPLY CHANGES');
         fireEvent.click(applyBtn);
 
