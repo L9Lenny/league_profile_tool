@@ -4,7 +4,15 @@
       "id": 103086,
       "name": "Immortalized Legend Ahri",
       "isBase": false,
-      "splashPath": "/lol-game-data/assets/v1/champion-splashes/103/103086.jpg"
+      "splashPath": "/lol-game-data/assets/ASSETS/Characters/Ahri/Skins/Skin86/Images/ahri_splash_centered_86.jpg"
+    }
+  ],
+  "145": [
+    {
+      "id": 145071,
+      "name": "Signature Immortalized Legend Kai'Sa",
+      "isBase": false,
+      "splashPath": "/lol-game-data/assets/ASSETS/Characters/Kaisa/Skins/Skin71/Images/kaisa_splash_centered_71.jpg"
     }
   ]
 }
