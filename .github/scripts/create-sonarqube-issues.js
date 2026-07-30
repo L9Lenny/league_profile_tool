@@ -21,6 +21,7 @@ const SONAR_PROJECT_KEY = process.env.SONAR_PROJECT_KEY || 'L9Lenny_lol-profile-
 const SONAR_ORGANIZATION = process.env.SONAR_ORGANIZATION || 'l9lenny';
 const SONAR_HOST = process.env.SONAR_HOST || 'https://sonarcloud.io';
 const SONAR_BRANCH = process.env.SONAR_BRANCH || 'main';
+const SONAR_SEVERITIES = process.env.SONAR_SEVERITIES || 'BLOCKER,CRITICAL,MAJOR';
 
 const labels = {
   'BLOCKER': ['sonarqube', 'blocker', 'critical'],
@@ -92,8 +93,8 @@ function makeRequest(url, options = {}) {
  * Fetch SonarQube issues
  */
 async function fetchSonarQubeIssues() {
-  const urlWithBranch = `${SONAR_HOST}/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&branch=${SONAR_BRANCH}&issueSeverities=BLOCKER,CRITICAL,MAJOR,MINOR&types=BUG,VULNERABILITY,CODE_SMELL&statuses=OPEN&ps=500`;
-  const urlWithoutBranch = `${SONAR_HOST}/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&issueSeverities=BLOCKER,CRITICAL,MAJOR,MINOR&types=BUG,VULNERABILITY,CODE_SMELL&statuses=OPEN&ps=500`;
+  const urlWithBranch = `${SONAR_HOST}/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&branch=${SONAR_BRANCH}&issueSeverities=${SONAR_SEVERITIES}&types=BUG,VULNERABILITY,CODE_SMELL&statuses=OPEN&ps=500`;
+  const urlWithoutBranch = `${SONAR_HOST}/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&issueSeverities=${SONAR_SEVERITIES}&types=BUG,VULNERABILITY,CODE_SMELL&statuses=OPEN&ps=500`;
 
   console.log(`📊 Fetching issues from SonarQube (with branch): ${urlWithBranch}`);
 
