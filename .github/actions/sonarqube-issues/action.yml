@@ -8,6 +8,10 @@ inputs:
   sonarqube-organization:
     description: 'SonarQube organization'
     required: true
+  sonarqube-severities:
+    description: 'Comma-separated SonarQube severities to include (e.g. BLOCKER,CRITICAL,MAJOR)'
+    required: false
+    default: 'BLOCKER,CRITICAL,MAJOR'
 
 runs:
   using: 'composite'
@@ -18,10 +22,11 @@ runs:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         SONAR_PROJECT_KEY: ${{ inputs.sonarqube-projectkey }}
         SONAR_ORGANIZATION: ${{ inputs.sonarqube-organization }}
+        SONAR_SEVERITIES: ${{ inputs.sonarqube-severities }}
       run: |
         # Scarica i risultati da SonarCloud
         ISSUES_RESPONSE=$(curl -s \
-          "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&issueSeverities=BLOCKER,CRITICAL,MAJOR&types=BUG,VULNERABILITY&statuses=OPEN" \
+          "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&organization=${SONAR_ORGANIZATION}&issueSeverities=${SONAR_SEVERITIES}&types=BUG,VULNERABILITY&statuses=OPEN" \
           -H "Authorization: Bearer ${{ env.SONAR_TOKEN }}")
         
         echo "SonarQube Response: $ISSUES_RESPONSE"

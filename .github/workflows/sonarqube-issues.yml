@@ -45,6 +45,7 @@ jobs:
           SONAR_PROJECT_KEY: L9Lenny_lol-profile-editor
           SONAR_ORGANIZATION: l9lenny
           SONAR_BRANCH: ${{ github.ref_name }}
+          SONAR_SEVERITIES: BLOCKER,CRITICAL,MAJOR
         run: node .github/scripts/create-sonarqube-issues.js
 
       - name: Auto-close resolved issues
