@@ -1,7 +1,7 @@
 {
     "version": "1.10.2",
-    "notes": "## [1.10.2] - 2026-07-30  ### Added - **Signature Immortalized Legend Kai'Sa (#891)**: Added missing Signature Immortalized Legend Kai'Sa background skin (ID 145071).  ### Fixed - **Champion Duplication & Mode Skin Unification**: Unified duplicate champions into a single grid card and combined all available mode skin backgrounds under one entry.",
-    "pub_date": "2026-07-30T20:43:00Z",
+    "notes": "## [1.10.2] - 2026-07-30  ### Added - **Signature Immortalized Legend Kai'Sa (#891)**: Added missing Signature Immortalized Legend Kai'Sa background skin (ID `145071`) via supplemental skin registry.  ### Fixed - **Champion Duplication & Mode Skin Unification**: Fixed issue where champions appeared multiple times in the selection grid due to game mode IDs (e.g. Swarm/Arena `60000+` IDs). Unified duplicate champions into a single card and combined all available background skins under one entry.  ",
+    "pub_date": "2026-07-30T19:03:31Z",
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
