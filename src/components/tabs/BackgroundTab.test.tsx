@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 vi.mock('../../data/supplemental-skins.json', () => ({
     default: {
         "103": [{ id: 103086, name: "Immortalized Legend Ahri", isBase: false, splashPath: "/lol-game-data/assets/v1/champion-splashes/103/103086.jpg" }],
+        "145": [{ id: 145071, name: "Signature Immortalized Legend Kai'Sa", isBase: false, splashPath: "/lol-game-data/assets/ASSETS/Characters/Kaisa/Skins/Skin71/Images/kaisa_splash_centered_71.jpg" }],
         "999": [{ id: 999001, name: "Skins From Unloaded Champ", isBase: false, splashPath: "/lol-game-data/assets/v1/champion-splashes/999/999001.jpg" }]
     }
 }));
@@ -14,6 +15,7 @@ describe('BackgroundTab', () => {
     const mockChampSummary = [
         { id: 1, name: 'Aatrox', alias: 'Aatrox', squarePortraitPath: '/assets/1.png' },
         { id: 103, name: 'Ahri', alias: 'Ahri', squarePortraitPath: '/assets/103.png' },
+        { id: 145, name: "Kai'Sa", alias: 'Kaisa', squarePortraitPath: '/assets/145.png' },
         { id: 999, name: 'Unloadable', alias: 'Unloadable', squarePortraitPath: '/assets/999.png' }
     ];
 
@@ -28,6 +30,13 @@ describe('BackgroundTab', () => {
         skins: [
             { id: 103000, name: 'Default Ahri', isBase: true, splashPath: '/assets/103000.jpg' },
             { id: 103001, name: 'Dynasty Ahri', isBase: false, splashPath: '/assets/103001.jpg' }
+        ]
+    };
+
+    const mockKaisaSkins = {
+        skins: [
+            { id: 145000, name: "Kai'Sa", isBase: true, splashPath: '/assets/145000.jpg' },
+            { id: 145070, name: "Risen Legend Kai'Sa", isBase: false, splashPath: '/assets/145070.jpg' }
         ]
     };
 
@@ -58,6 +67,12 @@ describe('BackgroundTab', () => {
                 return Promise.resolve({
                     ok: true,
                     json: async () => mockAhriSkins
+                } as Response);
+            }
+            if (url.includes('champions/145.json')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => mockKaisaSkins
                 } as Response);
             }
             return Promise.reject(new Error('Unknown URL'));
@@ -283,6 +298,20 @@ describe('BackgroundTab', () => {
         });
     });
 
+    it("should include Signature Immortalized Legend Kai'Sa in Kai'Sa skin list", async () => {
+        const props = createProps();
+        render(<BackgroundTab {...props} />);
+
+        const kaisaTxt = await screen.findByText("Kai'Sa");
+        fireEvent.click(kaisaTxt.closest('button')!);
+
+        await waitFor(() => {
+            expect(screen.getByText("Risen Legend Kai'Sa")).toBeDefined();
+            expect(screen.getByText("Signature Immortalized Legend Kai'Sa")).toBeDefined();
+            expect(screen.getByText('ID: 145071')).toBeDefined();
+        });
+    });
+
     it('should show placeholder when splash image fails to load', async () => {
         const props = createProps();
         render(<BackgroundTab {...props} />);
@@ -311,5 +340,39 @@ describe('BackgroundTab', () => {
         fireEvent.change(input, { target: { value: 'Skins From Unloaded' } });
 
         expect(await screen.findByText(/Skins From Unloaded Champ/)).toBeDefined();
+    });
+
+    it('should unify duplicate champions (e.g. mode IDs 60000+) and combine their skins', async () => {
+        const duplicateChampsSummary = [
+            { id: 1, name: 'Annie', alias: 'Annie', squarePortraitPath: '/assets/1.png' },
+            { id: 60001, name: 'Annie', alias: 'Annie', squarePortraitPath: '/assets/60001.png' }
+        ];
+
+        globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+            if (url.includes('champion-summary.json')) {
+                return Promise.resolve({ ok: true, json: async () => duplicateChampsSummary } as Response);
+            }
+            if (url.includes('champions/1.json')) {
+                return Promise.resolve({ ok: true, json: async () => ({ skins: [{ id: 1001, name: 'Goth Annie', isBase: false, splashPath: '/1001.jpg' }] }) } as Response);
+            }
+            if (url.includes('champions/60001.json')) {
+                return Promise.resolve({ ok: true, json: async () => ({ skins: [{ id: 60001001, name: 'Swarm Goth Annie', isBase: false, splashPath: '/60001001.jpg' }] }) } as Response);
+            }
+            return Promise.reject(new Error('Unknown URL'));
+        });
+
+        const props = createProps();
+        render(<BackgroundTab {...props} />);
+
+        const annieButtons = await screen.findAllByText('Annie');
+        // Annie should appear ONCE as a champion button in the grid
+        expect(annieButtons).toHaveLength(1);
+
+        fireEvent.click(annieButtons[0].closest('button')!);
+
+        await waitFor(() => {
+            expect(screen.getByText('Goth Annie')).toBeDefined();
+            expect(screen.getByText('Swarm Goth Annie')).toBeDefined();
+        });
     });
 });

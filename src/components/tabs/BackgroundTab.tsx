@@ -16,6 +16,7 @@ interface ChampionSummary {
     name: string;
     alias: string;
     squarePortraitPath: string;
+    allIds?: number[];
 }
 
 interface SkinEntry {
@@ -93,7 +94,28 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             const res = await fetch(`${CDRAGON_BASE}/v1/champion-summary.json`);
             if (!res.ok) throw new Error('Failed to fetch champion list');
             const list: ChampionSummary[] = await res.json();
-            const valid = list.filter(c => c.id > 0 && c.id < 66600).sort((a, b) => a.name.localeCompare(b.name));
+            const validRaw = list.filter(c => c.id > 0 && c.id < 66600);
+
+            // Group champions by lowercased name to unify duplicates (e.g. mode IDs 60000+)
+            const champMap = new Map<string, ChampionSummary>();
+            for (const c of validRaw) {
+                const key = c.name.toLowerCase().trim();
+                if (!champMap.has(key)) {
+                    champMap.set(key, { ...c, allIds: [c.id] });
+                } else {
+                    const existing = champMap.get(key)!;
+                    if (!existing.allIds) existing.allIds = [existing.id];
+                    if (!existing.allIds.includes(c.id)) {
+                        existing.allIds.push(c.id);
+                    }
+                    if (c.id < existing.id) {
+                        existing.id = c.id;
+                        existing.squarePortraitPath = c.squarePortraitPath;
+                    }
+                }
+            }
+
+            const valid = Array.from(champMap.values()).sort((a, b) => a.name.localeCompare(b.name));
             setChampions(valid);
             addLog(`Loaded ${valid.length} champions.`);
         } catch (err) {
@@ -110,29 +132,49 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         if (lcu) fetchCurrentBackground();
     }, [champsLoaded, loadingChamps, fetchChampions, lcu, fetchCurrentBackground]);
 
+    const fetchUnifiedChampSkins = useCallback(async (champ: ChampionSummary): Promise<SkinEntry[]> => {
+        const idsToFetch = champ.allIds && champ.allIds.length > 0 ? champ.allIds : [champ.id];
+        const skinList: SkinEntry[] = [];
+        const seenIds = new Set<number>();
+
+        for (const id of idsToFetch) {
+            try {
+                const res = await fetch(`${CDRAGON_BASE}/v1/champions/${id}.json`);
+                if (res.ok) {
+                    const data = await res.json();
+                    for (const s of (data.skins || [])) {
+                        if (!seenIds.has(s.id)) {
+                            seenIds.add(s.id);
+                            skinList.push({
+                                id: s.id,
+                                name: s.name,
+                                isBase: s.isBase,
+                                splashPath: s.splashPath,
+                            });
+                        }
+                    }
+                }
+            } catch { }
+
+            const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(id)];
+            if (extras) {
+                for (const extra of extras) {
+                    if (!seenIds.has(extra.id)) {
+                        seenIds.add(extra.id);
+                        skinList.push(extra);
+                    }
+                }
+            }
+        }
+
+        return skinList;
+    }, []);
+
     // Build skin search index after champions load
     useEffect(() => {
         if (!champsLoaded || allSkinsLoaded || champions.length === 0) return;
 
-        const fetchChampData = async (champ: ChampionSummary) => {
-            try {
-                const res = await fetch(`${CDRAGON_BASE}/v1/champions/${champ.id}.json`);
-                if (!res.ok) return null;
-                return { champ, data: await res.json() };
-            } catch { return null; }
-        };
-
-        const addChampToIndex = (champ: ChampionSummary, data: any, index: SkinSearchEntry[]) => {
-            const skinList: SkinEntry[] = (data.skins || []).map((s: any) => ({
-                id: s.id, name: s.name, isBase: s.isBase, splashPath: s.splashPath,
-            }));
-            const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(champ.id)];
-            if (extras) {
-                const existingIds = new Set(skinList.map(s => s.id));
-                for (const extra of extras) {
-                    if (!existingIds.has(extra.id)) skinList.push(extra);
-                }
-            }
+        const addChampToIndex = (champ: ChampionSummary, skinList: SkinEntry[], index: SkinSearchEntry[]) => {
             skinCacheRef.current.set(champ.id, skinList);
             for (const skin of skinList) {
                 index.push({ id: skin.id, name: skin.name, championName: champ.name });
@@ -144,10 +186,13 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             const batchSize = 20;
             for (let i = 0; i < champions.length; i += batchSize) {
                 const batch = champions.slice(i, i + batchSize);
-                const results = await Promise.allSettled(batch.map(champ => fetchChampData(champ)));
+                const results = await Promise.allSettled(batch.map(async champ => {
+                    const skinList = await fetchUnifiedChampSkins(champ);
+                    return { champ, skinList };
+                }));
                 for (const result of results) {
                     if (result.status !== 'fulfilled' || !result.value) continue;
-                    addChampToIndex(result.value.champ, result.value.data, index);
+                    addChampToIndex(result.value.champ, result.value.skinList, index);
                 }
             }
             for (const [champIdStr, extras] of Object.entries(supplementalSkins)) {
@@ -162,7 +207,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         };
 
         buildIndex();
-    }, [champsLoaded, allSkinsLoaded, champions]);
+    }, [champsLoaded, allSkinsLoaded, champions, fetchUnifiedChampSkins]);
 
     // Fetch skins for a specific champion (lazy, cached)
     const selectChampion = useCallback(async (champ: ChampionSummary) => {
@@ -179,27 +224,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         setLoadingSkins(true);
         setSkins([]);
         try {
-            const res = await fetch(`${CDRAGON_BASE}/v1/champions/${champ.id}.json`);
-            if (!res.ok) throw new Error(`Failed to fetch skins for ${champ.name}`);
-            const data = await res.json();
-            const skinList: SkinEntry[] = (data.skins || []).map((s: { id: number; name: string; isBase: boolean; splashPath: string }) => ({
-                id: s.id,
-                name: s.name,
-                isBase: s.isBase,
-                splashPath: s.splashPath,
-            }));
-
-            // Merge supplemental skins (missing from CommunityDragon)
-            const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(champ.id)];
-            if (extras) {
-                const existingIds = new Set(skinList.map(s => s.id));
-                for (const extra of extras) {
-                    if (!existingIds.has(extra.id)) {
-                        skinList.push(extra);
-                    }
-                }
-            }
-
+            const skinList = await fetchUnifiedChampSkins(champ);
             skinCacheRef.current.set(champ.id, skinList);
             setSkins(skinList);
         } catch (err) {
@@ -207,7 +232,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         } finally {
             setLoadingSkins(false);
         }
-    }, [addLog]);
+    }, [addLog, fetchUnifiedChampSkins]);
 
     // Scroll skin grid to top when champion changes
     useEffect(() => {
