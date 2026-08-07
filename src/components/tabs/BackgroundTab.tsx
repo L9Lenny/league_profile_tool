@@ -52,6 +52,52 @@ const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     e.currentTarget.src = FALLBACK_SPLASH;
 };
 
+function addUniqueSkins(target: SkinEntry[], source: SkinEntry[], seenIds: Set<number>): void {
+    for (const skin of source) {
+        if (!seenIds.has(skin.id)) {
+            seenIds.add(skin.id);
+            target.push(skin);
+        }
+    }
+}
+
+async function fetchSkinsForId(id: number): Promise<SkinEntry[]> {
+    try {
+        const res = await fetch(`${CDRAGON_BASE}/v1/champions/${id}.json`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return (data.skins || []).map((s: { id: number; name: string; isBase: boolean; splashPath: string }) => ({
+            id: s.id,
+            name: s.name,
+            isBase: s.isBase,
+            splashPath: s.splashPath,
+        }));
+    } catch {
+        return [];
+    }
+}
+
+function groupChampionsByName(list: ChampionSummary[]): ChampionSummary[] {
+    const champMap = new Map<string, ChampionSummary>();
+    for (const c of list) {
+        const key = c.name.toLowerCase().trim();
+        if (!champMap.has(key)) {
+            champMap.set(key, { ...c, allIds: [c.id] });
+        } else {
+            const existing = champMap.get(key)!;
+            existing.allIds ??= [existing.id];
+            if (!existing.allIds.includes(c.id)) {
+                existing.allIds.push(c.id);
+            }
+            if (c.id < existing.id) {
+                existing.id = c.id;
+                existing.squarePortraitPath = c.squarePortraitPath;
+            }
+        }
+    }
+    return Array.from(champMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
     const [loading, setLoading] = useState(false);
     const [champions, setChampions] = useState<ChampionSummary[]>([]);
@@ -94,28 +140,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             const res = await fetch(`${CDRAGON_BASE}/v1/champion-summary.json`);
             if (!res.ok) throw new Error('Failed to fetch champion list');
             const list: ChampionSummary[] = await res.json();
-            const validRaw = list.filter(c => c.id > 0 && c.id < 66600);
-
-            // Group champions by lowercased name to unify duplicates (e.g. mode IDs 60000+)
-            const champMap = new Map<string, ChampionSummary>();
-            for (const c of validRaw) {
-                const key = c.name.toLowerCase().trim();
-                if (!champMap.has(key)) {
-                    champMap.set(key, { ...c, allIds: [c.id] });
-                } else {
-                    const existing = champMap.get(key)!;
-                    if (!existing.allIds) existing.allIds = [existing.id];
-                    if (!existing.allIds.includes(c.id)) {
-                        existing.allIds.push(c.id);
-                    }
-                    if (c.id < existing.id) {
-                        existing.id = c.id;
-                        existing.squarePortraitPath = c.squarePortraitPath;
-                    }
-                }
-            }
-
-            const valid = Array.from(champMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+            const valid = groupChampionsByName(list.filter(c => c.id > 0 && c.id < 66600));
             setChampions(valid);
             addLog(`Loaded ${valid.length} champions.`);
         } catch (err) {
@@ -138,33 +163,11 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         const seenIds = new Set<number>();
 
         for (const id of idsToFetch) {
-            try {
-                const res = await fetch(`${CDRAGON_BASE}/v1/champions/${id}.json`);
-                if (res.ok) {
-                    const data = await res.json();
-                    for (const s of (data.skins || [])) {
-                        if (!seenIds.has(s.id)) {
-                            seenIds.add(s.id);
-                            skinList.push({
-                                id: s.id,
-                                name: s.name,
-                                isBase: s.isBase,
-                                splashPath: s.splashPath,
-                            });
-                        }
-                    }
-                }
-            } catch { }
+            const cdnSkins = await fetchSkinsForId(id);
+            addUniqueSkins(skinList, cdnSkins, seenIds);
 
             const extras = (supplementalSkins as Record<string, SkinEntry[]>)[String(id)];
-            if (extras) {
-                for (const extra of extras) {
-                    if (!seenIds.has(extra.id)) {
-                        seenIds.add(extra.id);
-                        skinList.push(extra);
-                    }
-                }
-            }
+            if (extras) addUniqueSkins(skinList, extras, seenIds);
         }
 
         return skinList;
