@@ -28,5 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.10.2] - 2026-07-30
 
+### Added
+- Signature Immortalized Legend Kai'Sa (#891): Added missing Signature Immortalized Legend Kai'Sa background skin (ID 145071) via supplemental skin registry.
+
 ### Fixed
+- Champion Duplication & Mode Skin Unification: Fixed issue where champions appeared multiple times in the selection grid due to game mode IDs (e.g. Swarm/Arena 60000+ IDs). Unified duplicate champions into a single card and combined all available background skins under one entry.
 - Updated updater.json with signatures for v1.10.2
