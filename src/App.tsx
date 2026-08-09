@@ -45,6 +45,7 @@ import SettingsTab from "./components/tabs/SettingsTab";
 import LobbyTab from "./components/tabs/LobbyTab";
 import FriendManagerTab from "./components/tabs/FriendManagerTab";
 import PresetsTab from "./components/tabs/PresetsTab";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -114,10 +115,11 @@ function App() {
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let disposed = false;
     const appWindow = getCurrentWindow();
 
     appWindow.onCloseRequested(async (event) => {
-      if (closingRef.current) return;
+      if (disposed || closingRef.current) return;
       closingRef.current = true;
       event.preventDefault();
 
@@ -143,9 +145,18 @@ function App() {
           await invoke("force_quit").catch(() => { });
         }
       }
-    }).then((fn) => { unlisten = fn; });
+    }).then((fn) => {
+      if (disposed) {
+        fn();
+      } else {
+        unlisten = fn;
+      }
+    });
 
-    return () => { if (unlisten) unlisten(); };
+    return () => {
+      disposed = true;
+      if (unlisten) unlisten();
+    };
   }, [musicBio.enabled, lcu, applyIdleBio, minimizeToTray, addLog]);
 
   const toggleMinimizeToTray = async () => {
@@ -227,6 +238,7 @@ function App() {
 
       <div className="main-container">
         <main className="content-area">
+          <ErrorBoundary>
           {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} />}
           {activeTab === 'profile' && <ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'friends' && <FriendManagerTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
@@ -239,6 +251,7 @@ function App() {
           {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
           {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
           {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} showToast={showToast} lcuRequest={lcuRequest} />}
+          </ErrorBoundary>
         </main>
 
         <footer className="status-bar">
