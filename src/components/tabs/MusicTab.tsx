@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { LcuInfo } from '../../hooks/useLcu';
 import { MusicBioSettings, DEFAULT_IDLE_BIO, clampPollInterval } from '../../hooks/useMusicSync';
@@ -18,7 +18,7 @@ const normalizeLastFmUsername = (value: string) => {
     if (!trimmed) return "";
     const lastFmUsernameRegex = /last\.fm\/user\/([^/?#]+)/i;
     const match = lastFmUsernameRegex.exec(trimmed);
-    return match ? decodeURIComponent(match[1]) : trimmed;
+    return match?.[1] ? decodeURIComponent(match[1]) : trimmed;
 };
 
 const StatusBadge: React.FC<{
@@ -48,6 +48,15 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
 
     // Auto-hide help if already setup
     const [showHelp, setShowHelp] = useState(!(musicBio.lastfmUsername.trim() && musicBio.lastfmApiKey.trim()));
+    const helpAutoDismissedRef = useRef(!(musicBio.lastfmUsername.trim() && musicBio.lastfmApiKey.trim()));
+
+    // Auto-dismiss help once credentials hydrate from storage
+    useEffect(() => {
+        if (!helpAutoDismissedRef.current && musicBio.lastfmUsername.trim() && musicBio.lastfmApiKey.trim()) {
+            setShowHelp(false);
+            helpAutoDismissedRef.current = true;
+        }
+    }, [musicBio.lastfmUsername, musicBio.lastfmApiKey]);
 
     const enableMusicSync = () => {
         if (!canEnableCurrentSource) {
@@ -59,8 +68,12 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
     };
 
     const disableMusicSync = async () => {
-        await applyIdleBio();
         setMusicBio(prev => ({ ...prev, enabled: false }));
+        try {
+            await applyIdleBio();
+        } catch (err) {
+            addLog(`Failed to restore idle bio on disable: ${err}`);
+        }
         showToast("Music sync disabled", "success");
     };
 

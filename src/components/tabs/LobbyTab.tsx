@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Users, Play, RefreshCw, UserCheck } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 
@@ -21,7 +21,7 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [isRefreshingFriends, setIsRefreshingFriends] = useState(false);
 
-    const refreshFriends = async () => {
+    const refreshFriends = useCallback(async () => {
         if (!lcu) return;
         setIsRefreshingFriends(true);
         try {
@@ -42,11 +42,11 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
         } finally {
             setIsRefreshingFriends(false);
         }
-    };
+    }, [lcu, lcuRequest, addLog]);
 
     useEffect(() => {
         if (lcu) refreshFriends();
-    }, [lcu]);
+    }, [lcu, refreshFriends]);
 
     const sendInvites = async (idsToInvite: number[]) => {
         if (!lcu || idsToInvite.length === 0) return;

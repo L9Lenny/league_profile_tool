@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
@@ -16,6 +16,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
     const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
+    const bioDirtyRef = useRef(false);
 
     const statusLabel = (value: string) => {
         switch (value) {
@@ -32,10 +33,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         try {
             const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as Record<string, unknown>;
             if (chatRes?.availability) setAvailability(chatRes.availability as string);
-            const lcuBio = (chatRes?.statusMessage as string) || "";
-            if (lcuBio.trim()) {
-                setBio(lcuBio);
-                localStorage.setItem(SAVED_BIO_KEY, lcuBio);
+            if (!bioDirtyRef.current) {
+                const lcuBio = (chatRes?.statusMessage as string) || "";
+                if (lcuBio.trim()) {
+                    setBio(lcuBio);
+                    localStorage.setItem(SAVED_BIO_KEY, lcuBio);
+                }
             }
         } catch (err) {
             addLog(`Profile sync failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -52,6 +55,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         try {
             await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: bio });
             localStorage.setItem(SAVED_BIO_KEY, bio);
+            bioDirtyRef.current = false;
             addLog(`Bio updated: "${bio}"`);
             showToast("Bio Updated!", "success");
         } catch (err: unknown) {
@@ -98,7 +102,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                         style={{ background: 'rgba(0, 0, 0, 0.3)' }}
                         placeholder="Tell your friends what you're up to..."
                         value={bio}
-                        onChange={(e) => setBio(e.target.value)}
+                        onChange={(e) => { bioDirtyRef.current = true; setBio(e.target.value); }}
                         disabled={!lcu || loading}
                         rows={3}
                     />
@@ -115,7 +119,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             </span>
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <select id="availability-select" className="availability-select" value={availability} onChange={(e) => setAvailability(e.target.value)} style={{ flex: 2 }}>
+                            <select id="availability-select" className="availability-select" value={availability} onChange={(e) => setAvailability(e.target.value)} disabled={!lcu || loading} style={{ flex: 2 }}>
                                 {[
                                     { value: "chat",    label: "ONLINE" },
                                     { value: "away",    label: "AWAY" },

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **ErrorBoundary**: Catches uncaught render errors and shows a recoverable screen instead of crashing.
+- **`patchChatLol()` mutex** (`src/utils/chatMe.ts`): Serializes read-modify-write on the `/lol-chat/v1/me` `lol` field so concurrent patches from enforcer, rank, background, and settings don't clobber each other.
+- **`LcuRequestFn` type**: Shared type alias replacing `any` across LCU-calling tabs.
+- **`noUncheckedIndexedAccess`**: Enabled in `tsconfig.json`.
+
+### Fixed
+- **Stale `presets` state in PresetsTab**: Rapid save/delete now reads `presetsRef.current` instead of stale state; disk writes serialized via `persistMutexRef`.
+- **Auto-Enforce toggle not reactive**: `autoEnforce` now checked inside each 15s cycle, so toggling in Settings takes effect without reconnect.
+- **Overlapping async cycles**: Added re-entry guards (`checkingRef`, `cycleRunningRef`, `musicSyncRunningRef`) and AbortController/timeout to `useLcu`, `useProfileEnforcer`, `useMusicSync`.
+- **Rank/Background/Challenge wipes other `lol` fields**: All tabs now use `patchChatLol()` to merge before writing.
+- **Bio draft loss**: `bioDirtyRef` preserves unsaved bio text across enforcer cycles.
+- **Music sync disable race**: `enabled: false` set before restoring idle bio.
+- **Stale summoner on disconnect**: HomeTab now clears summoner info on LCU disconnect.
+- **`setState` after unmount**: Added `cancelled` flags to BackgroundTab and HomeTab async fetches.
+- **useToast timer leak**: Added cleanup on unmount.
+- **useIcons corrupted-cache crash**: Added try/catch on `JSON.parse`.
+- **SettingsTab Clear All**: Parallel via `Promise.allSettled`; uses `patchChatLol`; autostart toggle now try/catches with toast.
+- **IconTab error log**: Now includes actual error message.
+- **Clear All settings coverage**: Added 4 missing keys (`music_bio_settings_v1`, `profile_icons`, `icon_data_version`, `profile_presets_list_v1`) to `ALL_SAVED_KEYS`.
+- **App close listener race**: `disposed` flag prevents handler running after cleanup.
+
 ## [1.11.0] - 2026-08-07
 
 ### Fixed

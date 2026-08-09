@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 export function useToast() {
     const [message, setMessage] = useState({ text: "", type: "" });
@@ -10,6 +10,12 @@ export function useToast() {
         toastTimerRef.current = setTimeout(() => {
             setMessage({ text: "", type: "" });
         }, 3000);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        };
     }, []);
 
     return { message, showToast };

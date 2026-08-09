@@ -66,21 +66,27 @@ async function fetchLastFmNowPlaying(settings: MusicBioSettings): Promise<NowPla
     const apiKey = settings.lastfmApiKey.trim();
     if (!username || !apiKey) return null;
     const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${encodeURIComponent(apiKey)}&format=json&limit=1`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
-    const payload = await response.json();
-    const recentTracks = payload?.recenttracks?.track;
-    const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
-    if (!track) return null;
-    const nowPlaying = String(track?.["@attr"]?.nowplaying || "").toLowerCase() === "true";
-    if (!nowPlaying) return null;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
+        const payload = await response.json();
+        const recentTracks = payload?.recenttracks?.track;
+        const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
+        if (!track) return null;
+        const nowPlaying = String(track?.["@attr"]?.nowplaying || "").toLowerCase() === "true";
+        if (!nowPlaying) return null;
 
-    return {
-        sourceLabel: "Last.fm",
-        artist: String(track?.artist?.["#text"] || "").trim(),
-        title: String(track?.name || "").trim(),
-        album: String(track?.album?.["#text"] || "").trim()
-    };
+        return {
+            sourceLabel: "Last.fm",
+            artist: String(track?.artist?.["#text"] || "").trim(),
+            title: String(track?.name || "").trim(),
+            album: String(track?.album?.["#text"] || "").trim()
+        };
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void) {
@@ -117,7 +123,7 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
     }, [musicBio, musicSettingsHydrated]);
 
     const applyIdleBio = useCallback(async () => {
-        if (!lcu) return;
+        if (!lcu || musicSyncRunningRef.current) return;
         const idle = truncateBio(musicBio.idleText.trim() || DEFAULT_IDLE_BIO);
         if (!idle) return;
         try {
@@ -141,6 +147,7 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
             try {
                 const settings = { ...musicBio, pollIntervalSec: clampPollInterval(musicBio.pollIntervalSec) };
                 const track = await fetchLastFmNowPlaying(settings);
+                if (cancelled) return;
 
                 let nextBio = "";
                 if (track) {
@@ -151,10 +158,12 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
 
                 if (!nextBio || nextBio === lastAutoBioRef.current) return;
                 await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: nextBio });
+                if (cancelled) return;
                 lastAutoBioRef.current = nextBio;
                 musicSyncLastErrorRef.current = "";
                 addLog(`Music bio updated (lastfm): "${nextBio}"`);
             } catch (err) {
+                if (cancelled) return;
                 const errorText = String(err);
                 if (errorText !== musicSyncLastErrorRef.current) {
                     musicSyncLastErrorRef.current = errorText;

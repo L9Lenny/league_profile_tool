@@ -35,7 +35,7 @@ const IconTab: React.FC<IconTabProps> = ({
                 body: { profileIconId: selectedIcon },
                 port: lcu.port,
                 token: lcu.token
-            }).catch(() => addLog("Official icon update failed (likely unowned). Trying Force method..."));
+            }).catch((err) => addLog(`Official icon update failed (${err}). Trying Force method...`));
 
             await invoke("lcu_request", {
                 method: "PUT",

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { RefreshCw, Cpu, Trash2, X, Check } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, SAVED_ICON_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
+import { patchChatLol } from '../../utils/chatMe';
 
 interface SettingsTabProps {
     isAutostartEnabled: boolean;
@@ -55,36 +56,41 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         enforcer: "Auto-Enforcer & localStorage",
     };
 
-    const resetChatPresence = () => {
+    const resetChatPresence = async (): Promise<void> => {
         if (!lcuRequest) return;
-        lcuRequest("GET", "/lol-chat/v1/me").then((chatRes: any) => {
-            let baseLol: any = {};
-            if (chatRes?.lol) {
-                baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
-            }
-            const chatBody: any = {};
-            if (resetChecks.rank) {
-                baseLol.rankedLeagueTier = "";
-                baseLol.rankedLeagueDivision = "";
-                baseLol.rankedLeagueQueue = "";
-            }
-            if (resetChecks.challenge) {
-                baseLol.challengeCrystalLevel = "";
-                baseLol.challengePoints = "";
-            }
-            if (resetChecks.background) {
-                baseLol.backgroundSkinId = "";
-            }
-            if (resetChecks.status) {
-                chatBody.availability = "chat";
-                chatBody.statusMessage = "";
-            }
-            chatBody.lol = baseLol;
-            lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
-        }).catch(() => {});
+        const promises: Promise<unknown>[] = [];
+
+        const hasLolFields = resetChecks.rank || resetChecks.challenge || resetChecks.background;
+        if (hasLolFields) {
+            promises.push(patchChatLol(lcuRequest, (current) => {
+                const updated: Record<string, unknown> = { ...current };
+                if (resetChecks.rank) {
+                    updated.rankedLeagueTier = "";
+                    updated.rankedLeagueDivision = "";
+                    updated.rankedLeagueQueue = "";
+                }
+                if (resetChecks.challenge) {
+                    updated.challengeCrystalLevel = "";
+                    updated.challengePoints = "";
+                }
+                if (resetChecks.background) {
+                    updated.backgroundSkinId = "";
+                }
+                return updated;
+            }));
+        }
+
+        if (resetChecks.status) {
+            promises.push(lcuRequest("PUT", "/lol-chat/v1/me", {
+                availability: "chat",
+                statusMessage: ""
+            }));
+        }
+
+        await Promise.allSettled(promises);
     };
 
-    const clearAllSettings = () => {
+    const clearAllSettings = async () => {
         const savedIconVal = resetChecks.icon ? localStorage.getItem(SAVED_ICON_KEY) : null;
 
         if (resetChecks.enforcer) {
@@ -99,35 +105,38 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             return;
         }
 
+        const promises: Promise<unknown>[] = [];
+
         const hasChatFields = resetChecks.rank || resetChecks.challenge || resetChecks.background || resetChecks.status;
-        if (hasChatFields) resetChatPresence();
+        if (hasChatFields) promises.push(resetChatPresence());
 
         if (resetChecks.background) {
-            lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
+            promises.push(lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
                 key: "backgroundSkinId",
                 value: 0,
-            }).catch(() => {});
+            }));
         }
 
         if (resetChecks.tokens) {
-            lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
+            promises.push(lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
                 challengeIds: [],
                 title: "",
                 bannerAccent: "",
                 crestBorder: "",
                 prestigeCrestBorderLevel: 0,
-            }).catch(() => {});
+            }));
         }
 
         if (resetChecks.icon) {
             const iconId = savedIconVal ? Number.parseInt(savedIconVal, 10) : 0;
             if (!Number.isNaN(iconId)) {
-                lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", {
+                promises.push(lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", {
                     profileIconId: iconId,
-                }).catch(() => {});
+                }));
             }
         }
 
+        await Promise.allSettled(promises);
         addLog("Saved settings cleared.");
         showToast?.("Saved settings cleared!", "success");
         setShowResetConfirm(false);
@@ -139,9 +148,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 <h3 className="card-title">Technical Settings</h3>
                 <button type="button" className="settings-row" onClick={async () => {
                     const newState = !isAutostartEnabled;
-                    if (newState) await enable(); else await disable();
-                    setIsAutostartEnabled(newState);
-                    addLog(`Auto-launch ${newState ? 'enabled' : 'disabled'}.`);
+                    try {
+                        if (newState) await enable(); else await disable();
+                        setIsAutostartEnabled(newState);
+                        addLog(`Auto-launch ${newState ? 'enabled' : 'disabled'}.`);
+                    } catch (err) {
+                        addLog(`Failed to toggle auto-launch: ${err}`);
+                        showToast?.(`Failed to toggle auto-launch: ${err}`, "error");
+                    }
                 }}>
                     <div className="settings-info">
                         <span className="settings-label">Auto-launch</span>

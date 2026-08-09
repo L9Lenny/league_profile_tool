@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { LcuInfo } from '../../hooks/useLcu';
 import { Save, FolderOpen, Trash2, CheckCircle2 } from 'lucide-react';
+import { patchChatLol, LcuRequestFn } from '../../utils/chatMe';
 import {
     SAVED_AVAILABILITY_KEY,
     SAVED_BIO_KEY,
@@ -11,11 +12,26 @@ import {
     SAVED_TITLE_KEY
 } from '../../storageKeys';
 
+interface ChallengeSummary {
+    bannerId?: string;
+    crestId?: string;
+    prestigeCrestBorderLevel?: number;
+    preferences?: {
+        bannerId?: string;
+        crestId?: string;
+        bannerAccent?: string;
+        crestBorder?: string;
+        prestigeCrestBorderLevel?: number;
+    };
+    bannerAccent?: string;
+    crestBorder?: string;
+}
+
 interface PresetsTabProps {
     lcu: LcuInfo | null;
     showToast: (msg: string, type: 'success' | 'error') => void;
     addLog: (msg: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
+    lcuRequest: LcuRequestFn;
 }
 
 interface ProfilePreset {
@@ -39,16 +55,26 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [newPresetName, setNewPresetName] = useState("");
     const [saving, setSaving] = useState(false);
 
-    /** Write presets to disk via Tauri; falls back to localStorage on error */
-    const persistPresets = useCallback(async (updated: ProfilePreset[]) => {
-        const json = JSON.stringify(updated);
-        try {
-            await invoke("save_presets", { data: json });
-        } catch (err) {
-            addLog(`Disk save failed, using localStorage fallback: ${err}`);
-            localStorage.setItem(PRESETS_LS_KEY, json);
-        }
-        setPresets(updated);
+    // Always track the latest presets so async handlers (save/delete) don't
+    // read stale state if multiple fire in quick succession.
+    const presetsRef = useRef(presets);
+    presetsRef.current = presets;
+
+    /** Serialize disk writes so save/delete don't interleave and clobber each other */
+    const persistMutexRef = useRef<Promise<void>>(Promise.resolve());
+    const persistPresets = useCallback((updated: ProfilePreset[]) => {
+        persistMutexRef.current = persistMutexRef.current.then(async () => {
+            const json = JSON.stringify(updated);
+            try {
+                await invoke("save_presets", { data: json });
+            } catch (err) {
+                addLog(`Disk save failed, using localStorage fallback: ${err}`);
+                localStorage.setItem(PRESETS_LS_KEY, json);
+            }
+            presetsRef.current = updated;
+            setPresets(updated);
+        });
+        return persistMutexRef.current;
     }, [addLog]);
 
     useEffect(() => {
@@ -99,7 +125,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
             tokens:       localStorage.getItem(SAVED_TOKENS_KEY),
             title:        localStorage.getItem(SAVED_TITLE_KEY)
         };
-        const updated = [...presets, newPreset];
+        const updated = [...presetsRef.current, newPreset];
         await persistPresets(updated);
         setNewPresetName("");
         showToast(`Preset "${newPreset.name}" saved!`, "success");
@@ -173,13 +199,10 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
         } catch (err) {
             addLog(`Official background update failed (${err}). Trying force method...`);
             try {
-                const chatMe: any = await lcuRequest("GET", "/lol-chat/v1/me");
-                let currentLol = {};
-                if (chatMe?.lol) {
-                    currentLol = typeof chatMe.lol === 'string' ? JSON.parse(chatMe.lol) : chatMe.lol;
-                }
-                const newLol = { ...currentLol, backgroundSkinId: backgroundId };
-                await lcuRequest("PUT", "/lol-chat/v1/me", { lol: newLol });
+                await patchChatLol(lcuRequest, (current) => ({
+                    ...current,
+                    backgroundSkinId: backgroundId,
+                }));
                 return true;
             } catch (forceErr) {
                 addLog(`Failed to apply background from preset (Force): ${forceErr}`);
@@ -192,14 +215,14 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
         tokens: string | null,
         title?: string | null
     ): Promise<boolean> => {
-        const payload: any = {};
-        
+        const payload: Record<string, unknown> = {};
+
         if (tokens === null) {
             localStorage.removeItem(SAVED_TOKENS_KEY);
         } else {
             localStorage.setItem(SAVED_TOKENS_KEY, tokens);
-            try { 
-                payload.challengeIds = JSON.parse(tokens); 
+            try {
+                payload.challengeIds = JSON.parse(tokens);
             } catch (e) {
                 console.debug("Failed to parse preset tokens JSON:", e);
             }
@@ -214,7 +237,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
         // The update endpoint does a FULL REPLACE — merge current preferences
         // so we don't reset banner/crest/prestige.
         try {
-            const summary: any = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player");
+            const summary = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player") as ChallengeSummary | null;
             if (summary) {
                 payload.bannerAccent = payload.bannerAccent ?? summary.bannerId ?? summary.preferences?.bannerId ?? summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
                 payload.crestBorder = payload.crestBorder ?? summary.crestId ?? summary.preferences?.crestId ?? summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
@@ -224,13 +247,15 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
             addLog(`Warning: Could not read current preferences to merge in preset: ${err}`);
         }
 
-        if (Object.keys(payload).length > 0) {
-            try {
-                await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", payload);
-            } catch (err) {
-                addLog(`Failed to apply tokens/title from preset: ${err}`);
-                return false;
-            }
+        if (Object.keys(payload).length === 0) {
+            return true;
+        }
+
+        try {
+            await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", payload);
+        } catch (err) {
+            addLog(`Failed to apply tokens/title from preset: ${err}`);
+            return false;
         }
         return true;
     };
@@ -258,7 +283,7 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
     };
 
     const handleDeletePreset = async (id: string) => {
-        const updated = presets.filter(p => p.id !== id);
+        const updated = presetsRef.current.filter(p => p.id !== id);
         await persistPresets(updated);
         showToast("Preset deleted.", "success");
     };

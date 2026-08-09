@@ -24,8 +24,8 @@ describe('useLogs', () => {
         });
 
         expect(result.current.logs).toHaveLength(1);
-        expect(result.current.logs[0].msg).toBe('Test message');
-        expect(result.current.logs[0].id).toBeDefined();
+        expect(result.current.logs[0]!.msg).toBe('Test message');
+        expect(result.current.logs[0]!.id).toBeDefined();
     });
 
     it('should limit logs to 50 entries', () => {
@@ -38,7 +38,7 @@ describe('useLogs', () => {
         }
 
         expect(result.current.logs).toHaveLength(50);
-        expect(result.current.logs[0].msg).toBe('Message 59');
+        expect(result.current.logs[0]!.msg).toBe('Message 59');
     });
 
     it('should clear logs', () => {

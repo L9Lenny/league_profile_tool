@@ -44,7 +44,7 @@ describe('RankTab', () => {
         render(<RankTab {...props} />);
 
         const goldBtn = await screen.findAllByText('GOLD');
-        fireEvent.click(goldBtn[0]);
+        fireEvent.click(goldBtn[0]!);
 
         const goldElements = screen.getAllByText(/GOLD/);
         expect(goldElements.length).toBeGreaterThan(0);

@@ -107,7 +107,7 @@ describe('FriendManagerTab', () => {
         expect(screen.getByText('Selected:')).toBeDefined();
         expect(screen.getByText('2')).toBeDefined();
 
-        fireEvent.click(screen.getByText('DESELECT ALL'));
+        fireEvent.click(screen.getByText('DESELECT VISIBLE'));
         expect(screen.getByText('0')).toBeDefined();
     });
 
