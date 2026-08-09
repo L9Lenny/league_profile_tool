@@ -368,7 +368,7 @@ describe('BackgroundTab', () => {
         // Annie should appear ONCE as a champion button in the grid
         expect(annieButtons).toHaveLength(1);
 
-        fireEvent.click(annieButtons[0].closest('button')!);
+        fireEvent.click(annieButtons[0]!.closest('button')!);
 
         await waitFor(() => {
             expect(screen.getByText('Goth Annie')).toBeDefined();

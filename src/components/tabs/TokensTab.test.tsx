@@ -114,10 +114,10 @@ describe('TokensTab', () => {
             const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
             expect(bannerSelect).toBeDefined();
             expect(bannerSelect?.length).toBe(4);
-            expect(bannerSelect?.options[0].text).toBe('No Banner');
-            expect(bannerSelect?.options[1].text).toBe('Lunar Revel 2023 Banner');
-            expect(bannerSelect?.options[2].text).toBe('Soul Fighter Banner');
-            expect(bannerSelect?.options[3].text).toBe('Winterblessed Banner');
+            expect(bannerSelect?.options[0]?.text).toBe('No Banner');
+            expect(bannerSelect?.options[1]?.text).toBe('Lunar Revel 2023 Banner');
+            expect(bannerSelect?.options[2]?.text).toBe('Soul Fighter Banner');
+            expect(bannerSelect?.options[3]?.text).toBe('Winterblessed Banner');
         });
     });
 
@@ -165,7 +165,7 @@ describe('TokensTab', () => {
             const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
             expect(bannerSelect).toBeDefined();
             expect(bannerSelect?.length).toBe(1);
-            expect(bannerSelect?.options[0].text).toBe('No Banner');
+            expect(bannerSelect?.options[0]?.text).toBe('No Banner');
         });
     });
 
@@ -195,8 +195,8 @@ describe('TokensTab', () => {
         await waitFor(() => {
             const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
             expect(bannerSelect?.length).toBe(3);
-            expect(bannerSelect?.options[1].text).toBe('Test Banner Five');
-            expect(bannerSelect?.options[2].text).toBe('Test Banner Seven');
+            expect(bannerSelect?.options[1]?.text).toBe('Test Banner Five');
+            expect(bannerSelect?.options[2]?.text).toBe('Test Banner Seven');
         });
     });
 
@@ -382,7 +382,7 @@ describe('TokensTab', () => {
         await waitFor(() => {
             const bannerSelect = document.getElementById('banner-select') as HTMLSelectElement;
             expect(bannerSelect?.length).toBe(1);
-            expect(bannerSelect?.options[0].text).toBe('No Banner');
+            expect(bannerSelect?.options[0]?.text).toBe('No Banner');
         });
     });
 

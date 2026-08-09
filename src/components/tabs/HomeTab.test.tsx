@@ -37,7 +37,7 @@ describe('HomeTab', () => {
         expect(mockProps.setActiveTab).toHaveBeenCalledWith('profile');
 
         // Go back
-        fireEvent.click(screen.getAllByRole('button', { name: /BACK/i })[0]);
+        fireEvent.click(screen.getAllByRole('button', { name: /BACK/i })[0]!);
         expect(screen.getByText('Customization')).toBeDefined();
 
         // Click on Enhancements category

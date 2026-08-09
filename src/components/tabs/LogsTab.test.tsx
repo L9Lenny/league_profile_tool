@@ -86,7 +86,7 @@ describe('LogsTab', () => {
         const copyBtns = screen.getAllByRole('button', { name: 'Copy log line' });
         expect(copyBtns).toHaveLength(4);
         
-        fireEvent.click(copyBtns[2]); // Log 2 (index 2 in descending array)
+        fireEvent.click(copyBtns[2]!); // Log 2 (index 2 in descending array)
         expect(writeTextMock).toHaveBeenCalledWith('[12:00:01] failed database connection error');
         await waitFor(() => {
             expect(mockProps.showToast).toHaveBeenCalledWith('Log line copied!', 'success');
@@ -149,8 +149,8 @@ describe('LogsTab', () => {
 
         // Default: NEWEST (descending order: Log 4 first, then Log 3, etc.)
         const logElementsBefore = screen.getAllByText(/12:00:0/);
-        expect(logElementsBefore[0].textContent).toBe('[12:00:03]'); // Log 4 (newest)
-        expect(logElementsBefore[3].textContent).toBe('[12:00:00]'); // Log 1 (oldest)
+        expect(logElementsBefore[0]!.textContent).toBe('[12:00:03]'); // Log 4 (newest)
+        expect(logElementsBefore[3]!.textContent).toBe('[12:00:00]'); // Log 1 (oldest)
 
         // Click sort toggle (from desc to asc)
         const sortBtn = screen.getByRole('button', { name: /NEWEST/ });
@@ -158,8 +158,8 @@ describe('LogsTab', () => {
 
         // Ascending order: Log 1 first, then Log 2, etc.
         const logElementsAfter = screen.getAllByText(/12:00:0/);
-        expect(logElementsAfter[0].textContent).toBe('[12:00:00]'); // Log 1 (oldest)
-        expect(logElementsAfter[3].textContent).toBe('[12:00:03]'); // Log 4 (newest)
+        expect(logElementsAfter[0]!.textContent).toBe('[12:00:00]'); // Log 1 (oldest)
+        expect(logElementsAfter[3]!.textContent).toBe('[12:00:03]'); // Log 4 (newest)
     });
 
     it('should toggle auto-scroll state', () => {

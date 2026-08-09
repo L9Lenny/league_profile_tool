@@ -475,7 +475,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             const token = tokens.find(t => t.id === tokenId);
                                             const isSelected = selectedSlot === i;
                                             const glowClass = getGlowClass(token?.level);
-                                            const hasToken = tokenId >= 0;
+                                            const hasToken = tokenId !== undefined && tokenId >= 0;
                                             
                                             return (
                                                 <button 
@@ -494,7 +494,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                                 >
                                                     {hasToken ? (
                                                         <img 
-                                                            src={getTokenImgUrl(tokenId, token?.level || 'IRON')} 
+                                                            src={tokenId !== undefined ? getTokenImgUrl(tokenId, token?.level || 'IRON') : ''} 
                                                             alt="Token" 
                                                         />
                                                     ) : (
