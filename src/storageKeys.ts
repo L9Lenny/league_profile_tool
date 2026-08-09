@@ -36,4 +36,8 @@ export const ALL_SAVED_KEYS: string[] = [
     SAVED_CHALLENGE_POINTS_KEY,
     SAVED_ENFORCE_OFFLINE_KEY,
     SAVED_AUTO_ENFORCE_KEY,
+    "music_bio_settings_v1",
+    "profile_icons",
+    "icon_data_version",
+    "profile_presets_list_v1",
 ];
