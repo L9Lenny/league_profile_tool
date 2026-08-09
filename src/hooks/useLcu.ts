@@ -9,12 +9,15 @@ export interface LcuInfo {
 export function useLcu(addLog: (msg: string) => void) {
     const [lcu, setLcu] = useState<LcuInfo | null>(null);
     const prevLcuRef = useRef<LcuInfo | null>(null);
+    const checkingRef = useRef(false);
     // Use a ref so checkConnection never needs addLog in its dependency array,
     // avoiding the interval being torn down and recreated on every log call.
     const addLogRef = useRef(addLog);
     addLogRef.current = addLog;
 
     const checkConnection = useCallback(async () => {
+        if (checkingRef.current) return;
+        checkingRef.current = true;
         try {
             const info = await invoke<LcuInfo>("get_lcu_connection");
             if (!prevLcuRef.current && info) {
@@ -33,6 +36,8 @@ export function useLcu(addLog: (msg: string) => void) {
                 prevLcuRef.current = null;
                 setLcu(null);
             }
+        } finally {
+            checkingRef.current = false;
         }
     }, []); // stable reference — addLog accessed via ref
 

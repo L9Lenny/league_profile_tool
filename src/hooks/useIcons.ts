@@ -74,7 +74,14 @@ export function useIcons(addLog: (msg: string) => void) {
                     addLog(`Icon background refresh failed: ${err}`);
                     // Fallback to cache even if version mismatch if fetch failed
                     const cached = localStorage.getItem("profile_icons");
-                    if (cached) setAllIcons(JSON.parse(cached));
+                    if (cached) {
+                        try {
+                            const parsed = JSON.parse(cached);
+                            if (Array.isArray(parsed)) setAllIcons(parsed);
+                        } catch {
+                            // cache corrupted — ignore
+                        }
+                    }
                 }
             }
         };
