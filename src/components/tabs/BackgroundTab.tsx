@@ -264,7 +264,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         }).slice(0, 12);
         setSkinSuggestions(matches);
         setShowSuggestions(matches.length > 0);
-    }, [skinQuery, selectedDirectSkin]);
+    }, [skinQuery, selectedDirectSkin, allSkinsLoaded]);
 
     // Close suggestions on outside click
     useEffect(() => {
