@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SettingsTab from './SettingsTab';
 
 // Mock Tauri plugin-autostart
@@ -104,14 +104,16 @@ describe('SettingsTab', () => {
         expect(screen.queryByText('What to clear?')).toBeNull();
     });
 
-    it('should call lcuRequest when Clear Selected is clicked with default options', () => {
+    it('should call lcuRequest when Clear Selected is clicked with default options', async () => {
         localStorage.setItem('profile_saved_icon_v1', '42');
         const lcuReq = vi.fn(() => Promise.resolve({ lol: {} }));
         render(<SettingsTab {...mockProps} lcuRequest={lcuReq} showToast={vi.fn()} />);
         fireEvent.click(screen.getByText('Clear Saved Data'));
         fireEvent.click(screen.getByText('Clear Selected'));
         expect(localStorage.getItem('profile_auto_enforce_v1')).toBeNull();
-        expect(lcuReq).toHaveBeenCalledWith('GET', '/lol-chat/v1/me');
+        await waitFor(() => {
+            expect(lcuReq).toHaveBeenCalledWith('GET', '/lol-chat/v1/me');
+        });
     });
 
     it('should not call lcuRequest when all options are unchecked', () => {

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Users, Trash2, Search, RefreshCw, CheckSquare, Square, AlertCircle } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
+import { LcuRequestFn } from '../../utils/chatMe';
 
 interface FriendManagerTabProps {
     lcu: LcuInfo | null;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<any>;
+    lcuRequest: LcuRequestFn;
 }
 
 interface Friend {
@@ -31,16 +32,16 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
         if (!lcu) return;
         setFetching(true);
         try {
-            const data: any = await lcuRequest("GET", "/lol-chat/v1/friends");
+            const data = await lcuRequest("GET", "/lol-chat/v1/friends") as Array<Record<string, unknown>> | null;
             if (Array.isArray(data)) {
                 setFriends(data.map(f => ({
-                    id: f.id,
-                    summonerId: f.summonerId,
-                    name: f.gameName ? `${f.gameName}#${f.gameTag}` : f.name,
-                    availability: f.availability,
-                    statusMessage: f.statusMessage,
-                    icon: f.icon,
-                    groupName: f.groupName
+                    id: f.id as string,
+                    summonerId: f.summonerId as number,
+                    name: f.gameName ? `${f.gameName}#${f.gameTag}` : f.name as string,
+                    availability: f.availability as string,
+                    statusMessage: f.statusMessage as string,
+                    icon: f.icon as number,
+                    groupName: f.groupName as string
                 })));
             }
         } catch (err) {
@@ -60,6 +61,8 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
             f.groupName.toLowerCase().includes(search.toLowerCase())
         );
     }, [friends, search]);
+
+    const allVisibleSelected = filteredFriends.length > 0 && filteredFriends.every(f => selected.has(f.id));
 
     const toggleSelect = (id: string) => {
         const next = new Set(selected);
@@ -86,7 +89,11 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
             }
         }
 
-        showToast(`Successfully removed ${successCount} friends.`, "success");
+        if (successCount > 0) {
+            showToast(`Successfully removed ${successCount} friends.`, "success");
+        } else {
+            showToast("No friends were removed.", "error");
+        }
         setSelected(new Set());
         fetchFriends();
         setLoading(false);
@@ -131,9 +138,17 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                         <button type="button" 
                             className="secondary-btn" 
                             style={{ padding: '6px 12px', fontSize: '0.7rem', background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer' }}
-                            onClick={() => setSelected(new Set(selected.size === filteredFriends.length ? [] : filteredFriends.map(f => f.id)))}
+                            onClick={() => {
+                                const next = new Set(selected);
+                                if (allVisibleSelected) {
+                                    for (const f of filteredFriends) next.delete(f.id);
+                                } else {
+                                    for (const f of filteredFriends) next.add(f.id);
+                                }
+                                setSelected(next);
+                            }}
                         >
-                            {selected.size === filteredFriends.length ? "DESELECT ALL" : "SELECT ALL VISIBLE"}
+                            {allVisibleSelected ? "DESELECT VISIBLE" : "SELECT ALL VISIBLE"}
                         </button>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', alignSelf: 'center', marginLeft: '10px' }}>
                             Selected: <strong style={{ color: 'var(--hextech-gold)' }}>{selected.size}</strong>

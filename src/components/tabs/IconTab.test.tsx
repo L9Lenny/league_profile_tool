@@ -85,7 +85,7 @@ describe('IconTab', () => {
         fireEvent.click(applyBtn);
 
         await waitFor(() => {
-            expect(mockProps.addLog).toHaveBeenCalledWith('Official icon update failed (likely unowned). Trying Force method...');
+            expect(mockProps.addLog).toHaveBeenCalledWith('Official icon update failed (Error: Unowned). Trying Force method...');
             expect(invoke).toHaveBeenCalledWith('lcu_request', expect.objectContaining({
                 method: 'PUT',
                 endpoint: '/lol-chat/v1/me',

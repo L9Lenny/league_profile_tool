@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
+import { LcuRequestFn, patchChatLol } from '../../utils/chatMe';
 import { 
     SAVED_RANK_QUEUE_KEY, 
     SAVED_RANK_TIER_KEY, 
@@ -13,7 +14,7 @@ interface RankTabProps {
     lcu: LcuInfo | null;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
+    lcuRequest: LcuRequestFn;
 }
 
 const TIERS = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"];
@@ -53,23 +54,19 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
     const [challengeCrystalLevel, setChallengeCrystalLevel] = useState("CHALLENGER");
     const [challengePoints, setChallengePoints] = useState("1200");
 
-    // Full lol object state to preserve other properties like background, icons, etc.
-    const [currentLolObj, setCurrentLolObj] = useState<any>({});
-
     const fetchCurrentData = useCallback(async () => {
         if (!lcu) return;
         setFetching(true);
         try {
             addLog("Syncing rank status from LCU...");
             
-            const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as any;
+            const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as { lol?: string | Record<string, unknown> } | null;
             if (chatRes?.lol) {
-                const lol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
-                setCurrentLolObj(lol);
-                if (lol.rankedLeagueTier) setSoloTier(lol.rankedLeagueTier);
-                if (lol.rankedLeagueDivision) setSoloDiv(lol.rankedLeagueDivision);
-                if (lol.rankedLeagueQueue) setQueueType(lol.rankedLeagueQueue);
-                if (lol.challengeCrystalLevel) setChallengeCrystalLevel(lol.challengeCrystalLevel);
+                const lol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) as Record<string, unknown> : chatRes.lol;
+                if (lol.rankedLeagueTier) setSoloTier(lol.rankedLeagueTier as string);
+                if (lol.rankedLeagueDivision) setSoloDiv(lol.rankedLeagueDivision as string);
+                if (lol.rankedLeagueQueue) setQueueType(lol.rankedLeagueQueue as string);
+                if (lol.challengeCrystalLevel) setChallengeCrystalLevel(lol.challengeCrystalLevel as string);
                 if (lol.challengePoints !== undefined) setChallengePoints(String(lol.challengePoints));
             }
 
@@ -91,28 +88,16 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
         if (!lcu) return;
         setLoading(true);
         try {
-            // Re-fetch latest to ensure we don't overwrite other recent changes
-            const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as any;
-            let baseLol = currentLolObj;
-            if (chatRes?.lol) {
-                baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
-                setCurrentLolObj(baseLol);
-            }
-
-            const updatedLol = {
-                ...baseLol,
+            // Serialized RMW: read latest lol, apply overrides, write back.
+            // This prevents races with other components editing the same field.
+            await patchChatLol(lcuRequest, (current) => ({
+                ...current,
                 rankedLeagueTier: soloTier,
                 rankedLeagueDivision: soloDiv,
                 rankedLeagueQueue: queueType,
                 challengeCrystalLevel: challengeCrystalLevel,
                 challengePoints: String(challengePoints || "0")
-            };
-
-            const chatBody = {
-                lol: updatedLol
-            };
-            
-            await lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
+            }));
 
             // Save overrides to local storage for the Auto-Enforcer
             localStorage.setItem(SAVED_RANK_QUEUE_KEY, queueType);
@@ -270,7 +255,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                         className="primary-btn" 
                         style={{ width: '100%', padding: '16px', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '1px' }} 
                         onClick={applyChanges} 
-                        disabled={!lcu || loading}
+                        disabled={!lcu || loading || fetching}
                     >
                         {loading ? 'APPLYING...' : 'APPLY RANK OVERRIDES'}
                     </button>
