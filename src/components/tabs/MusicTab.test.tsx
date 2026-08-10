@@ -66,7 +66,7 @@ describe('MusicTab', () => {
         fireEvent.change(userInput, { target: { value: 'https://www.last.fm/user/tester' } });
 
         expect(mockProps.setMusicBio).toHaveBeenCalled();
-        const updateFn = mockProps.setMusicBio.mock.calls[0][0];
+        const updateFn = mockProps.setMusicBio.mock.calls[0]![0];
         const newState = updateFn({ lastfmUsername: '' });
         expect(newState.lastfmUsername).toBe('tester');
     });
@@ -94,7 +94,7 @@ describe('MusicTab', () => {
 
         // Non-URL value
         fireEvent.change(userInput, { target: { value: 'just_a_name' } });
-        const updateFn = mockProps.setMusicBio.mock.calls[1][0];
+        const updateFn = mockProps.setMusicBio.mock.calls[1]![0];
         expect(updateFn({}).lastfmUsername).toBe('just_a_name');
     });
 

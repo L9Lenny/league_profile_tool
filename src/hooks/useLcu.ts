@@ -1,20 +1,20 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
+import { useAppStore } from '../store';
+import type { LcuInfo } from '../store';
 
-export interface LcuInfo {
-    port: string;
-    token: string;
-}
+export type { LcuInfo };
 
 export function useLcu(addLog: (msg: string) => void) {
-    const [lcu, setLcu] = useState<LcuInfo | null>(null);
+    const setLcu = useAppStore(s => s.setLcu);
     const prevLcuRef = useRef<LcuInfo | null>(null);
-    // Use a ref so checkConnection never needs addLog in its dependency array,
-    // avoiding the interval being torn down and recreated on every log call.
+    const checkingRef = useRef(false);
     const addLogRef = useRef(addLog);
     addLogRef.current = addLog;
 
     const checkConnection = useCallback(async () => {
+        if (checkingRef.current) return;
+        checkingRef.current = true;
         try {
             const info = await invoke<LcuInfo>("get_lcu_connection");
             if (!prevLcuRef.current && info) {
@@ -33,8 +33,10 @@ export function useLcu(addLog: (msg: string) => void) {
                 prevLcuRef.current = null;
                 setLcu(null);
             }
+        } finally {
+            checkingRef.current = false;
         }
-    }, []); // stable reference — addLog accessed via ref
+    }, [setLcu, addLog]);
 
     useEffect(() => {
         checkConnection();
@@ -42,12 +44,8 @@ export function useLcu(addLog: (msg: string) => void) {
         return () => clearInterval(interval);
     }, [checkConnection]);
 
-    const lcuRequest = useCallback(async (method: string, endpoint: string, body?: unknown): Promise<unknown> => {
-        if (!lcu) throw new Error("LCU not connected");
-        const payload: Record<string, unknown> = { method, endpoint, port: lcu.port, token: lcu.token };
-        if (body !== undefined) payload.body = body;
-        return invoke("lcu_request", payload);
-    }, [lcu]);
+    const lcu = useAppStore(s => s.lcu);
+    const lcuRequest = useAppStore(s => s.lcuRequest);
 
     return { lcu, lcuRequest };
 }

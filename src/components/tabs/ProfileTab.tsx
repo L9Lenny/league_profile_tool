@@ -1,23 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from "@tauri-apps/api/core";
+import { Info, ArrowLeftRight } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
-import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
+import { SAVED_ENFORCE_OFFLINE_KEY, SAVED_USE_IDLE_AS_BIO_KEY } from '../../storageKeys';
+import { AutoExpandingTextarea } from '../../hooks/useAutoGrowingTextarea';
+import { useAppStore } from '../../store';
+import { truncateBio } from '../../hooks/useMusicSync';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
+    musicSyncActive?: boolean;
 }
 
-const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
+const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequest, musicSyncActive = false }) => {
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
     const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
+    const [useIdleAsBio, setUseIdleAsBio] = useState(() => localStorage.getItem(SAVED_USE_IDLE_AS_BIO_KEY) === 'true');
+    const bioDirtyRef = useRef(false);
 
-    const statusLabel = (value: string) => {
+    const musicBio = useAppStore(s => s.musicBio);
+    const setMusicBio = useAppStore(s => s.setMusicBio);
+
+    const statusLabel = useCallback((value: string) => {
         switch (value) {
             case "chat":    return "ONLINE";
             case "away":    return "AWAY";
@@ -25,17 +35,19 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
             case "offline": return "OFFLINE";
             default:        return value.toUpperCase();
         }
-    };
+    }, []);
 
     const refreshProfileData = useCallback(async () => {
         if (!lcu) return;
         try {
             const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as Record<string, unknown>;
             if (chatRes?.availability) setAvailability(chatRes.availability as string);
-            const lcuBio = (chatRes?.statusMessage as string) || "";
-            if (lcuBio.trim()) {
-                setBio(lcuBio);
-                localStorage.setItem(SAVED_BIO_KEY, lcuBio);
+            if (!bioDirtyRef.current) {
+                const lcuBio = (chatRes?.statusMessage as string) || "";
+                if (lcuBio.trim()) {
+                    setBio(lcuBio);
+                    localStorage.setItem(SAVED_BIO_KEY, lcuBio);
+                }
             }
         } catch (err) {
             addLog(`Profile sync failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -46,21 +58,24 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         refreshProfileData();
     }, [refreshProfileData]);
 
-    const handleUpdateBio = async () => {
+    const handleUpdateBio = useCallback(async () => {
         if (!lcu) return;
         setLoading(true);
         try {
-            await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: bio });
-            localStorage.setItem(SAVED_BIO_KEY, bio);
-            addLog(`Bio updated: "${bio}"`);
+            const bioToApply = useIdleAsBio ? musicBio.idleText : bio;
+            const truncated = truncateBio(bioToApply.trim());
+            await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: truncated });
+            localStorage.setItem(SAVED_BIO_KEY, truncated);
+            bioDirtyRef.current = false;
+            addLog(`Bio updated: "${truncated}"`);
             showToast("Bio Updated!", "success");
         } catch (err: unknown) {
             showToast("Failed to update bio", "error");
             addLog(`Bio update failed: ${err instanceof Error ? err.message : String(err)}`);
         } finally { setLoading(false); }
-    };
+    }, [lcu, bio, useIdleAsBio, musicBio.idleText, addLog, showToast]);
 
-    const applyAvailability = async (next?: string) => {
+    const applyAvailability = useCallback(async (next?: string) => {
         if (!lcu) return;
         const target = (next || availability).trim();
         if (!target) return;
@@ -79,31 +94,97 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         } finally {
             setLoading(false);
         }
-    };
+    }, [lcu, availability, statusLabel, addLog, showToast]);
 
-    const toggleEnforceOffline = (checked: boolean) => {
+    const toggleEnforceOffline = useCallback((checked: boolean) => {
         setEnforceOffline(checked);
         localStorage.setItem(SAVED_ENFORCE_OFFLINE_KEY, checked.toString());
         addLog(`Enforce offline ${checked ? 'enabled' : 'disabled'}.`);
-    };
+    }, [addLog]);
+
+    const toggleUseIdleAsBio = useCallback((checked: boolean) => {
+        setUseIdleAsBio(checked);
+        localStorage.setItem(SAVED_USE_IDLE_AS_BIO_KEY, checked.toString());
+        addLog(`Use idle text as bio ${checked ? 'enabled' : 'disabled'}.`);
+    }, [addLog]);
+
+    const isBusy = musicSyncActive && !useIdleAsBio;
 
     return (
         <div className="tab-content fadeIn">
             <div className="card">
-                <h3 className="card-title">Profile Bio &amp; Status</h3>
-                <div className="input-group">
-                    <label htmlFor="bio-input">New Status Message</label>
-                    <textarea
-                        id="bio-input"
-                        style={{ background: 'rgba(0, 0, 0, 0.3)' }}
-                        placeholder="Tell your friends what you're up to..."
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        disabled={!lcu || loading}
-                        rows={3}
-                    />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <h3 className="card-title" style={{ margin: 0 }}>Profile Bio &amp; Status</h3>
                 </div>
-                <button type="button" className="primary-btn" onClick={handleUpdateBio} disabled={!lcu || loading || !bio.trim()} style={{ width: '100%', marginTop: '12px' }}>APPLY BIO</button>
+
+                <div style={{ marginBottom: '16px', padding: '10px 14px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', borderRadius: '8px' }}>
+                    <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input
+                            type="checkbox"
+                            checked={useIdleAsBio}
+                            onChange={(e) => toggleUseIdleAsBio(e.target.checked)}
+                            style={{ width: '18px', height: '18px', accentColor: 'var(--hextech-gold)' }}
+                        />
+                        <span style={{ color: useIdleAsBio ? 'var(--hextech-gold)' : 'var(--text-primary)', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <ArrowLeftRight size={14} />
+                            Use Music Sync idle text as bio
+                        </span>
+                    </label>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '4px', marginLeft: '28px' }}>
+                        {useIdleAsBio
+                            ? "Editing the Music Sync idle text. More room for ASCII art. Disable to use the normal status message."
+                            : "Toggle to use the Music Sync idle text (more room) instead of the normal status message."}
+                    </div>
+                </div>
+
+                {isBusy && (
+                    <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(255, 179, 71, 0.1)', border: '1px solid rgba(255, 179, 71, 0.3)', borderRadius: '8px', fontSize: '0.75rem', color: '#ffb347', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Info size={14} style={{ flexShrink: 0 }} />
+                        Music Sync is active — it controls your bio right now. Changes here will be overwritten. Disable Music Sync to use this bio.
+                    </div>
+                )}
+
+                <div className="input-group">
+                    {useIdleAsBio ? (
+                        <>
+                            <label htmlFor="idle-bio-input">Bio (from Music Sync idle text — up to 255 chars)</label>
+                            <AutoExpandingTextarea
+                                id="idle-bio-input"
+                                value={musicBio.idleText}
+                                onChange={(e) => {
+                                    bioDirtyRef.current = true;
+                                    setMusicBio(prev => ({ ...prev, idleText: e.target.value }));
+                                }}
+                                placeholder="Enter your bio text or ASCII art here..."
+                                disabled={!lcu || loading}
+                                minRows={8}
+                                maxRows={200}
+                                style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                                <Info size={10} /> {musicBio.idleText.length}/255 chars
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <label htmlFor="bio-input">New Status Message (up to 255 chars)</label>
+                            <AutoExpandingTextarea
+                                id="bio-input"
+                                value={bio}
+                                onChange={(e) => { bioDirtyRef.current = true; setBio(e.target.value); }}
+                                placeholder="Tell your friends what you're up to..."
+                                disabled={!lcu || loading}
+                                minRows={8}
+                                maxRows={200}
+                                style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                                <Info size={10} /> {bio.length}/255 chars
+                            </div>
+                        </>
+                    )}
+                </div>
+                <button type="button" className="primary-btn" onClick={handleUpdateBio} disabled={!lcu || loading || (useIdleAsBio ? !musicBio.idleText.trim() : !bio.trim())} style={{ width: '100%', marginTop: '12px' }}>APPLY BIO</button>
 
                 {lcu && (
                     <div style={{ marginTop: '16px' }}>
@@ -115,7 +196,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                             </span>
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <select id="availability-select" className="availability-select" value={availability} onChange={(e) => setAvailability(e.target.value)} style={{ flex: 2 }}>
+                            <select id="availability-select" className="availability-select" value={availability} onChange={(e) => setAvailability(e.target.value)} disabled={!lcu || loading} style={{ flex: 2 }}>
                                 {[
                                     { value: "chat",    label: "ONLINE" },
                                     { value: "away",    label: "AWAY" },
@@ -151,4 +232,4 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     );
 };
 
-export default ProfileTab;
+export default React.memo(ProfileTab);

@@ -1,15 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
-import { LcuInfo } from './useLcu';
+import { useAppStore } from '../store';
+import type { LcuInfo, MusicBioSettings } from '../store';
+import { defaultMusicBioSettings, DEFAULT_IDLE_BIO } from '../store';
 
-export interface MusicBioSettings {
-    enabled: boolean;
-    pollIntervalSec: number;
-    template: string;
-    idleText: string;
-    lastfmApiKey: string;
-    lastfmUsername: string;
-}
+export type { MusicBioSettings };
+export { defaultMusicBioSettings, DEFAULT_IDLE_BIO };
 
 export interface NowPlayingTrack {
     sourceLabel: string;
@@ -19,23 +15,13 @@ export interface NowPlayingTrack {
 }
 
 export const MUSIC_BIO_STORAGE_KEY = "music_bio_settings_v1";
-export const DEFAULT_IDLE_BIO = "Not listening now";
-
-export const defaultMusicBioSettings = (): MusicBioSettings => ({
-    enabled: false,
-    pollIntervalSec: 15,
-    template: "Listening to {title} - {artist}",
-    idleText: DEFAULT_IDLE_BIO,
-    lastfmApiKey: "",
-    lastfmUsername: "",
-});
 
 export const clampPollInterval = (value: number) => {
     if (!Number.isFinite(value)) return 15;
     return Math.max(5, Math.min(120, Math.round(value)));
 };
 
-export const truncateBio = (value: string, max = 127) => {
+export const truncateBio = (value: string, max = 255) => {
     const trimmed = value.trim();
     if (trimmed.length <= max) return trimmed;
     return `${trimmed.slice(0, max - 3)}...`;
@@ -66,37 +52,47 @@ async function fetchLastFmNowPlaying(settings: MusicBioSettings): Promise<NowPla
     const apiKey = settings.lastfmApiKey.trim();
     if (!username || !apiKey) return null;
     const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${encodeURIComponent(apiKey)}&format=json&limit=1`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
-    const payload = await response.json();
-    const recentTracks = payload?.recenttracks?.track;
-    const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
-    if (!track) return null;
-    const nowPlaying = String(track?.["@attr"]?.nowplaying || "").toLowerCase() === "true";
-    if (!nowPlaying) return null;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Last.fm HTTP ${response.status}`);
+        const payload = await response.json();
+        const recentTracks = payload?.recenttracks?.track;
+        const track = Array.isArray(recentTracks) ? recentTracks[0] : recentTracks;
+        if (!track) return null;
+        const nowPlaying = String(track?.["@attr"]?.nowplaying || "").toLowerCase() === "true";
+        if (!nowPlaying) return null;
 
-    return {
-        sourceLabel: "Last.fm",
-        artist: String(track?.artist?.["#text"] || "").trim(),
-        title: String(track?.name || "").trim(),
-        album: String(track?.album?.["#text"] || "").trim()
-    };
+        return {
+            sourceLabel: "Last.fm",
+            artist: String(track?.artist?.["#text"] || "").trim(),
+            title: String(track?.name || "").trim(),
+            album: String(track?.album?.["#text"] || "").trim()
+        };
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void) {
-    const [musicBio, setMusicBio] = useState<MusicBioSettings>(defaultMusicBioSettings);
-    const [musicSettingsHydrated, setMusicSettingsHydrated] = useState(false);
+    const musicBio = useAppStore(s => s.musicBio);
+    const setMusicBio = useAppStore(s => s.setMusicBio);
+    const musicSettingsHydratedRef = useRef(false);
+
     const musicSyncRunningRef = useRef(false);
     const lastAutoBioRef = useRef<string>("");
     const musicSyncLastErrorRef = useRef<string>("");
 
+    // Hydrate from localStorage once on mount
     useEffect(() => {
+        if (musicSettingsHydratedRef.current) return;
+        musicSettingsHydratedRef.current = true;
         try {
             const raw = localStorage.getItem(MUSIC_BIO_STORAGE_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw) as Partial<MusicBioSettings>;
                 setMusicBio({
-                    ...defaultMusicBioSettings(),
                     ...parsed,
                     idleText: String(parsed?.idleText ?? "").trim() || DEFAULT_IDLE_BIO,
                     pollIntervalSec: clampPollInterval(Number(parsed?.pollIntervalSec ?? 15))
@@ -105,19 +101,19 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
         } catch {
             // Ignore broken local storage values
         }
-        setMusicSettingsHydrated(true);
-    }, []);
+    }, [setMusicBio]);
 
+    // Persist to localStorage whenever musicBio changes
     useEffect(() => {
-        if (!musicSettingsHydrated) return;
+        if (!musicSettingsHydratedRef.current) return;
         localStorage.setItem(MUSIC_BIO_STORAGE_KEY, JSON.stringify({
             ...musicBio,
             pollIntervalSec: clampPollInterval(musicBio.pollIntervalSec)
         }));
-    }, [musicBio, musicSettingsHydrated]);
+    }, [musicBio]);
 
     const applyIdleBio = useCallback(async () => {
-        if (!lcu) return;
+        if (!lcu || musicSyncRunningRef.current) return;
         const idle = truncateBio(musicBio.idleText.trim() || DEFAULT_IDLE_BIO);
         if (!idle) return;
         try {
@@ -141,6 +137,7 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
             try {
                 const settings = { ...musicBio, pollIntervalSec: clampPollInterval(musicBio.pollIntervalSec) };
                 const track = await fetchLastFmNowPlaying(settings);
+                if (cancelled) return;
 
                 let nextBio = "";
                 if (track) {
@@ -151,10 +148,12 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
 
                 if (!nextBio || nextBio === lastAutoBioRef.current) return;
                 await invoke("update_bio", { port: lcu.port, token: lcu.token, newBio: nextBio });
+                if (cancelled) return;
                 lastAutoBioRef.current = nextBio;
                 musicSyncLastErrorRef.current = "";
                 addLog(`Music bio updated (lastfm): "${nextBio}"`);
             } catch (err) {
+                if (cancelled) return;
                 const errorText = String(err);
                 if (errorText !== musicSyncLastErrorRef.current) {
                     musicSyncLastErrorRef.current = errorText;

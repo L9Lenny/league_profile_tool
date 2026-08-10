@@ -503,4 +503,4 @@ const LogsTab: React.FC<LogsTabProps> = ({ logs, exportLogs, clearLogs, showToas
     );
 };
 
-export default LogsTab;
+export default React.memo(LogsTab);

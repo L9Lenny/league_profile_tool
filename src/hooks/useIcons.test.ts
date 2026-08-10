@@ -39,7 +39,7 @@ describe('useIcons', () => {
             expect(result.current.allIcons).toHaveLength(2);
         });
 
-        expect(result.current.allIcons[0].name).toBe('First Icon');
+        expect(result.current.allIcons[0]!.name).toBe('First Icon');
     });
 
     it('should filter icons based on search term', async () => {
@@ -59,7 +59,7 @@ describe('useIcons', () => {
         // useDeferredValue might need some wait
         await waitFor(() => {
             expect(result.current.visibleIcons).toHaveLength(1);
-            expect(result.current.visibleIcons[0].name).toBe('Mage');
+            expect(result.current.visibleIcons[0]!.name).toBe('Mage');
         });
     });
 

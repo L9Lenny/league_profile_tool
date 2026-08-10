@@ -45,6 +45,7 @@ import SettingsTab from "./components/tabs/SettingsTab";
 import LobbyTab from "./components/tabs/LobbyTab";
 import FriendManagerTab from "./components/tabs/FriendManagerTab";
 import PresetsTab from "./components/tabs/PresetsTab";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -61,7 +62,7 @@ function App() {
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
   useAnalytics();
-  useProfileEnforcer(lcu, lcuRequest, addLog);
+  useProfileEnforcer(lcu, lcuRequest, addLog, musicBio.enabled);
 
 
   const closingRef = useRef(false);
@@ -114,10 +115,11 @@ function App() {
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let disposed = false;
     const appWindow = getCurrentWindow();
 
     appWindow.onCloseRequested(async (event) => {
-      if (closingRef.current) return;
+      if (disposed || closingRef.current) return;
       closingRef.current = true;
       event.preventDefault();
 
@@ -143,9 +145,18 @@ function App() {
           await invoke("force_quit").catch(() => { });
         }
       }
-    }).then((fn) => { unlisten = fn; });
+    }).then((fn) => {
+      if (disposed) {
+        fn();
+      } else {
+        unlisten = fn;
+      }
+    });
 
-    return () => { if (unlisten) unlisten(); };
+    return () => {
+      disposed = true;
+      if (unlisten) unlisten();
+    };
   }, [musicBio.enabled, lcu, applyIdleBio, minimizeToTray, addLog]);
 
   const toggleMinimizeToTray = async () => {
@@ -227,18 +238,18 @@ function App() {
 
       <div className="main-container">
         <main className="content-area">
-          {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} />}
-          {activeTab === 'profile' && <ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'friends' && <FriendManagerTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'background' && <BackgroundTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
-          {activeTab === 'tokens' && <TokensTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'presets' && <PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'rank' && <RankTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'lobby' && <LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
-          {activeTab === 'icons' && <IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} />}
-          {activeTab === 'logs' && <LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} />}
-          {activeTab === 'settings' && <SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} showToast={showToast} lcuRequest={lcuRequest} />}
+          {activeTab === 'home' && <ErrorBoundary name="Home"><HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'profile' && <ErrorBoundary name="Profile"><ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} musicSyncActive={musicBio.enabled} /></ErrorBoundary>}
+          {activeTab === 'friends' && <ErrorBoundary name="Friends"><FriendManagerTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'background' && <ErrorBoundary name="Background"><BackgroundTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'music' && <ErrorBoundary name="Music"><MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} /></ErrorBoundary>}
+          {activeTab === 'tokens' && <ErrorBoundary name="Tokens"><TokensTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'presets' && <ErrorBoundary name="Presets"><PresetsTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'rank' && <ErrorBoundary name="Rank"><RankTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'lobby' && <ErrorBoundary name="Lobby"><LobbyTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}
+          {activeTab === 'icons' && <ErrorBoundary name="Icons"><IconTab lcu={lcu} showToast={showToast} addLog={addLog} {...icons} /></ErrorBoundary>}
+          {activeTab === 'logs' && <ErrorBoundary name="Logs"><LogsTab logs={logs} exportLogs={exportLogs} clearLogs={clearLogs} showToast={showToast} /></ErrorBoundary>}
+          {activeTab === 'settings' && <ErrorBoundary name="Settings"><SettingsTab isAutostartEnabled={isAutostartEnabled} setIsAutostartEnabled={setIsAutostartEnabled} minimizeToTray={minimizeToTray} toggleMinimizeToTray={toggleMinimizeToTray} latestVersion={latestVersion} clientVersion={clientVersion} addLog={addLog} showToast={showToast} lcuRequest={lcuRequest} /></ErrorBoundary>}
         </main>
 
         <footer className="status-bar">

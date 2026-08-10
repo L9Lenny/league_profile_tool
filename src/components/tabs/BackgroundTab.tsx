@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BACKGROUND_KEY } from '../../hooks/useAutoRestore';
+import { patchChatLol } from '../../utils/chatMe';
 import { Search, Image, Loader2, Hash } from 'lucide-react';
 import supplementalSkins from '../../data/supplemental-skins.json';
 
@@ -142,13 +143,13 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             const list: ChampionSummary[] = await res.json();
             const valid = groupChampionsByName(list.filter(c => c.id > 0 && c.id < 66600));
             setChampions(valid);
+            setChampsLoaded(true);
             addLog(`Loaded ${valid.length} champions.`);
         } catch (err) {
             addLog(`Error fetching champions: ${err}`);
             showToast('Failed to load champion list', 'error');
         } finally {
             setLoadingChamps(false);
-            setChampsLoaded(true);
         }
     }, [champsLoaded, loadingChamps, addLog, showToast]);
 
@@ -176,6 +177,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
     // Build skin search index after champions load
     useEffect(() => {
         if (!champsLoaded || allSkinsLoaded || champions.length === 0) return;
+        let cancelled = false;
 
         const addChampToIndex = (champ: ChampionSummary, skinList: SkinEntry[], index: SkinSearchEntry[]) => {
             skinCacheRef.current.set(champ.id, skinList);
@@ -188,6 +190,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             const index: SkinSearchEntry[] = [];
             const batchSize = 20;
             for (let i = 0; i < champions.length; i += batchSize) {
+                if (cancelled) return;
                 const batch = champions.slice(i, i + batchSize);
                 const results = await Promise.allSettled(batch.map(async champ => {
                     const skinList = await fetchUnifiedChampSkins(champ);
@@ -198,6 +201,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                     addChampToIndex(result.value.champ, result.value.skinList, index);
                 }
             }
+            if (cancelled) return;
             for (const [champIdStr, extras] of Object.entries(supplementalSkins)) {
                 for (const skin of extras as SkinEntry[]) {
                     if (!index.some(s => s.id === skin.id)) {
@@ -205,11 +209,13 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                     }
                 }
             }
+            if (cancelled) return;
             allSkinsRef.current = index;
             setAllSkinsLoaded(true);
         };
 
         buildIndex();
+        return () => { cancelled = true; };
     }, [champsLoaded, allSkinsLoaded, champions, fetchUnifiedChampSkins]);
 
     // Fetch skins for a specific champion (lazy, cached)
@@ -292,13 +298,10 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
         } catch (err) {
             addLog(`Official background update failed (${err}). Trying force method...`);
             try {
-                const chatMe: any = await lcuRequest("GET", "/lol-chat/v1/me");
-                let currentLol = {};
-                if (chatMe?.lol) {
-                    currentLol = typeof chatMe.lol === 'string' ? JSON.parse(chatMe.lol) : chatMe.lol;
-                }
-                const newLol = { ...currentLol, backgroundSkinId: skinId.toString() };
-                await lcuRequest("PUT", "/lol-chat/v1/me", { lol: newLol });
+                await patchChatLol(lcuRequest, (current) => ({
+                    ...current,
+                    backgroundSkinId: skinId.toString()
+                }));
                 
                 localStorage.setItem(SAVED_BACKGROUND_KEY, skinId.toString());
                 showToast(`Background forced to ${skinName}!`, 'success');
@@ -526,4 +529,4 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
     );
 };
 
-export default BackgroundTab;
+export default React.memo(BackgroundTab);

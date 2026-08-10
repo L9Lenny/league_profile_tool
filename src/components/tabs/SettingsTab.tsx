@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu, Trash2, X, Check } from 'lucide-react';
+import { RefreshCw, Cpu, Trash2, X, Check, Download, Upload } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
+import { save, open } from "@tauri-apps/plugin-dialog";
+import { invoke } from "@tauri-apps/api/core";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, SAVED_ICON_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
+import { patchChatLol } from '../../utils/chatMe';
 
 interface SettingsTabProps {
     isAutostartEnabled: boolean;
@@ -55,36 +58,41 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         enforcer: "Auto-Enforcer & localStorage",
     };
 
-    const resetChatPresence = () => {
+    const resetChatPresence = async (): Promise<void> => {
         if (!lcuRequest) return;
-        lcuRequest("GET", "/lol-chat/v1/me").then((chatRes: any) => {
-            let baseLol: any = {};
-            if (chatRes?.lol) {
-                baseLol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) : chatRes.lol;
-            }
-            const chatBody: any = {};
-            if (resetChecks.rank) {
-                baseLol.rankedLeagueTier = "";
-                baseLol.rankedLeagueDivision = "";
-                baseLol.rankedLeagueQueue = "";
-            }
-            if (resetChecks.challenge) {
-                baseLol.challengeCrystalLevel = "";
-                baseLol.challengePoints = "";
-            }
-            if (resetChecks.background) {
-                baseLol.backgroundSkinId = "";
-            }
-            if (resetChecks.status) {
-                chatBody.availability = "chat";
-                chatBody.statusMessage = "";
-            }
-            chatBody.lol = baseLol;
-            lcuRequest("PUT", "/lol-chat/v1/me", chatBody);
-        }).catch(() => {});
+        const promises: Promise<unknown>[] = [];
+
+        const hasLolFields = resetChecks.rank || resetChecks.challenge || resetChecks.background;
+        if (hasLolFields) {
+            promises.push(patchChatLol(lcuRequest, (current) => {
+                const updated: Record<string, unknown> = { ...current };
+                if (resetChecks.rank) {
+                    updated.rankedLeagueTier = "";
+                    updated.rankedLeagueDivision = "";
+                    updated.rankedLeagueQueue = "";
+                }
+                if (resetChecks.challenge) {
+                    updated.challengeCrystalLevel = "";
+                    updated.challengePoints = "";
+                }
+                if (resetChecks.background) {
+                    updated.backgroundSkinId = "";
+                }
+                return updated;
+            }));
+        }
+
+        if (resetChecks.status) {
+            promises.push(lcuRequest("PUT", "/lol-chat/v1/me", {
+                availability: "chat",
+                statusMessage: ""
+            }));
+        }
+
+        await Promise.allSettled(promises);
     };
 
-    const clearAllSettings = () => {
+    const clearAllSettings = async () => {
         const savedIconVal = resetChecks.icon ? localStorage.getItem(SAVED_ICON_KEY) : null;
 
         if (resetChecks.enforcer) {
@@ -99,38 +107,94 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             return;
         }
 
+        const promises: Promise<unknown>[] = [];
+
         const hasChatFields = resetChecks.rank || resetChecks.challenge || resetChecks.background || resetChecks.status;
-        if (hasChatFields) resetChatPresence();
+        if (hasChatFields) promises.push(resetChatPresence());
 
         if (resetChecks.background) {
-            lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
+            promises.push(lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile", {
                 key: "backgroundSkinId",
                 value: 0,
-            }).catch(() => {});
+            }));
         }
 
         if (resetChecks.tokens) {
-            lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
+            promises.push(lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", {
                 challengeIds: [],
                 title: "",
                 bannerAccent: "",
                 crestBorder: "",
                 prestigeCrestBorderLevel: 0,
-            }).catch(() => {});
+            }));
         }
 
         if (resetChecks.icon) {
             const iconId = savedIconVal ? Number.parseInt(savedIconVal, 10) : 0;
             if (!Number.isNaN(iconId)) {
-                lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", {
+                promises.push(lcuRequest("PUT", "/lol-summoner/v1/current-summoner/icon", {
                     profileIconId: iconId,
-                }).catch(() => {});
+                }));
             }
         }
 
+        await Promise.allSettled(promises);
         addLog("Saved settings cleared.");
         showToast?.("Saved settings cleared!", "success");
         setShowResetConfirm(false);
+    };
+
+    const exportSettings = async () => {
+        try {
+            const data: Record<string, string | null> = {};
+            ALL_SAVED_KEYS.forEach(key => { data[key] = localStorage.getItem(key); });
+            const json = JSON.stringify(data, null, 2);
+            const defaultName = `league-profile-settings-${new Date().toISOString().slice(0, 10)}.json`;
+            const path = await save({
+                defaultPath: defaultName,
+                filters: [{ name: "JSON", extensions: ["json"] }]
+            });
+            if (!path) return;
+            const target = Array.isArray(path) ? path[0] : path;
+            await invoke("save_logs_to_path", { path: target, content: json });
+            addLog(`Settings exported to: ${target}`);
+            showToast?.("Settings exported!", "success");
+        } catch (err) {
+            addLog(`Settings export failed: ${err}`);
+            showToast?.("Settings export failed", "error");
+        }
+    };
+
+    const importSettings = async () => {
+        try {
+            const path = await open({
+                filters: [{ name: "JSON", extensions: ["json"] }],
+                multiple: false,
+            });
+            if (!path) return;
+            const target = Array.isArray(path) ? path[0] : path;
+            const response = await fetch(`asset://localhost/${encodeURIComponent(target)}`).catch(() => null);
+            if (!response || !response.ok) {
+                throw new Error("Failed to read file");
+            }
+            const text = await response.text();
+            const data = JSON.parse(text) as Record<string, string | null>;
+            ALL_SAVED_KEYS.forEach(key => {
+                if (key in data) {
+                    if (data[key] === null) {
+                        localStorage.removeItem(key);
+                    } else {
+                        localStorage.setItem(key, data[key] as string);
+                    }
+                }
+            });
+            setAutoEnforce(localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true');
+            addLog("Settings imported successfully.");
+            showToast?.("Settings imported! Restart for full effect.", "success");
+        } catch (err) {
+            addLog(`Settings import failed: ${err}`);
+            showToast?.("Settings import failed", "error");
+        }
     };
 
     return (
@@ -139,9 +203,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 <h3 className="card-title">Technical Settings</h3>
                 <button type="button" className="settings-row" onClick={async () => {
                     const newState = !isAutostartEnabled;
-                    if (newState) await enable(); else await disable();
-                    setIsAutostartEnabled(newState);
-                    addLog(`Auto-launch ${newState ? 'enabled' : 'disabled'}.`);
+                    try {
+                        if (newState) await enable(); else await disable();
+                        setIsAutostartEnabled(newState);
+                        addLog(`Auto-launch ${newState ? 'enabled' : 'disabled'}.`);
+                    } catch (err) {
+                        addLog(`Failed to toggle auto-launch: ${err}`);
+                        showToast?.(`Failed to toggle auto-launch: ${err}`, "error");
+                    }
                 }}>
                     <div className="settings-info">
                         <span className="settings-label">Auto-launch</span>
@@ -203,6 +272,21 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 )}
             </div>
 
+            <div className="card">
+                <h3 className="card-title">Backup &amp; Restore</h3>
+                <p className="settings-desc" style={{ marginBottom: '10px' }}>
+                    Export all saved settings to a JSON file, or import a previously exported backup.
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button type="button" className="ghost-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={exportSettings}>
+                        <Download size={16} /> Export
+                    </button>
+                    <button type="button" className="ghost-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={importSettings}>
+                        <Upload size={16} /> Import
+                    </button>
+                </div>
+            </div>
+
             {latestVersion && clientVersion !== latestVersion && (
                 <div className="card update-panel-hero">
                     <div className="update-content">
@@ -237,4 +321,4 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     );
 };
 
-export default SettingsTab;
+export default React.memo(SettingsTab);

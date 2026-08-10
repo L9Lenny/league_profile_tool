@@ -17,12 +17,13 @@ import {
     UserMinus
 } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
+import { LcuRequestFn } from '../../utils/chatMe';
 
 interface HomeTabProps {
     lcu: LcuInfo | null;
     clientVersion: string;
     setActiveTab: (tab: string) => void;
-    lcuRequest: (method: string, endpoint: string, body?: any) => Promise<any>;
+    lcuRequest: LcuRequestFn;
 }
 
 interface SummonerInfo {
@@ -54,18 +55,22 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
     const [summoner, setSummoner] = useState<SummonerInfo | null>(null);
 
     useEffect(() => {
-        if (lcu) {
-            const fetchSummoner = async () => {
-                try {
-                    const data = await lcuRequest("GET", "/lol-summoner/v1/current-summoner");
-                    if (data) setSummoner(data);
-                } catch (e) {
-                    console.error("Failed to fetch summoner", e);
-                }
-            };
-            fetchSummoner();
+        if (!lcu) {
+            setSummoner(null);
+            return;
         }
-    }, [lcu]);
+        let cancelled = false;
+        const fetchSummoner = async () => {
+            try {
+                const data = await lcuRequest("GET", "/lol-summoner/v1/current-summoner") as SummonerInfo | null;
+                if (!cancelled && data) setSummoner(data);
+            } catch (e) {
+                console.error("Failed to fetch summoner", e);
+            }
+        };
+        fetchSummoner();
+        return () => { cancelled = true; };
+    }, [lcu, lcuRequest]);
 
     const categories: Category[] = [
         {
@@ -207,4 +212,4 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
     );
 };
 
-export default HomeTab;
+export default React.memo(HomeTab);

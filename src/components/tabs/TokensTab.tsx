@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_TOKENS_KEY, SAVED_TITLE_KEY, SAVED_BANNER_ACCENT_KEY, SAVED_CREST_BORDER_KEY } from '../../storageKeys';
 import { Search, Award, Info, RotateCw, Trash2, CheckCircle2 } from 'lucide-react';
@@ -222,7 +222,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
         return [];
     };
 
-    const fetchTokens = async () => {
+    const fetchTokens = useCallback(async () => {
         if (!lcu) return;
         setFetching(true);
         try {
@@ -263,7 +263,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
         } finally {
             setFetching(false);
         }
-    };
+    }, [lcu, lcuRequest, addLog, showToast]);
 
     useEffect(() => {
         localStorage.removeItem(SAVED_BANNER_ACCENT_KEY);
@@ -272,7 +272,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
 
     useEffect(() => {
         if (lcu) fetchTokens();
-    }, [lcu]);
+    }, [lcu, fetchTokens]);
 
     const filteredTokens = useMemo(() => {
         return tokens.filter(t => {
@@ -475,7 +475,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                             const token = tokens.find(t => t.id === tokenId);
                                             const isSelected = selectedSlot === i;
                                             const glowClass = getGlowClass(token?.level);
-                                            const hasToken = tokenId >= 0;
+                                            const hasToken = tokenId !== undefined && tokenId >= 0;
                                             
                                             return (
                                                 <button 
@@ -494,7 +494,7 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
                                                 >
                                                     {hasToken ? (
                                                         <img 
-                                                            src={getTokenImgUrl(tokenId, token?.level || 'IRON')} 
+                                                            src={tokenId !== undefined ? getTokenImgUrl(tokenId, token?.level || 'IRON') : ''} 
                                                             alt="Token" 
                                                         />
                                                     ) : (
@@ -730,4 +730,4 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
     );
 };
 
-export default TokensTab;
+export default React.memo(TokensTab);
