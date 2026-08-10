@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Auto-expanding textareas** (`src/hooks/useAutoGrowingTextarea.ts`): Custom hook and component for textareas that grow/shrink automatically based on content; eliminates need for manual resize handles.
 - **Zustand store** (`src/store.ts`): Centralizes `lcu`/`musicBio` shared state and `lcuRequest` action with retry; eliminates prop-drilling and stale-closure risk.
 - **Retry/backoff utility** (`src/utils/retry.ts`): `withRetry()` wraps LCU requests with exponential backoff; non-retryable errors (disconnected, invalid endpoint) skip retries.
 - **Typed storage layer** (`src/utils/storage.ts`): `loadJSON`/`saveJSON`/`loadString`/`saveString`/`loadBool`/`saveBool`/`removeKey` with zod schema validation and quota-safe try/catch.
 - **Per-tab ErrorBoundary**: Each tab wrapped in its own `<ErrorBoundary name="...">` so a crash in one tab doesn't take down the whole app.
 - **Settings backup & restore**: Export/import all localStorage keys as JSON via Tauri file dialogs in SettingsTab.
-- **Bigger bio textareas** (#890): MusicTab bio-template (3 rows) and idle-text (5 rows) are now resizable textareas at full width with monospace font; ProfileTab bio textarea expanded to 6 rows, resizable, monospace for ASCII art.
+- **Bigger bio textareas** (#890): MusicTab bio-template (3 rows) and idle-text (5 rows) are now auto-expanding textareas at full width with monospace font; ProfileTab bio textarea expanded to 6 rows, auto-expanding, monospace for ASCII art.
 - **Enforcer/music-sync conflict resolution** (#890): Enforcer skips `statusMessage` (bio) enforcement when Music Sync is active, preventing the two from fighting over the bio field.
 - **ErrorBoundary**: Catches uncaught render errors and shows a recoverable screen instead of crashing.
 - **`patchChatLol()` mutex** (`src/utils/chatMe.ts`): Serializes read-modify-write on the `/lol-chat/v1/me` `lol` field so concurrent patches from enforcer, rank, background, and settings don't clobber each other.
