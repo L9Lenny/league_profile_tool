@@ -216,7 +216,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                             onChange={(e) => setMusicBio(prev => ({ ...prev, template: e.target.value }))}
                             placeholder="Listening to {title} - {artist}"
                             minRows={3}
-                            maxRows={40}
+                            maxRows={200}
                             style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                         />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
@@ -231,7 +231,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                             onChange={(e) => setMusicBio(prev => ({ ...prev, idleText: e.target.value }))}
                             placeholder={DEFAULT_IDLE_BIO}
                             minRows={5}
-                            maxRows={60}
+                            maxRows={200}
                             style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                         />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
