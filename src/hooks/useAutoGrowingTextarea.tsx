@@ -1,4 +1,4 @@
-import { useRef, useEffect, forwardRef } from 'react';
+import { useRef, useLayoutEffect, forwardRef, useCallback } from 'react';
 
 interface AutoExpandingTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     minRows?: number;
@@ -6,59 +6,70 @@ interface AutoExpandingTextareaProps extends React.TextareaHTMLAttributes<HTMLTe
 }
 
 export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandingTextareaProps>(
-    function AutoExpandingTextarea({ value, onChange, placeholder, minRows = 1, maxRows = 10, style, ...props }, ref) {
+    function AutoExpandingTextarea({ value, onChange, placeholder, minRows = 1, maxRows = 12, style, ...props }, ref) {
         const internalRef = useRef<HTMLTextAreaElement | null>(null);
         const combinedRef = ref ? ((ref as React.RefObject<HTMLTextAreaElement>) || internalRef) : internalRef;
 
-        useEffect(() => {
+        const resize = useCallback(() => {
             const textarea = combinedRef.current;
             if (!textarea) return;
 
-            const updateHeight = () => {
-                textarea.style.height = 'auto';
-                const scrollHeight = textarea.scrollHeight;
-                const computedStyle = window.getComputedStyle(textarea);
-                const borderHeight = 
-                    parseFloat(computedStyle.borderTopWidth || '0') + 
-                    parseFloat(computedStyle.borderBottomWidth || '0');
-                
-                let newHeight = scrollHeight + borderHeight;
+            const computedStyle = window.getComputedStyle(textarea);
+            const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
+            const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+            const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+            const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+            const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+            const extra = paddingTop + paddingBottom + borderTop + borderBottom;
 
-                if (minRows) {
-                    const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
-                    const minHeight = (minRows * lineHeight) + borderHeight;
-                    newHeight = Math.max(newHeight, minHeight);
-                }
+            const minHeight = (minRows * lineHeight) + extra;
+            const maxHeight = (maxRows * lineHeight) + extra;
 
-                if (maxRows) {
-                    const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
-                    const maxHeight = (maxRows * lineHeight) + borderHeight;
-                    newHeight = Math.min(newHeight, maxHeight);
-                }
+            textarea.style.height = '0px';
+            const scrollHeight = textarea.scrollHeight;
+            let newHeight = Math.max(scrollHeight, minHeight);
 
-                textarea.style.height = `${newHeight}px`;
-            };
+            if (scrollHeight > maxHeight) {
+                newHeight = maxHeight;
+                textarea.style.overflowY = 'auto';
+            } else {
+                textarea.style.overflowY = 'hidden';
+            }
 
-            updateHeight();
+            textarea.style.height = `${newHeight}px`;
+        }, [minRows, maxRows, combinedRef]);
 
-            const handleInput = () => {
-                updateHeight();
-            };
+        useLayoutEffect(() => {
+            resize();
+        }, [value, resize]);
+
+        useLayoutEffect(() => {
+            const textarea = combinedRef.current;
+            if (!textarea) return;
+
+            const handleInput = () => resize();
+            const handleResize = () => resize();
 
             textarea.addEventListener('input', handleInput);
-            window.addEventListener('resize', updateHeight);
+            window.addEventListener('resize', handleResize);
+
+            const observer = new ResizeObserver(() => resize());
+            observer.observe(textarea);
 
             return () => {
                 textarea.removeEventListener('input', handleInput);
-                window.removeEventListener('resize', updateHeight);
+                window.removeEventListener('resize', handleResize);
+                observer.disconnect();
             };
-        }, [value, minRows, maxRows, combinedRef]);
+        }, [resize]);
 
-        const textareaStyle = {
+        const textareaStyle: React.CSSProperties = {
             ...style,
-            overflow: 'hidden' as const,
-            resize: 'vertical' as const,
-            height: 'auto' as const
+            overflowY: 'hidden',
+            resize: 'vertical',
+            height: 'auto',
+            boxSizing: 'border-box',
+            minHeight: undefined,
         };
 
         return (
@@ -67,8 +78,8 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                disabled={(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>).disabled}
                 style={textareaStyle}
+                rows={minRows}
                 {...props}
             />
         );
