@@ -4,6 +4,7 @@ import { Info } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
 import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
+import { AutoExpandingTextarea } from '../../hooks/useAutoGrowingTextarea';
 
 interface ProfileTabProps {
     lcu: LcuInfo | null;
@@ -105,14 +106,15 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                 )}
                 <div className="input-group">
                     <label htmlFor="bio-input">New Status Message</label>
-                    <textarea
+                    <AutoExpandingTextarea
                         id="bio-input"
-                        style={{ background: 'rgba(0, 0, 0, 0.3)', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.80rem' }}
-                        placeholder="Tell your friends what you're up to..."
                         value={bio}
                         onChange={(e) => { bioDirtyRef.current = true; setBio(e.target.value); }}
+                        placeholder="Tell your friends what you're up to..."
                         disabled={!lcu || loading}
-                        rows={6}
+                        minRows={3}
+                        maxRows={15}
+                        style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                     />
                 </div>
                 <button type="button" className="primary-btn" onClick={handleUpdateBio} disabled={!lcu || loading || !bio.trim()} style={{ width: '100%', marginTop: '12px' }}>APPLY BIO</button>

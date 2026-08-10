@@ -1,10 +1,6 @@
 import { useRef, useEffect, forwardRef } from 'react';
-import { HTMLAttributes } from 'react';
 
-interface AutoExpandingTextareaProps extends HTMLAttributes<HTMLTextAreaElement> {
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-    placeholder?: string;
+interface AutoExpandingTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     minRows?: number;
     maxRows?: number;
 }
@@ -71,6 +67,7 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
+                disabled={(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>).disabled}
                 style={textareaStyle}
                 {...props}
             />
