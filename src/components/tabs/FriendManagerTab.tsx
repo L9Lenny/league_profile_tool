@@ -34,15 +34,19 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
         try {
             const data = await lcuRequest("GET", "/lol-chat/v1/friends") as Array<Record<string, unknown>> | null;
             if (Array.isArray(data)) {
-                setFriends(data.map(f => ({
-                    id: f.id as string,
-                    summonerId: f.summonerId as number,
-                    name: f.gameName ? `${String(f.gameName)}#${f.gameTag}` : f.name as string,
-                    availability: f.availability as string,
-                    statusMessage: f.statusMessage as string,
-                    icon: f.icon as number,
-                    groupName: f.groupName as string
-                })));
+                setFriends(data.map(f => {
+                    const gameName = typeof f.gameName === 'string' ? f.gameName : '';
+                    const gameTag = typeof f.gameTag === 'string' ? f.gameTag : '';
+                    return {
+                        id: f.id as string,
+                        summonerId: f.summonerId as number,
+                        name: gameName ? `${gameName}#${gameTag}` : f.name as string,
+                        availability: f.availability as string,
+                        statusMessage: f.statusMessage as string,
+                        icon: f.icon as number,
+                        groupName: f.groupName as string
+                    };
+                }));
             }
         } catch (err) {
             addLog(`Error fetching friends: ${err}`);

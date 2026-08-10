@@ -54,6 +54,18 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
     const [challengeCrystalLevel, setChallengeCrystalLevel] = useState("CHALLENGER");
     const [challengePoints, setChallengePoints] = useState("1200");
 
+    const applyLolData = useCallback((raw: string | Record<string, unknown>) => {
+        const lol = typeof raw === 'string' ? JSON.parse(raw) as Record<string, unknown> : raw;
+        if (lol.rankedLeagueTier) setSoloTier(lol.rankedLeagueTier as string);
+        if (lol.rankedLeagueDivision) setSoloDiv(lol.rankedLeagueDivision as string);
+        if (lol.rankedLeagueQueue) setQueueType(lol.rankedLeagueQueue as string);
+        if (lol.challengeCrystalLevel) setChallengeCrystalLevel(lol.challengeCrystalLevel as string);
+        if (lol.challengePoints !== undefined) {
+            const cp = lol.challengePoints;
+            setChallengePoints(typeof cp === 'number' || typeof cp === 'string' ? String(cp) : "0");
+        }
+    }, []);
+
     const fetchCurrentData = useCallback(async () => {
         if (!lcu) return;
         setFetching(true);
@@ -62,15 +74,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
             
             const chatRes = await lcuRequest("GET", "/lol-chat/v1/me") as { lol?: string | Record<string, unknown> } | null;
             if (chatRes?.lol) {
-                const lol = typeof chatRes.lol === 'string' ? JSON.parse(chatRes.lol) as Record<string, unknown> : chatRes.lol;
-                if (lol.rankedLeagueTier) setSoloTier(lol.rankedLeagueTier as string);
-                if (lol.rankedLeagueDivision) setSoloDiv(lol.rankedLeagueDivision as string);
-                if (lol.rankedLeagueQueue) setQueueType(lol.rankedLeagueQueue as string);
-                if (lol.challengeCrystalLevel) setChallengeCrystalLevel(lol.challengeCrystalLevel as string);
-                if (lol.challengePoints !== undefined) {
-                    const cp = lol.challengePoints;
-                    setChallengePoints(typeof cp === 'number' || typeof cp === 'string' ? String(cp) : "0");
-                }
+                applyLolData(chatRes.lol);
             }
 
             addLog("Rank status synced successfully.");
@@ -79,7 +83,7 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
         } finally {
             setFetching(false);
         }
-    }, [lcu, lcuRequest, addLog]);
+    }, [lcu, lcuRequest, addLog, applyLolData]);
 
     useEffect(() => {
         if (lcu) {

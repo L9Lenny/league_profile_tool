@@ -6,6 +6,15 @@ import { invoke } from "@tauri-apps/api/core";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, SAVED_ICON_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 import { patchChatLol } from '../../utils/chatMe';
 
+const MAX_STORAGE_VALUE_LENGTH = 10000;
+
+function sanitizeForStorage(value: unknown): string {
+    const str = typeof value === 'string' ? value : String(value ?? '');
+    return str
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+        .slice(0, MAX_STORAGE_VALUE_LENGTH);
+}
+
 interface SettingsTabProps {
     isAutostartEnabled: boolean;
     setIsAutostartEnabled: (enabled: boolean) => void;
@@ -184,8 +193,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                     if (data[key] === null) {
                         localStorage.removeItem(key);
                     } else {
-                        const sanitized = typeof data[key] === 'string' ? data[key] as string : String(data[key] ?? '');
-                        localStorage.setItem(key, sanitized);
+                        localStorage.setItem(key, sanitizeForStorage(data[key]));
                     }
                 }
             });
