@@ -6,15 +6,13 @@ interface AutoExpandingTextareaProps extends React.TextareaHTMLAttributes<HTMLTe
 }
 
 export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandingTextareaProps>(
-    function AutoExpandingTextarea({ value, onChange, placeholder, minRows = 1, maxRows = 60, style, ...props }, ref) {
+    function AutoExpandingTextarea({ value, onChange, placeholder, minRows = 1, maxRows = 200, style, ...props }, ref) {
         const internalRef = useRef<HTMLTextAreaElement | null>(null);
         const combinedRef = ref ? ((ref as React.RefObject<HTMLTextAreaElement>) || internalRef) : internalRef;
-        const isUserResizing = useRef(false);
 
-        useLayoutEffect(() => {
+        const resize = () => {
             const textarea = combinedRef.current;
             if (!textarea) return;
-            if (isUserResizing.current) return;
 
             const computedStyle = window.getComputedStyle(textarea);
             const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
@@ -29,85 +27,48 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
 
             textarea.style.height = '0px';
             const scrollHeight = textarea.scrollHeight;
-            let newHeight = Math.max(scrollHeight, minHeight);
+            const newHeight = Math.max(scrollHeight, minHeight);
 
-            if (newHeight > maxHeight) {
+            if (newHeight >= maxHeight) {
                 textarea.style.overflowY = 'auto';
+                textarea.style.height = `${maxHeight}px`;
             } else {
                 textarea.style.overflowY = 'hidden';
+                textarea.style.height = `${newHeight}px`;
             }
+        };
 
-            textarea.style.height = `${newHeight}px`;
-        }, [value, minRows, maxRows, combinedRef]);
+        useLayoutEffect(() => {
+            resize();
+        }, [value]);
 
         useLayoutEffect(() => {
             const textarea = combinedRef.current;
             if (!textarea) return;
 
-            let resizeTimeout: number | undefined;
-
-            const handleInput = () => {
-                isUserResizing.current = false;
-                const computedStyle = window.getComputedStyle(textarea);
-                const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
-                const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-                const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-                const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
-                const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
-                const extra = paddingTop + paddingBottom + borderTop + borderBottom;
-
-                const minHeight = (minRows * lineHeight) + extra;
-                const maxHeight = (maxRows * lineHeight) + extra;
-
-                textarea.style.height = '0px';
-                const scrollHeight = textarea.scrollHeight;
-                let newHeight = Math.max(scrollHeight, minHeight);
-
-                if (newHeight > maxHeight) {
-                    textarea.style.overflowY = 'auto';
-                } else {
-                    textarea.style.overflowY = 'hidden';
-                }
-
-                textarea.style.height = `${newHeight}px`;
-            };
-
-            const handleMouseDown = (e: MouseEvent) => {
-                const rect = textarea.getBoundingClientRect();
-                const inResizeZone = e.clientY >= rect.bottom - 20 && e.clientY <= rect.bottom + 5;
-                if (inResizeZone) {
-                    isUserResizing.current = true;
-                }
-            };
-
-            const handleMouseUp = () => {
-                if (isUserResizing.current) {
-                    isUserResizing.current = false;
-                    handleInput();
-                }
-            };
-
+            const handleInput = () => resize();
             textarea.addEventListener('input', handleInput);
-            textarea.addEventListener('mousedown', handleMouseDown);
-            window.addEventListener('mouseup', handleMouseUp);
 
+            let resizeTimer: number | undefined;
             const handleWindowResize = () => {
-                if (resizeTimeout) window.clearTimeout(resizeTimeout);
-                resizeTimeout = window.setTimeout(() => {
-                    isUserResizing.current = false;
-                    handleInput();
-                }, 100);
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(() => resize(), 100);
             };
             window.addEventListener('resize', handleWindowResize);
 
+            const ro = new ResizeObserver(() => {
+                if (textarea.style.height === '0px') return;
+                resize();
+            });
+            ro.observe(textarea);
+
             return () => {
                 textarea.removeEventListener('input', handleInput);
-                textarea.removeEventListener('mousedown', handleMouseDown);
-                window.removeEventListener('mouseup', handleMouseUp);
                 window.removeEventListener('resize', handleWindowResize);
-                if (resizeTimeout) window.clearTimeout(resizeTimeout);
+                window.clearTimeout(resizeTimer);
+                ro.disconnect();
             };
-        }, [minRows, maxRows, combinedRef]);
+        }, []);
 
         const textareaStyle: React.CSSProperties = {
             ...style,
