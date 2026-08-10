@@ -57,10 +57,10 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 - **🏠 Live Profile Dashboard**: Redesigned home page with a live header displaying your current summoner icon, level, and Riot ID.
 - **🖼️ Profile Background**: Dedicated tab to set any champion skin as your profile background with lazy loading.
 - **🆕 Profile Tokens**: Customize your 3 challenge medals with a visual image picker powered by HD Community Dragon assets.
-- **🎵 Music Integration**: Synchronize your profile bio with your **Last.fm** scrobbles automatically.
+- **🎵 Music Integration**: Synchronize your profile bio with your **Last.fm** scrobbles automatically. Supports 255-char bios with ASCII art; idle text can be used standalone as your profile bio via a toggle switch.
 - **🏆 Rank Mirror**: Customize your visible **Solo/Duo rank** with live draft previews and holographic grids.
 - **🖼️ Icon Swapper**: Browse and apply **6,000+ profile icons** with descriptive names (e.g., "Blue Minion Bruiser").
-- **📝 Presence Control**: Edit **bio/chat status** and set LCU presence (**Online, Away, Mobile, Offline**).
+- **📝 Presence Control**: Edit **bio/chat status** and set LCU presence (**Online, Away, Mobile, Offline**). Auto-expanding textareas with monospace font for ASCII art, live char counter (N/255), and a toggle to use the Music Sync idle text as your bio for more room.
 - **⚡ Performance Optimized**: Version-aware local cache for metadata and JPG previews for instant loading.
 - **🔄 Auto-Updater**: Built-in update detection with secure ED25519 signatures.
 - **↔️ Collapsible Sidebar**: Support for icon-only mode with smooth transitions.
