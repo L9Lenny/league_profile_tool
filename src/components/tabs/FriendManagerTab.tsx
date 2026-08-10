@@ -248,4 +248,4 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
     );
 };
 
-export default FriendManagerTab;
+export default React.memo(FriendManagerTab);

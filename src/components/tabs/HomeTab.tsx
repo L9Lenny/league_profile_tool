@@ -212,4 +212,4 @@ const HomeTab: React.FC<HomeTabProps> = ({ lcu, clientVersion, setActiveTab, lcu
     );
 };
 
-export default HomeTab;
+export default React.memo(HomeTab);

@@ -225,4 +225,4 @@ const LobbyTab: React.FC<LobbyTabProps> = ({ lcu, showToast, addLog, lcuRequest 
     );
 };
 
-export default LobbyTab;
+export default React.memo(LobbyTab);

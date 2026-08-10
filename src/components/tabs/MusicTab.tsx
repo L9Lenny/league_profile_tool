@@ -3,11 +3,12 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { LcuInfo } from '../../hooks/useLcu';
 import { MusicBioSettings, DEFAULT_IDLE_BIO, clampPollInterval } from '../../hooks/useMusicSync';
 import { Disc3, HelpCircle, ChevronRight, ChevronDown, ExternalLink, Activity, Info } from 'lucide-react';
+import { AutoExpandingTextarea } from '../../hooks/useAutoGrowingTextarea';
 
 interface MusicTabProps {
     lcu: LcuInfo | null;
     musicBio: MusicBioSettings;
-    setMusicBio: React.Dispatch<React.SetStateAction<MusicBioSettings>>;
+    setMusicBio: (updater: Partial<MusicBioSettings> | ((prev: MusicBioSettings) => MusicBioSettings)) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     applyIdleBio: () => Promise<void>;
@@ -204,13 +205,19 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                             placeholder="paste your Last.fm API key"
                         />
                     </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px' }}>
                     <div className="input-group" style={{ margin: 0 }}>
                         <label htmlFor="bio-template">Bio Template</label>
-                        <input
+                        <AutoExpandingTextarea
                             id="bio-template"
                             value={musicBio.template}
                             onChange={(e) => setMusicBio(prev => ({ ...prev, template: e.target.value }))}
                             placeholder="Listening to {title} - {artist}"
+                            minRows={5}
+                            maxRows={200}
+                            style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                         />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
                             <Info size={10} /> Use: {"{title}"} {"{artist}"} {"{album}"} {"{source}"}
@@ -218,12 +225,18 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                     </div>
                     <div className="input-group" style={{ margin: 0 }}>
                         <label htmlFor="idle-text">Idle Text (When no music plays)</label>
-                        <input
+                        <AutoExpandingTextarea
                             id="idle-text"
                             value={musicBio.idleText}
                             onChange={(e) => setMusicBio(prev => ({ ...prev, idleText: e.target.value }))}
                             placeholder={DEFAULT_IDLE_BIO}
+                            minRows={5}
+                            maxRows={200}
+                            style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                         />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                            <Info size={10} /> This replaces your Profile Bio when music sync is active. Use multiple lines for ASCII art.
+                        </div>
                     </div>
                 </div>
 
@@ -256,4 +269,4 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
     );
 };
 
-export default MusicTab;
+export default React.memo(MusicTab);

@@ -148,4 +148,4 @@ const IconTab: React.FC<IconTabProps> = ({
     );
 };
 
-export default IconTab;
+export default React.memo(IconTab);

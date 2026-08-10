@@ -730,4 +730,4 @@ const TokensTab: React.FC<TokensTabProps> = ({ lcu, showToast, addLog, lcuReques
     );
 };
 
-export default TokensTab;
+export default React.memo(TokensTab);

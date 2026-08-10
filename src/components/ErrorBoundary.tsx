@@ -2,6 +2,7 @@ import React from 'react';
 
 interface ErrorBoundaryProps {
     children: React.ReactNode;
+    name?: string;
 }
 
 interface ErrorBoundaryState {
@@ -20,7 +21,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     }
 
     componentDidCatch(error: Error, info: React.ErrorInfo) {
-        console.error('ErrorBoundary caught:', error, info.componentStack);
+        const label = this.props.name ?? 'App';
+        console.error(`[ErrorBoundary:${label}] caught:`, error, info.componentStack);
     }
 
     handleReset = () => {
@@ -29,10 +31,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
     render() {
         if (this.state.hasError) {
+            const label = this.props.name ?? 'App';
             return (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-primary, #ddd)' }}>
                     <h2 style={{ color: 'var(--hextech-gold, #c8aa6e)', marginBottom: '12px' }}>
-                        Something went wrong
+                        Something went wrong{label !== 'App' ? ` in ${label}` : ''}
                     </h2>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #aaa)', marginBottom: '20px' }}>
                         {this.state.error?.message ?? 'An unexpected error occurred.'}

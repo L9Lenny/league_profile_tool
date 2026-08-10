@@ -271,4 +271,4 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
     );
 };
 
-export default RankTab;
+export default React.memo(RankTab);

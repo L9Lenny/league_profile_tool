@@ -18,6 +18,20 @@ export const SAVED_CHALLENGE_POINTS_KEY  = "profile_saved_challenge_points_v1";
 // Settings
 export const SAVED_ENFORCE_OFFLINE_KEY = "profile_enforce_offline_v1"; // Legacy (will be mapped to auto enforce)
 export const SAVED_AUTO_ENFORCE_KEY = "profile_auto_enforce_v1";
+export const SAVED_USE_IDLE_AS_BIO_KEY = "profile_use_idle_as_bio_v1";
+
+// Music Sync
+export const MUSIC_BIO_SETTINGS_KEY = "music_bio_settings_v1";
+
+// Icons
+export const PROFILE_ICONS_KEY = "profile_icons";
+export const ICON_DATA_VERSION_KEY = "icon_data_version";
+
+// Presets (localStorage fallback — also persisted to disk via Tauri)
+export const PRESETS_LS_KEY = "profile_presets_list_v1";
+
+// Analytics (intentionally NOT in ALL_SAVED_KEYS — survives Clear All)
+export const ANALYTICS_ID_KEY = "lp_analytics_id";
 
 /** All persistent keys, used for the Clear All Settings feature. */
 export const ALL_SAVED_KEYS: string[] = [
@@ -36,8 +50,9 @@ export const ALL_SAVED_KEYS: string[] = [
     SAVED_CHALLENGE_POINTS_KEY,
     SAVED_ENFORCE_OFFLINE_KEY,
     SAVED_AUTO_ENFORCE_KEY,
-    "music_bio_settings_v1",
-    "profile_icons",
-    "icon_data_version",
-    "profile_presets_list_v1",
+    SAVED_USE_IDLE_AS_BIO_KEY,
+    MUSIC_BIO_SETTINGS_KEY,
+    PROFILE_ICONS_KEY,
+    ICON_DATA_VERSION_KEY,
+    PRESETS_LS_KEY,
 ];

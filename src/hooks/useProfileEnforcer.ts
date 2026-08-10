@@ -38,13 +38,17 @@ interface ChallengeSummary {
 export function useProfileEnforcer(
     lcu: LcuInfo | null,
     lcuRequest: LcuRequestFn,
-    addLog: (msg: string) => void
+    addLog: (msg: string) => void,
+    musicSyncActive: boolean = false
 ) {
     const sessionActive = useRef(false);
     // Track whether the initial enforcement (with full logging) has run this session.
     const hasLoggedInitial = useRef(false);
     // Prevent overlapping enforcement cycles.
     const cycleRunningRef = useRef(false);
+    // Track music sync state without re-triggering the interval effect.
+    const musicSyncActiveRef = useRef(false);
+    useEffect(() => { musicSyncActiveRef.current = musicSyncActive; }, [musicSyncActive]);
 
     // Reset state when the LCU disconnects
     useEffect(() => {
@@ -101,10 +105,14 @@ export function useProfileEnforcer(
                 // 2. Status & Bio
                 const savedStatus = localStorage.getItem(SAVED_AVAILABILITY_KEY);
                 const savedBio = localStorage.getItem(SAVED_BIO_KEY);
-                if (savedStatus || savedBio !== null) {
+                const skipBio = musicSyncActiveRef.current;
+                if (skipBio && isInitial) {
+                    addLog("Auto-Enforcer: Skipping bio enforcement — Music Sync is active.");
+                }
+                if (savedStatus || (savedBio !== null && !skipBio)) {
                     const statusBody: Record<string, unknown> = {};
                     if (savedStatus) statusBody.availability = savedStatus;
-                    if (savedBio !== null) statusBody.statusMessage = savedBio;
+                    if (savedBio !== null && !skipBio) statusBody.statusMessage = savedBio;
                     await runSilent("Status & Bio", () => lcuRequest("PUT", "/lol-chat/v1/me", statusBody), isInitial);
                 }
 
