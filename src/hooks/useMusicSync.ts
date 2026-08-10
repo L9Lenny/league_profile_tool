@@ -21,7 +21,7 @@ export const clampPollInterval = (value: number) => {
     return Math.max(5, Math.min(120, Math.round(value)));
 };
 
-export const truncateBio = (value: string, max = 127) => {
+export const truncateBio = (value: string, max = 255) => {
     const trimmed = value.trim();
     if (trimmed.length <= max) return trimmed;
     return `${trimmed.slice(0, max - 3)}...`;

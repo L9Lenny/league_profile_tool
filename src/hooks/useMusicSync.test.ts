@@ -24,7 +24,7 @@ describe('useMusicSync utilities', () => {
 
     it('truncateBio should trim and limit length', () => {
         expect(truncateBio('  hello  ')).toBe('hello');
-        expect(truncateBio('a'.repeat(200))).toBe('a'.repeat(124) + '...');
+        expect(truncateBio('a'.repeat(300))).toBe('a'.repeat(252) + '...');
         expect(truncateBio('short')).toBe('short');
     });
 

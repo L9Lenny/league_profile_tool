@@ -215,7 +215,7 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
                             value={musicBio.template}
                             onChange={(e) => setMusicBio(prev => ({ ...prev, template: e.target.value }))}
                             placeholder="Listening to {title} - {artist}"
-                            minRows={3}
+                            minRows={5}
                             maxRows={200}
                             style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                         />
