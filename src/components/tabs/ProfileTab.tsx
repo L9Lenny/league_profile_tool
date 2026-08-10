@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from "@tauri-apps/api/core";
+import { Info } from 'lucide-react';
 import { LcuInfo } from '../../hooks/useLcu';
 import { SAVED_BIO_KEY, SAVED_AVAILABILITY_KEY } from '../../hooks/useAutoRestore';
 import { SAVED_ENFORCE_OFFLINE_KEY } from '../../storageKeys';
@@ -9,9 +10,10 @@ interface ProfileTabProps {
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     lcuRequest: (method: string, endpoint: string, body?: Record<string, unknown>) => Promise<unknown>;
+    musicSyncActive?: boolean;
 }
 
-const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequest }) => {
+const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequest, musicSyncActive = false }) => {
     const [bio, setBio] = useState(() => localStorage.getItem(SAVED_BIO_KEY) ?? "");
     const [availability, setAvailability] = useState("chat");
     const [loading, setLoading] = useState(false);
@@ -95,16 +97,22 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         <div className="tab-content fadeIn">
             <div className="card">
                 <h3 className="card-title">Profile Bio &amp; Status</h3>
+                {musicSyncActive && (
+                    <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(255, 179, 71, 0.1)', border: '1px solid rgba(255, 179, 71, 0.3)', borderRadius: '8px', fontSize: '0.75rem', color: '#ffb347', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Info size={14} style={{ flexShrink: 0 }} />
+                        Music Sync is active — it controls your bio right now. Changes here will be overwritten. Disable Music Sync to use this bio.
+                    </div>
+                )}
                 <div className="input-group">
                     <label htmlFor="bio-input">New Status Message</label>
                     <textarea
                         id="bio-input"
-                        style={{ background: 'rgba(0, 0, 0, 0.3)' }}
+                        style={{ background: 'rgba(0, 0, 0, 0.3)', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.80rem' }}
                         placeholder="Tell your friends what you're up to..."
                         value={bio}
                         onChange={(e) => { bioDirtyRef.current = true; setBio(e.target.value); }}
                         disabled={!lcu || loading}
-                        rows={3}
+                        rows={6}
                     />
                 </div>
                 <button type="button" className="primary-btn" onClick={handleUpdateBio} disabled={!lcu || loading || !bio.trim()} style={{ width: '100%', marginTop: '12px' }}>APPLY BIO</button>

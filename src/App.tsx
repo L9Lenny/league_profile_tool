@@ -62,7 +62,7 @@ function App() {
   const { musicBio, setMusicBio, applyIdleBio } = useMusicSync(lcu, addLog);
   const icons = useIcons(addLog);
   useAnalytics();
-  useProfileEnforcer(lcu, lcuRequest, addLog);
+  useProfileEnforcer(lcu, lcuRequest, addLog, musicBio.enabled);
 
 
   const closingRef = useRef(false);
@@ -240,7 +240,7 @@ function App() {
         <main className="content-area">
           <ErrorBoundary>
           {activeTab === 'home' && <HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} />}
-          {activeTab === 'profile' && <ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
+          {activeTab === 'profile' && <ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} musicSyncActive={musicBio.enabled} />}
           {activeTab === 'friends' && <FriendManagerTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'background' && <BackgroundTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} />}
           {activeTab === 'music' && <MusicTab lcu={lcu} musicBio={musicBio} setMusicBio={setMusicBio} showToast={showToast} addLog={addLog} applyIdleBio={applyIdleBio} />}
