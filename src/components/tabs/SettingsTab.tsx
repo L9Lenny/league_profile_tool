@@ -182,11 +182,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             });
             if (!path) return;
             const target = Array.isArray(path) ? path[0] : path;
-            const response = await fetch(`asset://localhost/${encodeURIComponent(target)}`).catch(() => null);
-            if (!response?.ok) {
-                throw new Error("Failed to read file");
-            }
-            const text = await response.text();
+            const text = await invoke<string>("read_text_file", { path: target });
             const data = JSON.parse(text) as Record<string, string | null>;
             ALL_SAVED_KEYS.forEach(key => {
                 if (key in data) {

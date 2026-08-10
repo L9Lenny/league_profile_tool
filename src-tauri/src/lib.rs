@@ -236,6 +236,15 @@ fn force_quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 
+#[tauri::command]
+fn read_text_file(path: String) -> Result<String, String> {
+    let trimmed = path.trim();
+    if trimmed.is_empty() {
+        return Err("Missing path".to_string());
+    }
+    fs::read_to_string(trimmed).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -305,7 +314,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray, lcu_request, save_logs_to_path, force_quit, load_presets, save_presets])
+        .invoke_handler(tauri::generate_handler![get_lcu_connection, update_bio, set_minimize_to_tray, get_minimize_to_tray, lcu_request, save_logs_to_path, force_quit, load_presets, save_presets, read_text_file])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_, _| {});
