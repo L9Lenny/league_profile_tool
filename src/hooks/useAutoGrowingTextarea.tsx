@@ -57,7 +57,7 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
         const textareaStyle = {
             ...style,
             overflow: 'hidden' as const,
-            resize: 'none' as const,
+            resize: 'vertical' as const,
             height: 'auto' as const
         };
 
