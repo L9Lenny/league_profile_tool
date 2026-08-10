@@ -9,8 +9,8 @@ import { patchChatLol } from '../../utils/chatMe';
 const MAX_STORAGE_VALUE_LENGTH = 10000;
 
 function sanitizeForStorage(value: unknown): string {
-    const str = typeof value === 'string' ? value : String(value ?? '');
-    return str
+    if (typeof value !== 'string') return '';
+    return decodeURIComponent(encodeURIComponent(value))
         .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
         .slice(0, MAX_STORAGE_VALUE_LENGTH);
 }
