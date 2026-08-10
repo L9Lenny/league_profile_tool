@@ -5,45 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.12.0] - 2026-08-11
 
 ### Added
-- **Auto-expanding textareas** (`src/hooks/useAutoGrowingTextarea.tsx`): `AutoExpandingTextarea` component (forwardRef) that grows/shrink instantly based on content via `useLayoutEffect`; preserves manual vertical resize. Used in MusicTab (bio template, idle text) and ProfileTab (status message).
-- **Zustand store** (`src/store.ts`): Centralizes `lcu`/`musicBio` shared state and `lcuRequest` action with retry; eliminates prop-drilling and stale-closure risk.
-- **Retry/backoff utility** (`src/utils/retry.ts`): `withRetry()` wraps LCU requests with exponential backoff; non-retryable errors (disconnected, invalid endpoint) skip retries.
-- **Typed storage layer** (`src/utils/storage.ts`): `loadJSON`/`saveJSON`/`loadString`/`saveString`/`loadBool`/`saveBool`/`removeKey` with zod schema validation and quota-safe try/catch.
-- **Per-tab ErrorBoundary**: Each tab wrapped in its own `<ErrorBoundary name="...">` so a crash in one tab doesn't take down the whole app.
-- **Settings backup & restore**: Export/import all localStorage keys as JSON via Tauri file dialogs in SettingsTab.
-- **Bigger bio textareas** (#890): MusicTab bio-template (5 rows) and idle-text (5 rows) are now auto-expanding textareas at full width with monospace font; ProfileTab bio textarea expanded to 8 rows, auto-expanding, monospace for ASCII art.
-- **Bio length limit 127 → 255** (#890): `truncateBio` now uses 255-char limit (the actual LCU `statusMessage` max), allowing longer ASCII art in bio.
-- **Idle-text-as-bio switch** (#890): New toggle in ProfileTab — "Use Music Sync idle text as bio" — lets you use the idle text field (more room, up to 200 rows) as your profile bio without enabling Music Sync. Persists across sessions via `SAVED_USE_IDLE_AS_BIO_KEY`.
-- **Char counter**: Both ProfileTab and MusicTab textareas now show a live `N/255` character counter.
-- **Enforcer/music-sync conflict resolution** (#890): Enforcer skips `statusMessage` (bio) enforcement when Music Sync is active, preventing the two from fighting over the bio field.
-- **ErrorBoundary**: Catches uncaught render errors and shows a recoverable screen instead of crashing.
-- **`patchChatLol()` mutex** (`src/utils/chatMe.ts`): Serializes read-modify-write on the `/lol-chat/v1/me` `lol` field so concurrent patches from enforcer, rank, background, and settings don't clobber each other.
-- **`LcuRequestFn` type**: Shared type alias replacing `any` across LCU-calling tabs.
-- **`noUncheckedIndexedAccess`**: Enabled in `tsconfig.json`.
-- **Storage key constants** (`src/storageKeys.ts`): Named constants for all localStorage keys, replacing string literals throughout.
+- **Auto-expanding textareas** (#890): `AutoExpandingTextarea` component that grows/shrinks instantly with content; used in MusicTab and ProfileTab with monospace font for ASCII art. Manual vertical resize preserved.
+- **Bio length 127 → 255 chars** (#890): Bios now use the full LCU limit, allowing longer ASCII art.
+- **Idle-text-as-bio switch** (#890): Toggle in ProfileTab to use the Music Sync idle text (more room) as your profile bio without enabling Music Sync.
+- **Char counter**: Live `N/255` indicator under all bio textareas.
+- **Zustand store** (`src/store.ts`): Centralizes `lcu`/`musicBio` state and `lcuRequest` action with retry; eliminates prop-drilling.
+- **Retry/backoff utility** (`src/utils/retry.ts`): `withRetry()` wraps LCU requests with exponential backoff.
+- **Typed storage layer** (`src/utils/storage.ts`): Zod-validated `loadJSON`/`saveJSON` and helpers.
+- **Per-tab ErrorBoundary**: Each tab isolated so a crash in one doesn't take down the app.
+- **Settings backup & restore**: Export/import all localStorage keys as JSON via Tauri file dialogs.
+- **Enforcer/music-sync conflict resolution** (#890): Enforcer skips `statusMessage` when Music Sync is active.
+- **`patchChatLol()` mutex**: Serializes concurrent patches to `/lol-chat/v1/me` `lol` field.
+- **Storage key constants** (`src/storageKeys.ts`): Named constants replacing string literals.
 
 ### Fixed
-- **Stale `presets` state in PresetsTab**: Rapid save/delete now reads `presetsRef.current` instead of stale state; disk writes serialized via `persistMutexRef`.
-- **Auto-Enforce toggle not reactive**: `autoEnforce` now checked inside each 15s cycle, so toggling in Settings takes effect without reconnect.
-- **Overlapping async cycles**: Added re-entry guards (`checkingRef`, `cycleRunningRef`, `musicSyncRunningRef`) and AbortController/timeout to `useLcu`, `useProfileEnforcer`, `useMusicSync`.
-- **Rank/Background/Challenge wipes other `lol` fields**: All tabs now use `patchChatLol()` to merge before writing.
-- **Bio draft loss**: `bioDirtyRef` preserves unsaved bio text across enforcer cycles.
+- **Reactive textarea resize**: Instant resize on content change (removed `ResizeObserver` loop).
+- **Stale `presets` state**: Rapid save/delete now reads ref instead of stale state.
+- **Auto-Enforce toggle reactive**: Toggling in Settings takes effect without reconnect.
+- **Overlapping async cycles**: Re-entry guards and AbortController/timeout in `useLcu`, `useProfileEnforcer`, `useMusicSync`.
+- **Rank/Background/Challenge wipes `lol` fields**: All tabs use `patchChatLol()` to merge.
+- **Bio draft loss**: `bioDirtyRef` preserves unsaved bio across enforcer cycles.
 - **Music sync disable race**: `enabled: false` set before restoring idle bio.
-- **Stale summoner on disconnect**: HomeTab now clears summoner info on LCU disconnect.
-- **`setState` after unmount**: Added `cancelled` flags to BackgroundTab and HomeTab async fetches.
-- **useToast timer leak**: Added cleanup on unmount.
-- **useIcons corrupted-cache crash**: Added try/catch on `JSON.parse`.
-- **SettingsTab Clear All**: Parallel via `Promise.allSettled`; uses `patchChatLol`; autostart toggle now try/catches with toast.
-- **IconTab error log**: Now includes actual error message.
-- **Clear All settings coverage**: Added 4 missing keys (`music_bio_settings_v1`, `profile_icons`, `icon_data_version`, `profile_presets_list_v1`) to `ALL_SAVED_KEYS`.
-- **App close listener race**: `disposed` flag prevents handler running after cleanup.
-- **Reactive textarea resize**: Removed `ResizeObserver` loop and `isUserResizing` flag that caused slow progressive resize; textarea now resizes instantly on every content change (add/delete/paste) via single `useLayoutEffect` on `value`.
+- **Stale summoner on disconnect**: HomeTab clears summoner info on LCU disconnect.
+- **`setState` after unmount**: `cancelled` flags in BackgroundTab and HomeTab.
+- **useToast timer leak**, **useIcons corrupted-cache crash**, **SettingsTab Clear All** parallelization, **Clear All settings coverage** (4 missing keys), **App close listener race**.
 
 ### Dependencies
-- **npm:** lucide-react 1.24.0 → 1.30.0, react-window 2.2.7 → 2.3.0, react-dom 19.2.7 → 19.2.8, @types/react-dom 19.1.6 → 19.2.4, jsdom 29.1.1 → 30.0.1, @tauri-apps/plugin-dialog 2.7.1 → 2.7.2, zustand 5.x (new), zod 4.x (new)
+- **npm:** lucide-react 1.24.0 → 1.30.0, react-window 2.2.7 → 2.3.0, react-dom 19.2.7 → 19.2.8, jsdom 29.1.1 → 30.0.1, zustand 5.x (new), zod 4.x (new)
 - **cargo:** base64 0.23.0 → 0.23.1
 - **github-actions:** github/codeql-action v4.37.4 → v4.37.6
 
