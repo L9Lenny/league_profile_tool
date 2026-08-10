@@ -321,4 +321,4 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     );
 };
 
-export default SettingsTab;
+export default React.memo(SettingsTab);

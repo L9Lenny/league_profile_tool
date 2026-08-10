@@ -266,4 +266,4 @@ const MusicTab: React.FC<MusicTabProps> = ({ lcu, musicBio, setMusicBio, showToa
     );
 };
 
-export default MusicTab;
+export default React.memo(MusicTab);

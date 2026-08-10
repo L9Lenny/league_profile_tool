@@ -529,4 +529,4 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
     );
 };
 
-export default BackgroundTab;
+export default React.memo(BackgroundTab);

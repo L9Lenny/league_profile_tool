@@ -461,4 +461,4 @@ const PresetsTab: React.FC<PresetsTabProps> = ({ lcu, showToast, addLog, lcuRequ
     );
 };
 
-export default PresetsTab;
+export default React.memo(PresetsTab);

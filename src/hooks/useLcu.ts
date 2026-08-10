@@ -36,7 +36,7 @@ export function useLcu(addLog: (msg: string) => void) {
         } finally {
             checkingRef.current = false;
         }
-    }, [setLcu]);
+    }, [setLcu, addLog]);
 
     useEffect(() => {
         checkConnection();

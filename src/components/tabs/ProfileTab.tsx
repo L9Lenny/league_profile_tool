@@ -20,7 +20,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     const [enforceOffline, setEnforceOffline] = useState(() => localStorage.getItem(SAVED_ENFORCE_OFFLINE_KEY) === 'true');
     const bioDirtyRef = useRef(false);
 
-    const statusLabel = (value: string) => {
+    const statusLabel = useCallback((value: string) => {
         switch (value) {
             case "chat":    return "ONLINE";
             case "away":    return "AWAY";
@@ -28,7 +28,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
             case "offline": return "OFFLINE";
             default:        return value.toUpperCase();
         }
-    };
+    }, []);
 
     const refreshProfileData = useCallback(async () => {
         if (!lcu) return;
@@ -51,7 +51,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         refreshProfileData();
     }, [refreshProfileData]);
 
-    const handleUpdateBio = async () => {
+    const handleUpdateBio = useCallback(async () => {
         if (!lcu) return;
         setLoading(true);
         try {
@@ -64,9 +64,9 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
             showToast("Failed to update bio", "error");
             addLog(`Bio update failed: ${err instanceof Error ? err.message : String(err)}`);
         } finally { setLoading(false); }
-    };
+    }, [lcu, bio, addLog, showToast]);
 
-    const applyAvailability = async (next?: string) => {
+    const applyAvailability = useCallback(async (next?: string) => {
         if (!lcu) return;
         const target = (next || availability).trim();
         if (!target) return;
@@ -85,13 +85,13 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
         } finally {
             setLoading(false);
         }
-    };
+    }, [lcu, availability, statusLabel, addLog, showToast]);
 
-    const toggleEnforceOffline = (checked: boolean) => {
+    const toggleEnforceOffline = useCallback((checked: boolean) => {
         setEnforceOffline(checked);
         localStorage.setItem(SAVED_ENFORCE_OFFLINE_KEY, checked.toString());
         addLog(`Enforce offline ${checked ? 'enabled' : 'disabled'}.`);
-    };
+    }, [addLog]);
 
     return (
         <div className="tab-content fadeIn">
@@ -163,4 +163,4 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
     );
 };
 
-export default ProfileTab;
+export default React.memo(ProfileTab);
