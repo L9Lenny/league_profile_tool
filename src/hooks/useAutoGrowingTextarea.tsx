@@ -10,7 +10,7 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
         const internalRef = useRef<HTMLTextAreaElement | null>(null);
         const combinedRef = ref ? ((ref as React.RefObject<HTMLTextAreaElement>) || internalRef) : internalRef;
 
-        const resize = () => {
+        useLayoutEffect(() => {
             const textarea = combinedRef.current;
             if (!textarea) return;
 
@@ -36,39 +36,7 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
                 textarea.style.overflowY = 'hidden';
                 textarea.style.height = `${newHeight}px`;
             }
-        };
-
-        useLayoutEffect(() => {
-            resize();
-        }, [value]);
-
-        useLayoutEffect(() => {
-            const textarea = combinedRef.current;
-            if (!textarea) return;
-
-            const handleInput = () => resize();
-            textarea.addEventListener('input', handleInput);
-
-            let resizeTimer: number | undefined;
-            const handleWindowResize = () => {
-                window.clearTimeout(resizeTimer);
-                resizeTimer = window.setTimeout(() => resize(), 100);
-            };
-            window.addEventListener('resize', handleWindowResize);
-
-            const ro = new ResizeObserver(() => {
-                if (textarea.style.height === '0px') return;
-                resize();
-            });
-            ro.observe(textarea);
-
-            return () => {
-                textarea.removeEventListener('input', handleInput);
-                window.removeEventListener('resize', handleWindowResize);
-                window.clearTimeout(resizeTimer);
-                ro.disconnect();
-            };
-        }, []);
+        }, [value, minRows, maxRows]);
 
         const textareaStyle: React.CSSProperties = {
             ...style,
@@ -76,6 +44,7 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
             resize: 'vertical',
             height: 'auto',
             boxSizing: 'border-box',
+            transition: 'none',
         };
 
         return (
