@@ -113,7 +113,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ lcu, showToast, addLog, lcuRequ
                         placeholder="Tell your friends what you're up to..."
                         disabled={!lcu || loading}
                         minRows={3}
-                        maxRows={15}
+                        maxRows={60}
                         style={{ background: 'rgba(0, 0, 0, 0.3)', fontFamily: 'monospace', fontSize: '0.80rem' }}
                     />
                 </div>
