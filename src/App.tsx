@@ -238,7 +238,6 @@ function App() {
 
       <div className="main-container">
         <main className="content-area">
-<<<<<<< HEAD
           {activeTab === 'home' && <ErrorBoundary name="Home"><HomeTab lcu={lcu} clientVersion={clientVersion} setActiveTab={setActiveTab} lcuRequest={lcuRequest} /></ErrorBoundary>}
           {activeTab === 'profile' && <ErrorBoundary name="Profile"><ProfileTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} musicSyncActive={musicBio.enabled} /></ErrorBoundary>}
           {activeTab === 'friends' && <ErrorBoundary name="Friends"><FriendManagerTab lcu={lcu} showToast={showToast} addLog={addLog} lcuRequest={lcuRequest} /></ErrorBoundary>}

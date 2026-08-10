@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Typed storage layer** (`src/utils/storage.ts`): `loadJSON`/`saveJSON`/`loadString`/`saveString`/`loadBool`/`saveBool`/`removeKey` with zod schema validation and quota-safe try/catch.
 - **Per-tab ErrorBoundary**: Each tab wrapped in its own `<ErrorBoundary name="...">` so a crash in one tab doesn't take down the whole app.
 - **Settings backup & restore**: Export/import all localStorage keys as JSON via Tauri file dialogs in SettingsTab.
+- **Bigger bio textareas** (#890): MusicTab bio-template (3 rows) and idle-text (5 rows) are now resizable textareas at full width with monospace font; ProfileTab bio textarea expanded to 6 rows, resizable, monospace for ASCII art.
+- **Enforcer/music-sync conflict resolution** (#890): Enforcer skips `statusMessage` (bio) enforcement when Music Sync is active, preventing the two from fighting over the bio field.
 - **ErrorBoundary**: Catches uncaught render errors and shows a recoverable screen instead of crashing.
 - **`patchChatLol()` mutex** (`src/utils/chatMe.ts`): Serializes read-modify-write on the `/lol-chat/v1/me` `lol` field so concurrent patches from enforcer, rank, background, and settings don't clobber each other.
 - **`LcuRequestFn` type**: Shared type alias replacing `any` across LCU-calling tabs.
@@ -34,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **IconTab error log**: Now includes actual error message.
 - **Clear All settings coverage**: Added 4 missing keys (`music_bio_settings_v1`, `profile_icons`, `icon_data_version`, `profile_presets_list_v1`) to `ALL_SAVED_KEYS`.
 - **App close listener race**: `disposed` flag prevents handler running after cleanup.
+
+### Dependencies
+- **npm:** lucide-react 1.24.0 → 1.27.0, react-window 1.8.11 → 1.8.12, react-dom 19.1.0 → 19.2.0, jsdom 26.1.0 → 27.1.0, @tauri-apps/plugin-dialog 2.4.0 → 2.5.0, zustand 5.x (new), zod 4.x (new)
+- **cargo:** base64 0.22.1 → 0.23.1
+- **github-actions:** github/codeql-action v3 → v4.37.6
 
 ## [1.11.0] - 2026-08-07
 
