@@ -14,7 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Typed storage layer** (`src/utils/storage.ts`): `loadJSON`/`saveJSON`/`loadString`/`saveString`/`loadBool`/`saveBool`/`removeKey` with zod schema validation and quota-safe try/catch.
 - **Per-tab ErrorBoundary**: Each tab wrapped in its own `<ErrorBoundary name="...">` so a crash in one tab doesn't take down the whole app.
 - **Settings backup & restore**: Export/import all localStorage keys as JSON via Tauri file dialogs in SettingsTab.
-- **Bigger bio textareas** (#890): MusicTab bio-template (3 rows) and idle-text (5 rows) are now auto-expanding textareas at full width with monospace font; ProfileTab bio textarea expanded to 6 rows, auto-expanding, monospace for ASCII art.
+- **Bigger bio textareas** (#890): MusicTab bio-template (5 rows) and idle-text (5 rows) are now auto-expanding textareas at full width with monospace font; ProfileTab bio textarea expanded to 8 rows, auto-expanding, monospace for ASCII art.
+- **Bio length limit 127 → 255** (#890): `truncateBio` now uses 255-char limit (the actual LCU `statusMessage` max), allowing longer ASCII art in bio.
+- **Idle-text-as-bio switch** (#890): New toggle in ProfileTab — "Use Music Sync idle text as bio" — lets you use the idle text field (more room, up to 200 rows) as your profile bio without enabling Music Sync. Persists across sessions via `SAVED_USE_IDLE_AS_BIO_KEY`.
+- **Char counter**: Both ProfileTab and MusicTab textareas now show a live `N/255` character counter.
 - **Enforcer/music-sync conflict resolution** (#890): Enforcer skips `statusMessage` (bio) enforcement when Music Sync is active, preventing the two from fighting over the bio field.
 - **ErrorBoundary**: Catches uncaught render errors and shows a recoverable screen instead of crashing.
 - **`patchChatLol()` mutex** (`src/utils/chatMe.ts`): Serializes read-modify-write on the `/lol-chat/v1/me` `lol` field so concurrent patches from enforcer, rank, background, and settings don't clobber each other.
