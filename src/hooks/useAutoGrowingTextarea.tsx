@@ -15,11 +15,11 @@ export const AutoExpandingTextarea = forwardRef<HTMLTextAreaElement, AutoExpandi
             if (!textarea) return;
 
             const computedStyle = window.getComputedStyle(textarea);
-            const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
-            const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-            const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-            const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
-            const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+            const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 24;
+            const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0;
+            const paddingBottom = Number.parseFloat(computedStyle.paddingBottom) || 0;
+            const borderTop = Number.parseFloat(computedStyle.borderTopWidth) || 0;
+            const borderBottom = Number.parseFloat(computedStyle.borderBottomWidth) || 0;
             const extra = paddingTop + paddingBottom + borderTop + borderBottom;
 
             const minHeight = (minRows * lineHeight) + extra;

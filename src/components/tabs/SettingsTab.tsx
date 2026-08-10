@@ -174,7 +174,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             if (!path) return;
             const target = Array.isArray(path) ? path[0] : path;
             const response = await fetch(`asset://localhost/${encodeURIComponent(target)}`).catch(() => null);
-            if (!response || !response.ok) {
+            if (!response?.ok) {
                 throw new Error("Failed to read file");
             }
             const text = await response.text();
@@ -184,7 +184,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                     if (data[key] === null) {
                         localStorage.removeItem(key);
                     } else {
-                        localStorage.setItem(key, data[key] as string);
+                        const sanitized = typeof data[key] === 'string' ? data[key] as string : String(data[key] ?? '');
+                        localStorage.setItem(key, sanitized);
                     }
                 }
             });

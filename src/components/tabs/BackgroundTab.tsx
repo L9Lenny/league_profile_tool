@@ -186,6 +186,16 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
             }
         };
 
+        const addSupplementalSkins = (index: SkinSearchEntry[]) => {
+            for (const [champIdStr, extras] of Object.entries(supplementalSkins)) {
+                for (const skin of extras as SkinEntry[]) {
+                    if (!index.some(s => s.id === skin.id)) {
+                        index.push({ id: skin.id, name: skin.name, championName: `Champion ${champIdStr}` });
+                    }
+                }
+            }
+        };
+
         const buildIndex = async () => {
             const index: SkinSearchEntry[] = [];
             const batchSize = 20;
@@ -202,13 +212,7 @@ const BackgroundTab: React.FC<BackgroundTabProps> = ({ lcu, showToast, addLog, l
                 }
             }
             if (cancelled) return;
-            for (const [champIdStr, extras] of Object.entries(supplementalSkins)) {
-                for (const skin of extras as SkinEntry[]) {
-                    if (!index.some(s => s.id === skin.id)) {
-                        index.push({ id: skin.id, name: skin.name, championName: `Champion ${champIdStr}` });
-                    }
-                }
-            }
+            addSupplementalSkins(index);
             if (cancelled) return;
             allSkinsRef.current = index;
             setAllSkinsLoaded(true);

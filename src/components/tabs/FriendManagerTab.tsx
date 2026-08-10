@@ -37,7 +37,7 @@ const FriendManagerTab: React.FC<FriendManagerTabProps> = ({ lcu, showToast, add
                 setFriends(data.map(f => ({
                     id: f.id as string,
                     summonerId: f.summonerId as number,
-                    name: f.gameName ? `${f.gameName}#${f.gameTag}` : f.name as string,
+                    name: f.gameName ? `${String(f.gameName)}#${f.gameTag}` : f.name as string,
                     availability: f.availability as string,
                     statusMessage: f.statusMessage as string,
                     icon: f.icon as number,

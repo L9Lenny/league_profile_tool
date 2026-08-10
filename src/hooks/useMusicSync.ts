@@ -1,11 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
-import { useAppStore } from '../store';
+import { useAppStore, DEFAULT_IDLE_BIO } from '../store';
 import type { LcuInfo, MusicBioSettings } from '../store';
-import { defaultMusicBioSettings, DEFAULT_IDLE_BIO } from '../store';
 
 export type { MusicBioSettings };
-export { defaultMusicBioSettings, DEFAULT_IDLE_BIO };
+export { defaultMusicBioSettings, DEFAULT_IDLE_BIO } from '../store';
 
 export interface NowPlayingTrack {
     sourceLabel: string;

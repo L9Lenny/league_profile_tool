@@ -67,7 +67,10 @@ const RankTab: React.FC<RankTabProps> = ({ lcu, showToast, addLog, lcuRequest })
                 if (lol.rankedLeagueDivision) setSoloDiv(lol.rankedLeagueDivision as string);
                 if (lol.rankedLeagueQueue) setQueueType(lol.rankedLeagueQueue as string);
                 if (lol.challengeCrystalLevel) setChallengeCrystalLevel(lol.challengeCrystalLevel as string);
-                if (lol.challengePoints !== undefined) setChallengePoints(String(lol.challengePoints));
+                if (lol.challengePoints !== undefined) {
+                    const cp = lol.challengePoints;
+                    setChallengePoints(typeof cp === 'number' || typeof cp === 'string' ? String(cp) : "0");
+                }
             }
 
             addLog("Rank status synced successfully.");

@@ -77,9 +77,118 @@ export function useProfileEnforcer(
             }
         };
 
+        const enforceIcon = async (
+            lcuReq: LcuRequestFn,
+            isInitial: boolean,
+            run: typeof runSilent
+        ) => {
+            const savedIcon = localStorage.getItem(SAVED_ICON_KEY);
+            if (!savedIcon) return;
+            await run("Icon", () => lcuReq("PUT", "/lol-chat/v1/me", { icon: Number.parseInt(savedIcon, 10) }), isInitial);
+        };
+
+        const enforceStatusAndBio = async (
+            lcuReq: LcuRequestFn,
+            skipBio: boolean,
+            isInitial: boolean,
+            run: typeof runSilent,
+            log: (msg: string) => void
+        ) => {
+            const savedStatus = localStorage.getItem(SAVED_AVAILABILITY_KEY);
+            const savedBio = localStorage.getItem(SAVED_BIO_KEY);
+            if (skipBio && isInitial) {
+                log("Auto-Enforcer: Skipping bio enforcement — Music Sync is active.");
+            }
+            if (!savedStatus && (savedBio === null || skipBio)) return;
+            const statusBody: Record<string, unknown> = {};
+            if (savedStatus) statusBody.availability = savedStatus;
+            if (savedBio !== null && !skipBio) statusBody.statusMessage = savedBio;
+            await run("Status & Bio", () => lcuReq("PUT", "/lol-chat/v1/me", statusBody), isInitial);
+        };
+
+        const enforceTokensAndTitle = async (
+            lcuReq: LcuRequestFn,
+            isInitial: boolean,
+            run: typeof runSilent,
+            log: (msg: string) => void
+        ) => {
+            const savedTokens = localStorage.getItem(SAVED_TOKENS_KEY);
+            const savedTitle = localStorage.getItem(SAVED_TITLE_KEY);
+            if (!savedTokens && savedTitle === null) return;
+            await run("Tokens & Regalia", async () => {
+                const challengeIds: unknown = savedTokens ? JSON.parse(savedTokens) : undefined;
+                const prefBody: Record<string, unknown> = {};
+                if (challengeIds) prefBody.challengeIds = challengeIds;
+                if (savedTitle !== null && savedTitle !== "-1") prefBody.title = savedTitle;
+
+                let mergeOk = false;
+                try {
+                    const summary = await lcuReq("GET", "/lol-challenges/v1/summary-player-data/local-player") as ChallengeSummary | null;
+                    if (summary) {
+                        prefBody.bannerAccent = summary.bannerId ?? summary.preferences?.bannerId ?? summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
+                        prefBody.crestBorder = summary.crestId ?? summary.preferences?.crestId ?? summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
+                        prefBody.prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
+                        mergeOk = true;
+                    }
+                } catch (err) {
+                    if (isInitial) log(`Auto-Enforcer warning: Could not read current preferences to merge: ${err}`);
+                }
+
+                if (!mergeOk && !savedTokens && savedTitle === null) return;
+                await lcuReq("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
+            }, isInitial);
+        };
+
+        const enforceRankAndChallenge = async (
+            lcuReq: LcuRequestFn,
+            isInitial: boolean,
+            run: typeof runSilent
+        ) => {
+            const savedRankTier = localStorage.getItem(SAVED_RANK_TIER_KEY);
+            const savedRankDiv = localStorage.getItem(SAVED_RANK_DIV_KEY);
+            const savedRankQueue = localStorage.getItem(SAVED_RANK_QUEUE_KEY);
+            const savedCrystal = localStorage.getItem(SAVED_CHALLENGE_CRYSTAL_KEY);
+            const savedPoints = localStorage.getItem(SAVED_CHALLENGE_POINTS_KEY);
+            if (!savedRankTier && !savedRankDiv && !savedRankQueue && !savedCrystal && !savedPoints) return;
+            await run("Rank & Challenge Stats", async () => {
+                await patchChatLol(lcuReq, (current) => {
+                    const updated: Record<string, unknown> = { ...current };
+                    if (savedRankTier) updated.rankedLeagueTier = savedRankTier;
+                    if (savedRankDiv) updated.rankedLeagueDivision = savedRankDiv;
+                    if (savedRankQueue) updated.rankedLeagueQueue = savedRankQueue;
+                    if (savedCrystal) updated.challengeCrystalLevel = savedCrystal;
+                    if (savedPoints) updated.challengePoints = savedPoints;
+                    return updated;
+                });
+            }, isInitial);
+        };
+
+        const enforceBackground = async (
+            lcuReq: LcuRequestFn,
+            isInitial: boolean,
+            run: typeof runSilent,
+            log: (msg: string) => void
+        ) => {
+            const savedBackground = localStorage.getItem(SAVED_BACKGROUND_KEY);
+            if (!savedBackground) return;
+            await run("Profile Background", async () => {
+                try {
+                    await lcuReq("POST", "/lol-summoner/v1/current-summoner/summoner-profile/", {
+                        key: "backgroundSkinId",
+                        value: Number.parseInt(savedBackground, 10)
+                    });
+                } catch (err) {
+                    if (isInitial) log(`Auto-Enforcer Background: Official update failed (${err}). Trying force chat fallback...`);
+                    await patchChatLol(lcuReq, (current) => ({
+                        ...current,
+                        backgroundSkinId: savedBackground.toString()
+                    }));
+                }
+            }, isInitial);
+        };
+
         const enforceProfile = async () => {
-            if (!sessionActive.current) return;
-            if (cycleRunningRef.current) return;
+            if (!sessionActive.current || cycleRunningRef.current) return;
 
             // Check autoEnforce on every cycle so toggling it in Settings
             // takes effect within one interval without needing a reconnect.
@@ -96,98 +205,11 @@ export function useProfileEnforcer(
                     hasLoggedInitial.current = true;
                 }
 
-                // 1. Icon (PFP)
-                const savedIcon = localStorage.getItem(SAVED_ICON_KEY);
-                if (savedIcon) {
-                    await runSilent("Icon", () => lcuRequest("PUT", "/lol-chat/v1/me", { icon: Number.parseInt(savedIcon, 10) }), isInitial);
-                }
-
-                // 2. Status & Bio
-                const savedStatus = localStorage.getItem(SAVED_AVAILABILITY_KEY);
-                const savedBio = localStorage.getItem(SAVED_BIO_KEY);
-                const skipBio = musicSyncActiveRef.current;
-                if (skipBio && isInitial) {
-                    addLog("Auto-Enforcer: Skipping bio enforcement — Music Sync is active.");
-                }
-                if (savedStatus || (savedBio !== null && !skipBio)) {
-                    const statusBody: Record<string, unknown> = {};
-                    if (savedStatus) statusBody.availability = savedStatus;
-                    if (savedBio !== null && !skipBio) statusBody.statusMessage = savedBio;
-                    await runSilent("Status & Bio", () => lcuRequest("PUT", "/lol-chat/v1/me", statusBody), isInitial);
-                }
-
-                // 3. Tokens, Title
-                const savedTokens = localStorage.getItem(SAVED_TOKENS_KEY);
-                const savedTitle = localStorage.getItem(SAVED_TITLE_KEY);
-
-                if (savedTokens || savedTitle !== null) {
-                    await runSilent("Tokens & Regalia", async () => {
-                        const challengeIds: unknown = savedTokens ? JSON.parse(savedTokens) : undefined;
-                        const prefBody: Record<string, unknown> = {};
-                        if (challengeIds) prefBody.challengeIds = challengeIds;
-                        if (savedTitle !== null && savedTitle !== "-1") prefBody.title = savedTitle;
-
-                        // The update endpoint does a FULL REPLACE — merge current
-                        // preferences so we don't reset banner/crest/prestige.
-                        let mergeOk = false;
-                        try {
-                            const summary = await lcuRequest("GET", "/lol-challenges/v1/summary-player-data/local-player") as ChallengeSummary | null;
-                            if (summary) {
-                                prefBody.bannerAccent = summary.bannerId ?? summary.preferences?.bannerId ?? summary.bannerAccent ?? summary.preferences?.bannerAccent ?? "";
-                                prefBody.crestBorder = summary.crestId ?? summary.preferences?.crestId ?? summary.crestBorder ?? summary.preferences?.crestBorder ?? "";
-                                prefBody.prestigeCrestBorderLevel = summary.prestigeCrestBorderLevel ?? summary.preferences?.prestigeCrestBorderLevel ?? 0;
-                                mergeOk = true;
-                            }
-                        } catch (err) {
-                            if (isInitial) addLog(`Auto-Enforcer warning: Could not read current preferences to merge: ${err}`);
-                        }
-
-                        if (!mergeOk && !savedTokens && savedTitle === null) return;
-                        await lcuRequest("POST", "/lol-challenges/v1/update-player-preferences", prefBody);
-                    }, isInitial);
-                }
-
-                // 4. Rank & Challenge overrides (via chat presence lol object)
-                const savedRankTier = localStorage.getItem(SAVED_RANK_TIER_KEY);
-                const savedRankDiv = localStorage.getItem(SAVED_RANK_DIV_KEY);
-                const savedRankQueue = localStorage.getItem(SAVED_RANK_QUEUE_KEY);
-                const savedCrystal = localStorage.getItem(SAVED_CHALLENGE_CRYSTAL_KEY);
-                const savedPoints = localStorage.getItem(SAVED_CHALLENGE_POINTS_KEY);
-
-                if (savedRankTier || savedRankDiv || savedRankQueue || savedCrystal || savedPoints) {
-                    await runSilent("Rank & Challenge Stats", async () => {
-                        await patchChatLol(lcuRequest, (current) => {
-                            const updated: Record<string, unknown> = { ...current };
-                            if (savedRankTier) updated.rankedLeagueTier = savedRankTier;
-                            if (savedRankDiv) updated.rankedLeagueDivision = savedRankDiv;
-                            if (savedRankQueue) updated.rankedLeagueQueue = savedRankQueue;
-                            if (savedCrystal) updated.challengeCrystalLevel = savedCrystal;
-                            if (savedPoints) updated.challengePoints = savedPoints;
-                            return updated;
-                        });
-                    }, isInitial);
-                }
-
-                // 5. Background
-                const savedBackground = localStorage.getItem(SAVED_BACKGROUND_KEY);
-                if (savedBackground) {
-                    await runSilent("Profile Background", async () => {
-                        try {
-                            // Try official method first
-                            await lcuRequest("POST", "/lol-summoner/v1/current-summoner/summoner-profile/", {
-                                key: "backgroundSkinId",
-                                value: Number.parseInt(savedBackground, 10)
-                            });
-                        } catch (err) {
-                            if (isInitial) addLog(`Auto-Enforcer Background: Official update failed (${err}). Trying force chat fallback...`);
-                            // Fallback to chat presence force method via serialized RMW
-                            await patchChatLol(lcuRequest, (current) => ({
-                                ...current,
-                                backgroundSkinId: savedBackground.toString()
-                            }));
-                        }
-                    }, isInitial);
-                }
+                await enforceIcon(lcuRequest, isInitial, runSilent);
+                await enforceStatusAndBio(lcuRequest, musicSyncActiveRef.current, isInitial, runSilent, addLog);
+                await enforceTokensAndTitle(lcuRequest, isInitial, runSilent, addLog);
+                await enforceRankAndChallenge(lcuRequest, isInitial, runSilent);
+                await enforceBackground(lcuRequest, isInitial, runSilent, addLog);
 
                 if (isInitial) {
                     addLog("Auto-Enforcer restoration flow completed.");
