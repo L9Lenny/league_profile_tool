@@ -38,9 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **App close listener race**: `disposed` flag prevents handler running after cleanup.
 
 ### Dependencies
-- **npm:** lucide-react 1.24.0 → 1.27.0, react-window 1.8.11 → 1.8.12, react-dom 19.1.0 → 19.2.0, jsdom 26.1.0 → 27.1.0, @tauri-apps/plugin-dialog 2.4.0 → 2.5.0, zustand 5.x (new), zod 4.x (new)
-- **cargo:** base64 0.22.1 → 0.23.1
-- **github-actions:** github/codeql-action v3 → v4.37.6
+- **npm:** lucide-react 1.24.0 → 1.30.0, react-window 2.2.7 → 2.3.0, react-dom 19.2.7 → 19.2.8, @types/react-dom 19.1.6 → 19.2.4, jsdom 29.1.1 → 30.0.1, @tauri-apps/plugin-dialog 2.7.1 → 2.7.2, zustand 5.x (new), zod 4.x (new)
+- **cargo:** base64 0.23.0 → 0.23.1
+- **github-actions:** github/codeql-action v4.37.4 → v4.37.6
+- **Note:** Dependabot PRs #904-910 are superseded by this commit (changes already incorporated in branch `890-jump-between-music-sync-bio-massage`) — must be closed manually via GitHub UI.
 
 ## [1.11.0] - 2026-08-07
 
