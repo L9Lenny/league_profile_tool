@@ -7,6 +7,7 @@ import {
     buildBioFromTemplate,
     DEFAULT_IDLE_BIO
 } from './useMusicSync';
+import { useAppStore, defaultMusicBioSettings } from '../store';
 
 // Mock Tauri APIs
 vi.mock('@tauri-apps/api/core', () => ({
@@ -46,6 +47,10 @@ describe('useMusicSync hook', () => {
         vi.clearAllMocks();
         localStorage.clear();
         globalThis.fetch = vi.fn();
+        useAppStore.setState({
+            lcu: null,
+            musicBio: defaultMusicBioSettings(),
+        });
     });
 
     it('should initialize with default settings', () => {

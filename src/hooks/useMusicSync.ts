@@ -1,15 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { invoke } from "@tauri-apps/api/core";
-import { LcuInfo } from './useLcu';
+import { useAppStore } from '../store';
+import type { LcuInfo, MusicBioSettings } from '../store';
+import { defaultMusicBioSettings, DEFAULT_IDLE_BIO } from '../store';
 
-export interface MusicBioSettings {
-    enabled: boolean;
-    pollIntervalSec: number;
-    template: string;
-    idleText: string;
-    lastfmApiKey: string;
-    lastfmUsername: string;
-}
+export type { MusicBioSettings };
+export { defaultMusicBioSettings, DEFAULT_IDLE_BIO };
 
 export interface NowPlayingTrack {
     sourceLabel: string;
@@ -19,16 +15,6 @@ export interface NowPlayingTrack {
 }
 
 export const MUSIC_BIO_STORAGE_KEY = "music_bio_settings_v1";
-export const DEFAULT_IDLE_BIO = "Not listening now";
-
-export const defaultMusicBioSettings = (): MusicBioSettings => ({
-    enabled: false,
-    pollIntervalSec: 15,
-    template: "Listening to {title} - {artist}",
-    idleText: DEFAULT_IDLE_BIO,
-    lastfmApiKey: "",
-    lastfmUsername: "",
-});
 
 export const clampPollInterval = (value: number) => {
     if (!Number.isFinite(value)) return 15;
@@ -90,19 +76,23 @@ async function fetchLastFmNowPlaying(settings: MusicBioSettings): Promise<NowPla
 }
 
 export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void) {
-    const [musicBio, setMusicBio] = useState<MusicBioSettings>(defaultMusicBioSettings);
-    const [musicSettingsHydrated, setMusicSettingsHydrated] = useState(false);
+    const musicBio = useAppStore(s => s.musicBio);
+    const setMusicBio = useAppStore(s => s.setMusicBio);
+    const musicSettingsHydratedRef = useRef(false);
+
     const musicSyncRunningRef = useRef(false);
     const lastAutoBioRef = useRef<string>("");
     const musicSyncLastErrorRef = useRef<string>("");
 
+    // Hydrate from localStorage once on mount
     useEffect(() => {
+        if (musicSettingsHydratedRef.current) return;
+        musicSettingsHydratedRef.current = true;
         try {
             const raw = localStorage.getItem(MUSIC_BIO_STORAGE_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw) as Partial<MusicBioSettings>;
                 setMusicBio({
-                    ...defaultMusicBioSettings(),
                     ...parsed,
                     idleText: String(parsed?.idleText ?? "").trim() || DEFAULT_IDLE_BIO,
                     pollIntervalSec: clampPollInterval(Number(parsed?.pollIntervalSec ?? 15))
@@ -111,16 +101,16 @@ export function useMusicSync(lcu: LcuInfo | null, addLog: (msg: string) => void)
         } catch {
             // Ignore broken local storage values
         }
-        setMusicSettingsHydrated(true);
-    }, []);
+    }, [setMusicBio]);
 
+    // Persist to localStorage whenever musicBio changes
     useEffect(() => {
-        if (!musicSettingsHydrated) return;
+        if (!musicSettingsHydratedRef.current) return;
         localStorage.setItem(MUSIC_BIO_STORAGE_KEY, JSON.stringify({
             ...musicBio,
             pollIntervalSec: clampPollInterval(musicBio.pollIntervalSec)
         }));
-    }, [musicBio, musicSettingsHydrated]);
+    }, [musicBio]);
 
     const applyIdleBio = useCallback(async () => {
         if (!lcu || musicSyncRunningRef.current) return;

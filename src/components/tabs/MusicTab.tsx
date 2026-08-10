@@ -7,7 +7,7 @@ import { Disc3, HelpCircle, ChevronRight, ChevronDown, ExternalLink, Activity, I
 interface MusicTabProps {
     lcu: LcuInfo | null;
     musicBio: MusicBioSettings;
-    setMusicBio: React.Dispatch<React.SetStateAction<MusicBioSettings>>;
+    setMusicBio: (updater: Partial<MusicBioSettings> | ((prev: MusicBioSettings) => MusicBioSettings)) => void;
     showToast: (text: string, type: string) => void;
     addLog: (msg: string) => void;
     applyIdleBio: () => Promise<void>;

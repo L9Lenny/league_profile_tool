@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { RefreshCw, Cpu, Trash2, X, Check } from 'lucide-react';
+import { RefreshCw, Cpu, Trash2, X, Check, Download, Upload } from 'lucide-react';
 import { enable, disable } from "@tauri-apps/plugin-autostart";
+import { save, open } from "@tauri-apps/plugin-dialog";
+import { invoke } from "@tauri-apps/api/core";
 import { SAVED_AUTO_ENFORCE_KEY, SAVED_ENFORCE_OFFLINE_KEY, SAVED_ICON_KEY, ALL_SAVED_KEYS } from '../../storageKeys';
 import { patchChatLol } from '../../utils/chatMe';
 
@@ -142,6 +144,59 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         setShowResetConfirm(false);
     };
 
+    const exportSettings = async () => {
+        try {
+            const data: Record<string, string | null> = {};
+            ALL_SAVED_KEYS.forEach(key => { data[key] = localStorage.getItem(key); });
+            const json = JSON.stringify(data, null, 2);
+            const defaultName = `league-profile-settings-${new Date().toISOString().slice(0, 10)}.json`;
+            const path = await save({
+                defaultPath: defaultName,
+                filters: [{ name: "JSON", extensions: ["json"] }]
+            });
+            if (!path) return;
+            const target = Array.isArray(path) ? path[0] : path;
+            await invoke("save_logs_to_path", { path: target, content: json });
+            addLog(`Settings exported to: ${target}`);
+            showToast?.("Settings exported!", "success");
+        } catch (err) {
+            addLog(`Settings export failed: ${err}`);
+            showToast?.("Settings export failed", "error");
+        }
+    };
+
+    const importSettings = async () => {
+        try {
+            const path = await open({
+                filters: [{ name: "JSON", extensions: ["json"] }],
+                multiple: false,
+            });
+            if (!path) return;
+            const target = Array.isArray(path) ? path[0] : path;
+            const response = await fetch(`asset://localhost/${encodeURIComponent(target)}`).catch(() => null);
+            if (!response || !response.ok) {
+                throw new Error("Failed to read file");
+            }
+            const text = await response.text();
+            const data = JSON.parse(text) as Record<string, string | null>;
+            ALL_SAVED_KEYS.forEach(key => {
+                if (key in data) {
+                    if (data[key] === null) {
+                        localStorage.removeItem(key);
+                    } else {
+                        localStorage.setItem(key, data[key] as string);
+                    }
+                }
+            });
+            setAutoEnforce(localStorage.getItem(SAVED_AUTO_ENFORCE_KEY) === 'true');
+            addLog("Settings imported successfully.");
+            showToast?.("Settings imported! Restart for full effect.", "success");
+        } catch (err) {
+            addLog(`Settings import failed: ${err}`);
+            showToast?.("Settings import failed", "error");
+        }
+    };
+
     return (
         <div className="tab-content fadeIn">
             <div className="card">
@@ -215,6 +270,21 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         <Trash2 size={18} style={{ color: '#ff6b6b', flexShrink: 0, marginLeft: '16px' }} />
                     </button>
                 )}
+            </div>
+
+            <div className="card">
+                <h3 className="card-title">Backup &amp; Restore</h3>
+                <p className="settings-desc" style={{ marginBottom: '10px' }}>
+                    Export all saved settings to a JSON file, or import a previously exported backup.
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button type="button" className="ghost-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={exportSettings}>
+                        <Download size={16} /> Export
+                    </button>
+                    <button type="button" className="ghost-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }} onClick={importSettings}>
+                        <Upload size={16} /> Import
+                    </button>
+                </div>
             </div>
 
             {latestVersion && clientVersion !== latestVersion && (
