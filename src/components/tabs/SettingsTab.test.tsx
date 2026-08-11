@@ -1,11 +1,23 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SettingsTab from './SettingsTab';
 
-// Mock Tauri plugin-autostart
+const mockInvoke = vi.fn();
+const mockOpen = vi.fn();
+const mockSave = vi.fn();
+
 vi.mock('@tauri-apps/plugin-autostart', () => ({
     enable: vi.fn(),
     disable: vi.fn(),
+}));
+
+vi.mock('@tauri-apps/plugin-dialog', () => ({
+    open: (...args: unknown[]) => mockOpen(...args),
+    save: (...args: unknown[]) => mockSave(...args),
+}));
+
+vi.mock('@tauri-apps/api/core', () => ({
+    invoke: (...args: unknown[]) => mockInvoke(...args),
 }));
 
 describe('SettingsTab', () => {
@@ -124,5 +136,132 @@ describe('SettingsTab', () => {
         checkboxes.forEach(cb => fireEvent.click(cb));
         fireEvent.click(screen.getByText('Clear Selected'));
         expect(lcuReq).not.toHaveBeenCalled();
+    });
+
+    describe('importSettings', () => {
+        beforeEach(() => {
+            mockInvoke.mockReset();
+            mockOpen.mockReset();
+            localStorage.clear();
+        });
+
+        it('should import settings from a JSON file via Tauri invoke', async () => {
+            const fileContent = JSON.stringify({
+                profile_saved_icon_v1: '99',
+                profile_auto_enforce_v1: 'true',
+                profile_saved_bio_v1: 'Hello World',
+            });
+            mockOpen.mockResolvedValue('/fake/path/settings.json');
+            mockInvoke.mockResolvedValue(fileContent);
+
+            const showToast = vi.fn();
+            render(<SettingsTab {...mockProps} showToast={showToast} />);
+
+            fireEvent.click(screen.getByText('Import'));
+            await waitFor(() => {
+                expect(mockInvoke).toHaveBeenCalledWith('read_text_file', { path: '/fake/path/settings.json' });
+            });
+
+            expect(localStorage.getItem('profile_saved_icon_v1')).toBe('99');
+            expect(localStorage.getItem('profile_auto_enforce_v1')).toBe('true');
+            expect(localStorage.getItem('profile_saved_bio_v1')).toBe('Hello World');
+            expect(showToast).toHaveBeenCalledWith('Settings imported! Restart for full effect.', 'success');
+        });
+
+        it('should remove keys that are null in the imported JSON', async () => {
+            localStorage.setItem('profile_saved_icon_v1', 'old-value');
+            const fileContent = JSON.stringify({ profile_saved_icon_v1: null });
+            mockOpen.mockResolvedValue('/fake/path.json');
+            mockInvoke.mockResolvedValue(fileContent);
+
+            render(<SettingsTab {...mockProps} showToast={vi.fn()} />);
+            fireEvent.click(screen.getByText('Import'));
+            await waitFor(() => {
+                expect(localStorage.getItem('profile_saved_icon_v1')).toBeNull();
+            });
+        });
+
+        it('should sanitize control characters from imported values', async () => {
+            const malicious = 'hello\x00\x01\x02world\x7F';
+            const fileContent = JSON.stringify({ profile_saved_bio_v1: malicious });
+            mockOpen.mockResolvedValue('/fake/path.json');
+            mockInvoke.mockResolvedValue(fileContent);
+
+            render(<SettingsTab {...mockProps} showToast={vi.fn()} />);
+            fireEvent.click(screen.getByText('Import'));
+            await waitFor(() => {
+                const stored = localStorage.getItem('profile_saved_bio_v1');
+                expect(stored).toBe('helloworld');
+                expect(stored).not.toContain('\x00');
+                expect(stored).not.toContain('\x7F');
+            });
+        });
+
+        it('should not write non-string values to localStorage', async () => {
+            const fileContent = JSON.stringify({ profile_saved_icon_v1: 42 });
+            mockOpen.mockResolvedValue('/fake/path.json');
+            mockInvoke.mockResolvedValue(fileContent);
+
+            render(<SettingsTab {...mockProps} showToast={vi.fn()} />);
+            fireEvent.click(screen.getByText('Import'));
+            await waitFor(() => {
+                expect(localStorage.getItem('profile_saved_icon_v1')).toBeNull();
+            });
+        });
+
+        it('should handle import failure gracefully', async () => {
+            mockOpen.mockResolvedValue('/fake/path.json');
+            mockInvoke.mockRejectedValue(new Error('Read error'));
+
+            const showToast = vi.fn();
+            render(<SettingsTab {...mockProps} showToast={showToast} />);
+            fireEvent.click(screen.getByText('Import'));
+            await waitFor(() => {
+                expect(showToast).toHaveBeenCalledWith('Settings import failed', 'error');
+            });
+        });
+
+        it('should do nothing when no file is selected', async () => {
+            mockOpen.mockResolvedValue(null);
+            render(<SettingsTab {...mockProps} showToast={vi.fn()} />);
+            fireEvent.click(screen.getByText('Import'));
+            await waitFor(() => {
+                expect(mockInvoke).not.toHaveBeenCalled();
+            });
+        });
+    });
+
+    describe('exportSettings', () => {
+        beforeEach(() => {
+            mockInvoke.mockReset();
+            mockSave.mockReset();
+            localStorage.clear();
+        });
+
+        it('should export settings to a file via Tauri invoke', async () => {
+            localStorage.setItem('profile_saved_icon_v1', '55');
+            mockSave.mockResolvedValue('/fake/export.json');
+            mockInvoke.mockResolvedValue(undefined);
+
+            const showToast = vi.fn();
+            render(<SettingsTab {...mockProps} showToast={showToast} />);
+            fireEvent.click(screen.getByText('Export'));
+            await waitFor(() => {
+                expect(mockInvoke).toHaveBeenCalledWith(
+                    'save_logs_to_path',
+                    expect.objectContaining({ path: '/fake/export.json' })
+                );
+                expect(showToast).toHaveBeenCalledWith('Settings exported!', 'success');
+            });
+        });
+
+        it('should not export when no save path is chosen', async () => {
+            mockSave.mockResolvedValue(null);
+            render(<SettingsTab {...mockProps} showToast={vi.fn()} />);
+            fireEvent.click(screen.getByText('Export'));
+            await waitFor(() => {
+                expect(mockInvoke).not.toHaveBeenCalled();
+            });
+        });
     });
 });
