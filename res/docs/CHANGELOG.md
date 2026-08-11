@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Dependencies
+- **npm:** @testing-library/jest-dom 6.9.1 → 7.0.0 (#933), typescript 6.0.3 → 7.0.2 (#934), @types/node 26.1.1 → 26.2.0 (#935), @types/react 19.2.17 → 19.2.18 (#936), @vitejs/plugin-react 6.0.3 → 6.0.5 (#937)
+
+### Notes
+- Merged the 5 open dependabot PRs above into `develop` (commit `7d1ef7c`). Resolved a conflict on #936 in `package.json` / `package-lock.json` by keeping `@types/node ^26.2.0` (from #935) together with the new `@types/react ^19.2.18`; lockfile regenerated via `npm install`. Verified with `tsc --noEmit` and `vitest run` (159/159 passing).
+
 ## [1.12.0] - 2026-08-11
 
 ### Added
