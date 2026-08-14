@@ -5,15 +5,15 @@
     "platforms": {
         "windows-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.12.0/League-Profile-Tool_1.12.0_x64-setup.exe"
+            "url": "https://github.com/lenny-ts/league_profile_tool/releases/download/v1.12.0/League-Profile-Tool_1.12.0_x64-setup.exe"
         },
         "darwin-x86_64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.12.0/League-Profile-Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/lenny-ts/league_profile_tool/releases/download/v1.12.0/League-Profile-Tool_aarch64.app.tar.gz"
         },
         "darwin-aarch64": {
             "signature": "Not Found",
-            "url": "https://github.com/L9Lenny/league_profile_tool/releases/download/v1.12.0/League-Profile-Tool_aarch64.app.tar.gz"
+            "url": "https://github.com/lenny-ts/league_profile_tool/releases/download/v1.12.0/League-Profile-Tool_aarch64.app.tar.gz"
         }
     }
 }

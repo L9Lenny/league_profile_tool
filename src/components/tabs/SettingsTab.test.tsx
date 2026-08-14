@@ -47,7 +47,7 @@ describe('SettingsTab', () => {
     it('should show update panel when a new version is available', () => {
         render(<SettingsTab {...mockProps} />);
         expect(screen.getByText('New Enhancement Available')).toBeDefined();
-        expect(screen.getByText('UPDATE NOW')).toHaveAttribute('href', 'https://github.com/L9Lenny/league_profile_tool/releases/latest');
+        expect(screen.getByText('UPDATE NOW')).toHaveAttribute('href', 'https://github.com/lenny-ts/league_profile_tool/releases/latest');
     });
 
     it('should not show update panel when version is up to date', () => {
