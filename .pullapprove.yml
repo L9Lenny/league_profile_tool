@@ -4,4 +4,4 @@ groups:
     reviews:
       required: 1
     members:
-      - L9Lenny
+      - lenny-ts

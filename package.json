@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.12.0",
   "description": "A professional tool for League of Legends profile customization via LCU API.",
-  "author": "L9Lenny",
+  "author": "lenny-ts",
   "type": "module",
   "scripts": {
     "dev": "vite",

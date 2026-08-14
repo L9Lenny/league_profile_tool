@@ -4,28 +4,28 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 
 <p align="center">
 
-<a href="https://github.com/L9Lenny/league_profile_tool/releases">
-  <img src="https://img.shields.io/github/release/L9Lenny/league_profile_tool.svg?style=flat-square" alt="Latest Release"/>
+<a href="https://github.com/lenny-ts/league_profile_tool/releases">
+  <img src="https://img.shields.io/github/release/lenny-ts/league_profile_tool.svg?style=flat-square" alt="Latest Release"/>
 </a>
 
-<a href="https://github.com/L9Lenny/league_profile_tool/actions">
-  <img src="https://img.shields.io/github/actions/workflow/status/L9Lenny/league_profile_tool/release.yml?style=flat-square&logo=githubactions&logoColor=white&color=238636&cacheSeconds=0" alt="CI Workflow"/>
+<a href="https://github.com/lenny-ts/league_profile_tool/actions">
+  <img src="https://img.shields.io/github/actions/workflow/status/lenny-ts/league_profile_tool/release.yml?style=flat-square&logo=githubactions&logoColor=white&color=238636&cacheSeconds=0" alt="CI Workflow"/>
 </a>
 
-<a href="https://github.com/L9Lenny/league_profile_tool/actions/workflows/virustotal-report.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/L9Lenny/league_profile_tool/virustotal-report.yml?style=flat-square&logo=virustotal&logoColor=white&label=VirusTotal&color=0b65d8&cacheSeconds=0" alt="VirusTotal"/>
+<a href="https://github.com/lenny-ts/league_profile_tool/actions/workflows/virustotal-report.yml">
+  <img src="https://img.shields.io/github/actions/workflow/status/lenny-ts/league_profile_tool/virustotal-report.yml?style=flat-square&logo=virustotal&logoColor=white&label=VirusTotal&color=0b65d8&cacheSeconds=0" alt="VirusTotal"/>
 </a>
 
-<a href="https://sonarcloud.io/summary/new_code?id=L9Lenny_league_profile_tool">
+<a href="https://sonarcloud.io/summary/new_code?id=lenny-ts_league_profile_tool">
   <img src="https://img.shields.io/badge/Code%20Quality-SonarCloud-F3702A?style=flat-square&logo=sonarcloud&logoColor=white&cacheSeconds=0" alt="Code Quality"/>
 </a>
 
-<a href="https://github.com/L9Lenny/league_profile_tool/releases">
+<a href="https://github.com/lenny-ts/league_profile_tool/releases">
   <img src="https://img.shields.io/endpoint?url=https://downloadsbadge.duckdns.org/downloads&style=flat-square" alt="Downloads"/>
 </a>
 
 <a href="LICENSE">
-  <img src="https://img.shields.io/github/license/L9Lenny/league_profile_tool?style=flat-square&color=9e6a03&cacheSeconds=0" alt="License"/>
+  <img src="https://img.shields.io/github/license/lenny-ts/league_profile_tool?style=flat-square&color=9e6a03&cacheSeconds=0" alt="License"/>
 </a>
 
 </p>
@@ -42,12 +42,12 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
   </a>
 </p>
 
-> **Tip:** Fast links: [Download](https://github.com/L9Lenny/league_profile_tool/releases) • [Security Report](res/docs/SECURITY_REPORT.md) • [Changelog](res/docs/CHANGELOG.md)
+> **Tip:** Fast links: [Download](https://github.com/lenny-ts/league_profile_tool/releases) • [Security Report](res/docs/SECURITY_REPORT.md) • [Changelog](res/docs/CHANGELOG.md)
 
 | 🚀 Start Here | 🔗 Link |
 |---|---|
-| Latest Release | [GitHub Releases](https://github.com/L9Lenny/league_profile_tool/releases) |
-| CI Workflows | [GitHub Actions](https://github.com/L9Lenny/league_profile_tool/actions) |
+| Latest Release | [GitHub Releases](https://github.com/lenny-ts/league_profile_tool/releases) |
+| CI Workflows | [GitHub Actions](https://github.com/lenny-ts/league_profile_tool/actions) |
 | Security Report | [`res/docs/SECURITY_REPORT.md`](res/docs/SECURITY_REPORT.md) |
 
 ## ✨ Main Features
@@ -67,7 +67,7 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 
 ## ⚡ Quick Start (Users)
 
-1. Download the latest build from [Releases](https://github.com/L9Lenny/league_profile_tool/releases).
+1. Download the latest build from [Releases](https://github.com/lenny-ts/league_profile_tool/releases).
 2. Start League of Legends client.
 3. Open **League Profile Tool**.
 4. Join our [Discord Server](https://discord.gg/G3M4X3B) (Optional) for support and updates.
@@ -84,7 +84,7 @@ A desktop tool built with **Tauri v2** and **React** for League of Legends profi
 ### Run locally
 
 ```bash
-git clone https://github.com/L9Lenny/league_profile_tool.git
+git clone https://github.com/lenny-ts/league_profile_tool.git
 cd league_profile_tool
 npm ci
 npm run tauri dev
@@ -149,7 +149,7 @@ If the project is useful to you, you can support it here:
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/L9Lenny"><img src="https://avatars.githubusercontent.com/u/74313264?v=4?s=100" width="100px;" alt="L9Lenny"/><br /><sub><b>L9Lenny</b></sub></a><br /><a href="https://github.com/L9Lenny/league_profile_tool/commits?author=L9Lenny" title="Code">💻</a> <a href="#design-L9Lenny" title="Design">🎨</a> <a href="#maintenance-L9Lenny" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/lenny-ts"><img src="https://avatars.githubusercontent.com/u/74313264?v=4?s=100" width="100px;" alt="lenny-ts"/><br /><sub><b>lenny-ts</b></sub></a><br /><a href="https://github.com/lenny-ts/league_profile_tool/commits?author=lenny-ts" title="Code">💻</a> <a href="#design-lenny-ts" title="Design">🎨</a> <a href="#maintenance-lenny-ts" title="Maintenance">🚧</a></td>
     </tr>
   </tbody>
 </table>

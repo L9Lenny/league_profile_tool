@@ -1,6 +1,6 @@
 {
   "projectName": "league-profile-tool",
-  "projectOwner": "L9Lenny",
+  "projectOwner": "lenny-ts",
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
@@ -10,10 +10,10 @@
   "commit": false,
   "contributors": [
     {
-      "login": "L9Lenny",
-      "name": "L9Lenny",
+      "login": "lenny-ts",
+      "name": "lenny-ts",
       "avatar_url": "https://avatars.githubusercontent.com/u/74313264?v=4",
-      "profile": "https://github.com/L9Lenny",
+      "profile": "https://github.com/lenny-ts",
       "contributions": [
         "code",
         "design",

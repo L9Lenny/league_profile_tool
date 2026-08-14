@@ -1,6 +1,6 @@
 # Security Report
 
-- Repository: `L9Lenny/league_profile_tool`
+- Repository: `lenny-ts/league_profile_tool`
 - Release Tag: `v1.11.0`
 - Release Name: League Profile Tool v1.11.0
 - Published At: 2026-08-07T15:59:23Z
