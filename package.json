@@ -29,7 +29,7 @@
     "react-icons": "^5.7.0",
     "react-window": "^2.3.0",
     "zod": "^4.4.3",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",
